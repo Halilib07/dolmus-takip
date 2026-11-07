@@ -55,7 +55,6 @@
 
         #uygulamaEkrani { display: none; }
         
-        /* 3 SEKMELİ YAPI */
         .tabs { display: flex; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .tab-btn { flex: 1; padding: 15px; border: none; background: white; cursor: pointer; font-size: 16px; font-weight: bold; color: #7f8c8d; transition: 0.3s; border-right: 1px solid #eee; }
         .tab-btn:last-child { border-right: none; }
@@ -66,7 +65,6 @@
         .form-grid .full { grid-column: span 2; }
         button.btn-primary { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
         
-        /* Rapor Sekmesi Özel Tasarım */
         .rapor-filtre-alani { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; background: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
         .rapor-filtre-alani .input-grup { margin-top: 0; flex: 1; min-width: 150px; }
         .rapor-filtre-alani button { padding: 12px 20px; background: var(--info); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; height: 46px; }
@@ -100,7 +98,6 @@
 
         .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
 
-        /* Şık Yüzen Etiketler */
         .input-grup { position: relative; margin-top: 10px; }
         .input-grup input, .input-grup select { width: 100%; padding: 22px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
         .input-grup input:focus, .input-grup select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
@@ -118,7 +115,7 @@
         .btn-duzenle { background: var(--warning); }
         .btn-dagit { background: var(--purple); width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
 
-        .uyari-panosu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .uyari-panosu { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 100px; }
         .uyari-kutu h4 { margin: 0 0 5px 0; font-size: 13px; opacity: 0.9; }
         .uyari-kutu p { margin: 0; font-size: 18px; font-weight: bold; }
@@ -129,6 +126,9 @@
         .durum-kirmizi { background-color: var(--danger); }
         .durum-gri { background-color: #95a5a6; }
 
+        @media (max-width: 1024px) {
+            .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
+        }
         @media (max-width: 900px) {
             .chart-grid { grid-template-columns: 1fr; }
             .chart-container-wrapper { height: 250px; }
@@ -196,6 +196,10 @@
             <div class="uyari-kutu durum-gri" id="yagKutu">
                 <div><h4>🛢️ Yağ Değişimi</h4><div class="uyari-alt-yazi" id="yagKmYazi"></div></div>
                 <p id="yagDurum">KM Girilmedi</p>
+            </div>
+            <div class="uyari-kutu durum-gri" id="trigerKutu">
+                <div><h4>⚙️ Triger Seti</h4><div class="uyari-alt-yazi" id="trigerKmYazi"></div></div>
+                <p id="trigerDurum">KM Girilmedi</p>
             </div>
         </div>
 
@@ -374,7 +378,7 @@
     <!-- AYARLAR SEKME EKRANI -->
     <div id="ayarlar" class="tab-content">
         <div class="card">
-            <h2>⚙️ Sistem Ayarları (Araç & Sabit Giderler)</h2>
+            <h2>⚙️ Sistem Ayarları (Araç Bakım & Takip)</h2>
             <div class="form-grid">
                 <div class="input-grup">
                     <input type="date" id="ayarMuayeneTarihi" onchange="aracAyarlariniKaydet()">
@@ -390,10 +394,19 @@
                 </div>
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="ayarYagOmru" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
-                    <label for="ayarYagOmru">Yağ Değişim Ömrü (KM)</label>
+                    <label for="ayarYagOmru">Yağ Değişim Ömrü (Örn: 10.000 KM)</label>
+                </div>
+                <!-- YENİ: TRİGER SETİ AYARLARI -->
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="ayarTrigerKm" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
+                    <label for="ayarTrigerKm">Son Triger Seti Değişim KM</label>
+                </div>
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="ayarTrigerOmru" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
+                    <label for="ayarTrigerOmru">Triger Seti Ömrü (Örn: 100.000 KM)</label>
                 </div>
             </div>
-            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Girdiğiniz tarihlerin üzerine sistem otomatik olarak <b>+1 Yıl</b> ekler. Yağ ömrü için belirlediğiniz KM, şoförün girdiği <b>en güncel tarihli</b> KM'den düşülerek hesaplanır.</p>
+            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Girdiğiniz tarihlerin üzerine sistem otomatik olarak <b>+1 Yıl</b> ekler. Yağ ve Triger ömrü için belirlediğiniz KM, şoförün girdiği <b>en güncel tarihli</b> KM'den düşülerek hesaplanır.</p>
         </div>
 
         <div class="card">
@@ -508,7 +521,7 @@
             document.getElementById('loginEkrani').style.display = 'none';
             document.getElementById('uygulamaEkrani').style.display = 'block';
             document.getElementById('raporTabBtn').style.display = 'block'; 
-            document.getElementById('ayarlarTabBtn').style.display = 'block'; // Ayarları göster
+            document.getElementById('ayarlarTabBtn').style.display = 'block';
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
@@ -516,7 +529,7 @@
             document.getElementById('loginEkrani').style.display = 'none';
             document.getElementById('uygulamaEkrani').style.display = 'block';
             document.getElementById('raporTabBtn').style.display = 'none'; 
-            document.getElementById('ayarlarTabBtn').style.display = 'none'; // Şoförden gizle
+            document.getElementById('ayarlarTabBtn').style.display = 'none';
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
@@ -544,7 +557,9 @@
         const egzoz = document.getElementById('ayarEgzozTarihi').value;
         const yagKm = formatiCoz(document.getElementById('ayarYagKm').value);
         const yagOmru = formatiCoz(document.getElementById('ayarYagOmru').value); 
-        const ayarlar = { muayene, egzoz, yagKm, yagOmru };
+        const trigerKm = formatiCoz(document.getElementById('ayarTrigerKm').value);
+        const trigerOmru = formatiCoz(document.getElementById('ayarTrigerOmru').value);
+        const ayarlar = { muayene, egzoz, yagKm, yagOmru, trigerKm, trigerOmru };
         try {
             await window.setDoc(window.doc(window.db, "sistem", "aracAyarlari"), ayarlar);
             aracUyarilariniGuncelle(); 
@@ -563,6 +578,8 @@
                     document.getElementById('ayarEgzozTarihi').value = ayarlar.egzoz || "";
                     document.getElementById('ayarYagKm').value = sayiyiFormatla(ayarlar.yagKm) || "";
                     document.getElementById('ayarYagOmru').value = sayiyiFormatla(ayarlar.yagOmru) || ""; 
+                    document.getElementById('ayarTrigerKm').value = sayiyiFormatla(ayarlar.trigerKm) || ""; 
+                    document.getElementById('ayarTrigerOmru').value = sayiyiFormatla(ayarlar.trigerOmru) || ""; 
                 }
                 aracUyarilariniGuncelle(ayarlar);
             }
@@ -574,11 +591,14 @@
             muayene: document.getElementById('ayarMuayeneTarihi') ? document.getElementById('ayarMuayeneTarihi').value : (gelenAyarlar ? gelenAyarlar.muayene : null),
             egzoz: document.getElementById('ayarEgzozTarihi') ? document.getElementById('ayarEgzozTarihi').value : (gelenAyarlar ? gelenAyarlar.egzoz : null),
             yagKm: document.getElementById('ayarYagKm') ? formatiCoz(document.getElementById('ayarYagKm').value) : (gelenAyarlar ? gelenAyarlar.yagKm : 0),
-            yagOmru: document.getElementById('ayarYagOmru') ? formatiCoz(document.getElementById('ayarYagOmru').value) : (gelenAyarlar ? gelenAyarlar.yagOmru : 10000) 
+            yagOmru: document.getElementById('ayarYagOmru') ? formatiCoz(document.getElementById('ayarYagOmru').value) : (gelenAyarlar ? gelenAyarlar.yagOmru : 10000),
+            trigerKm: document.getElementById('ayarTrigerKm') ? formatiCoz(document.getElementById('ayarTrigerKm').value) : (gelenAyarlar ? gelenAyarlar.trigerKm : 0),
+            trigerOmru: document.getElementById('ayarTrigerOmru') ? formatiCoz(document.getElementById('ayarTrigerOmru').value) : (gelenAyarlar ? gelenAyarlar.trigerOmru : 100000)
         };
 
         const bugun = new Date(); bugun.setHours(0,0,0,0);
 
+        // Muayene
         const muayeneKutu = document.getElementById('muayeneKutu');
         const muayeneDurum = document.getElementById('muayeneDurum');
         const muayeneTarihYazi = document.getElementById('muayeneTarihYazi');
@@ -593,6 +613,7 @@
             else { muayeneKutu.classList.add('durum-yesil'); muayeneDurum.innerText = `${kalanGun} Gün Kaldı`; }
         }
 
+        // Egzoz
         const egzozKutu = document.getElementById('egzozKutu');
         const egzozDurum = document.getElementById('egzozDurum');
         const egzozTarihYazi = document.getElementById('egzozTarihYazi');
@@ -607,18 +628,21 @@
             else { egzozKutu.classList.add('durum-yesil'); egzozDurum.innerText = `${kalanGun} Gün Kaldı`; }
         }
 
+        // En Güncel KM'yi bul (Hem Yağ hem Triger için lazım)
+        let enGuncelKayit = null;
+        for (let i = 0; i < kayitlar.length; i++) {
+            if (kayitlar[i].km && kayitlar[i].km > 0) { enGuncelKayit = kayitlar[i]; break; }
+        }
+        const guncelKm = enGuncelKayit ? enGuncelKayit.km : 0;
+
+        // Yağ
         const yagKutu = document.getElementById('yagKutu');
         const yagDurum = document.getElementById('yagDurum');
         const yagKmYazi = document.getElementById('yagKmYazi'); 
         if(ayarlar.yagKm > 0) {
-            let enGuncelKayit = null;
-            for (let i = 0; i < kayitlar.length; i++) {
-                if (kayitlar[i].km && kayitlar[i].km > 0) { enGuncelKayit = kayitlar[i]; break; }
-            }
-            if(enGuncelKayit) {
-                const sonKm = enGuncelKayit.km;
+            if(guncelKm > 0) {
                 const hedefKm = ayarlar.yagKm + ayarlar.yagOmru; 
-                const kalanKm = hedefKm - sonKm; 
+                const kalanKm = hedefKm - guncelKm; 
                 yagKmYazi.innerText = "Değişim: " + hedefKm.toLocaleString('tr-TR') + " KM";
                 yagKutu.className = 'uyari-kutu';
                 if(kalanKm <= 0) { yagKutu.classList.add('durum-kirmizi'); yagDurum.innerText = `DEĞİŞİM ZAMANI!`; }
@@ -628,6 +652,26 @@
                 yagKutu.className = 'uyari-kutu durum-gri';
                 yagDurum.innerText = "KM Girilmedi";
                 yagKmYazi.innerText = "";
+            }
+        }
+
+        // Triger Seti
+        const trigerKutu = document.getElementById('trigerKutu');
+        const trigerDurum = document.getElementById('trigerDurum');
+        const trigerKmYazi = document.getElementById('trigerKmYazi'); 
+        if(ayarlar.trigerKm > 0) {
+            if(guncelKm > 0) {
+                const hedefKmTriger = ayarlar.trigerKm + ayarlar.trigerOmru; 
+                const kalanKmTriger = hedefKmTriger - guncelKm; 
+                trigerKmYazi.innerText = "Değişim: " + hedefKmTriger.toLocaleString('tr-TR') + " KM";
+                trigerKutu.className = 'uyari-kutu';
+                if(kalanKmTriger <= 0) { trigerKutu.classList.add('durum-kirmizi'); trigerDurum.innerText = `DEĞİŞİM ZAMANI!`; }
+                else if(kalanKmTriger <= 5000) { trigerKutu.classList.add('durum-sari'); trigerDurum.innerText = `${kalanKmTriger.toLocaleString('tr-TR')} KM Kaldı!`; }
+                else { trigerKutu.classList.add('durum-yesil'); trigerDurum.innerText = `${kalanKmTriger.toLocaleString('tr-TR')} KM Kaldı`; }
+            } else {
+                trigerKutu.className = 'uyari-kutu durum-gri';
+                trigerDurum.innerText = "KM Girilmedi";
+                trigerKmYazi.innerText = "";
             }
         }
     }
@@ -690,6 +734,7 @@
             if (ayniTarihliKayit) { await window.deleteDoc(window.doc(window.db, "kayitlar", ayniTarihliKayit.id)); }
             await window.addDoc(window.collection(window.db, "kayitlar"), kayit);
             
+            // SADECE SIVI BAKIM GİRİLDİYSE YAĞ KM'SİNİ GÜNCELLE (Triger'e dokunma, o manuel)
             if (siviBakimDeger > 0 && kmDeger > 0) {
                 const ayarDocRef = window.doc(window.db, "sistem", "aracAyarlari");
                 const ayarDocSnap = await window.getDoc(ayarDocRef);
@@ -771,7 +816,6 @@
         try {
             await batch.commit();
             alert(`✅ Başarılı! Her güne ${gunlukPay.toLocaleString('tr-TR')} TL eklendi.\nRaporları görmek için Raporlar sekmesine geçebilirsiniz.`);
-            // Dağıtım sonrası otomatik rapor sekmesine geç
             switchTab('rapor', document.getElementById('raporTabBtn'));
         } catch(e) { alert("Hata!"); }
     }
