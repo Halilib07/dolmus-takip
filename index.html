@@ -111,8 +111,7 @@
             <div class="form-grid">
                 
                 <div class="input-grup">
-                    <!-- Tarih değiştiğinde kontrol fonksiyonu tetikleniyor -->
-                    <input type="date" id="tarih" onchange="tarihKontrolEt()">
+                    <input type="date" id="tarih">
                     <label for="tarih">Tarih</label>
                 </div>
                 
@@ -267,9 +266,7 @@
 <script>
     let kayitlar = [];
     let grafik = null;
-    let duzenlenenId = null; // O an düzenlenen kaydın ID'sini tutar
 
-    // Sayfa açıldığında bugünün tarihini seç
     document.getElementById('tarih').valueAsDate = new Date();
 
     const YONETICI_SIFRESI = "Hb.123-"; 
@@ -277,9 +274,9 @@
 
     // --- FORMATLAMA FONKSİYONLARI ---
     function sayiyiFormatla(deger) {
-        if (!deger) return "0"; 
+        if (!deger) return "";
         let sadeceRakam = deger.toString().replace(/\D/g, '');
-        if (sadeceRakam === "") return "0"; 
+        if (sadeceRakam === "") return "";
         return Number(sadeceRakam).toLocaleString('tr-TR');
     }
 
@@ -293,7 +290,6 @@
         input.addEventListener('input', function(e) {
             let imlecPozisyonu = this.selectionStart;
             let eskiDeger = this.value;
-            if(this.value === "") { this.value = ""; return; }
             this.value = sayiyiFormatla(this.value);
             let yeniDeger = this.value;
             let fark = yeniDeger.length - eskiDeger.length;
@@ -302,60 +298,10 @@
             }
         });
         input.addEventListener('blur', function() {
-            if (this.value === "") this.value = "0";
+            if (this.value === "0") this.value = "";
         });
     });
 
-    // --- TARİH SEÇİLDİĞİNDE VERİ KONTROLÜ ---
-    function tarihKontrolEt() {
-        const secilenTarih = document.getElementById('tarih').value;
-        if(!secilenTarih) return;
-
-        // Seçilen tarihe ait bir kayıt var mı?
-        const mevcutKayit = kayitlar.find(k => k.tarih === secilenTarih);
-
-        if (mevcutKayit) {
-            // Varsa formu doldur
-            document.getElementById('hasilat').value = sayiyiFormatla(mevcutKayit.hasilat);
-            document.getElementById('km').value = sayiyiFormatla(mevcutKayit.km);
-            document.getElementById('mazotTL').value = sayiyiFormatla(mevcutKayit.mazotTL);
-            document.getElementById('siviBakim').value = sayiyiFormatla(mevcutKayit.siviBakim);
-            document.getElementById('tamir').value = sayiyiFormatla(mevcutKayit.tamir);
-            document.getElementById('parca').value = sayiyiFormatla(mevcutKayit.parca);
-            document.getElementById('diger').value = sayiyiFormatla(mevcutKayit.diger);
-            document.getElementById('gunlukSoforUcret').value = sayiyiFormatla(mevcutKayit.gunlukSoforUcret || 0);
-
-            duzenlenenId = mevcutKayit.id;
-            
-            // Başlığı ve butonu güncelle
-            document.getElementById('formBaslik').innerText = "Günü Düzenle (" + secilenTarih.split('-').reverse().join('.') + ")";
-            document.getElementById('kaydetBtn').innerText = "Değişiklikleri Güncelle";
-            document.getElementById('kaydetBtn').style.background = "var(--warning)";
-            document.getElementById('mesaj').innerText = "Bu tarihe ait kayıt bulundu. Düzenleyip güncelleyebilirsiniz.";
-            document.getElementById('mesaj').style.color = "var(--warning)";
-        } else {
-            // Yoksa formu temizle
-            temizleForm();
-            duzenlenenId = null;
-            document.getElementById('formBaslik').innerText = "Günlük Sefer ve Gider Ekle";
-            document.getElementById('kaydetBtn').innerText = "Günü Kaydet (Buluta Gönder)";
-            document.getElementById('kaydetBtn').style.background = "var(--success)";
-            document.getElementById('mesaj').innerText = "";
-        }
-    }
-
-    function temizleForm() {
-        document.getElementById('hasilat').value = '';
-        document.getElementById('km').value = '';
-        document.getElementById('mazotTL').value = '';
-        document.getElementById('siviBakim').value = '';
-        document.getElementById('tamir').value = '';
-        document.getElementById('parca').value = '';
-        document.getElementById('diger').value = '';
-        document.getElementById('gunlukSoforUcret').value = '';
-    }
-
-    // --- GİRİŞ VE SEKMELER ---
     function girisYap() {
         const girilenSifre = document.getElementById('sifre').value;
         const hataEl = document.getElementById('loginHata');
@@ -391,7 +337,6 @@
         if(tabId === 'rapor') { guncelleRapor(); }
     }
 
-    // --- KAYDETME / GÜNCELLEME FONKSİYONU ---
     async function kaydet() {
         if(!window.firebaseHazir) {
             alert("Bulut sistemi henüz yüklenmedi, lütfen 1-2 saniye sonra tekrar deneyin.");
@@ -404,44 +349,73 @@
             return;
         }
 
+        // Aynı tarihte kayıt var mı diye kontrol et
+        const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
+
+        if (ayniTarihliKayit) {
+            const onay = confirm("⚠️ DİKKAT: " + secilenTarih.split('-').reverse().join('.') + " tarihinde zaten bir kayıt var!\n\nSadece DOLDURDUĞUNUZ kutular güncellenecek, BOŞ bıraktığınız kutular eski haliyle kalacaktır. Onaylıyor musunuz?");
+            if (!onay) return; 
+        }
+
         const btn = document.getElementById('kaydetBtn');
         const mesajEl = document.getElementById('mesaj');
         btn.innerText = "Buluta Kaydediliyor...";
         btn.disabled = true;
 
-        const kayit = {
-            tarih: secilenTarih,
-            hasilat: formatiCoz(document.getElementById('hasilat').value),
-            km: formatiCoz(document.getElementById('km').value),
-            mazotTL: formatiCoz(document.getElementById('mazotTL').value),
-            siviBakim: formatiCoz(document.getElementById('siviBakim').value),
-            tamir: formatiCoz(document.getElementById('tamir').value),
-            parca: formatiCoz(document.getElementById('parca').value),
-            diger: formatiCoz(document.getElementById('diger').value),
-            gunlukSoforUcret: formatiCoz(document.getElementById('gunlukSoforUcret').value),
-            zaman: Date.now()
+        // Yeni girilen değerler (boşsa "null" kabul edeceğiz)
+        const yeniDegerler = {
+            hasilat: document.getElementById('hasilat').value !== "" ? formatiCoz(document.getElementById('hasilat').value) : null,
+            km: document.getElementById('km').value !== "" ? formatiCoz(document.getElementById('km').value) : null,
+            mazotTL: document.getElementById('mazotTL').value !== "" ? formatiCoz(document.getElementById('mazotTL').value) : null,
+            siviBakim: document.getElementById('siviBakim').value !== "" ? formatiCoz(document.getElementById('siviBakim').value) : null,
+            tamir: document.getElementById('tamir').value !== "" ? formatiCoz(document.getElementById('tamir').value) : null,
+            parca: document.getElementById('parca').value !== "" ? formatiCoz(document.getElementById('parca').value) : null,
+            diger: document.getElementById('diger').value !== "" ? formatiCoz(document.getElementById('diger').value) : null,
+            gunlukSoforUcret: document.getElementById('gunlukSoforUcret').value !== "" ? formatiCoz(document.getElementById('gunlukSoforUcret').value) : null,
         };
+
+        // Kayıt objesini hazırla
+        let kayit = {
+            tarih: secilenTarih,
+            zaman: ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now() // Eski kayıtsa eski zamanı koru
+        };
+
+        // Mantık: Eğer eski kayıt varsa, boş bırakılan yerler eskisinden alınır. Yoksa 0 kabul edilir.
+        const alanlar = ['hasilat', 'km', 'mazotTL', 'siviBakim', 'tamir', 'parca', 'diger', 'gunlukSoforUcret'];
+        
+        alanlar.forEach(alan => {
+            if (yeniDegerler[alan] !== null) {
+                kayit[alan] = yeniDegerler[alan]; // Yeni değer girildiyse onu kullan
+            } else if (ayniTarihliKayit) {
+                kayit[alan] = ayniTarihliKayit[alan] || 0; // Boş bırakıldıysa eski kayıttan al
+            } else {
+                kayit[alan] = 0; // Yeni kayıtsa ve boşsa 0 kabul et
+            }
+        });
 
         kayit.toplamGider = kayit.mazotTL + kayit.siviBakim + kayit.tamir + kayit.parca + kayit.diger + kayit.gunlukSoforUcret;
 
         try {
-            // Eğer bir düzenleme yapılıyorsa, önce eski kaydı sil
-            if (duzenlenenId !== null) {
-                await window.deleteDoc(window.doc(window.db, "kayitlar", duzenlenenId));
+            // Eski kayıt varsa sil
+            if (ayniTarihliKayit) {
+                await window.deleteDoc(window.doc(window.db, "kayitlar", ayniTarihliKayit.id));
             }
 
-            // Yeni veya güncellenmiş kaydı ekle
+            // Yeni birleştirilmiş kaydı ekle
             await window.addDoc(window.collection(window.db, "kayitlar"), kayit);
             
             mesajEl.style.color = "green";
-            mesajEl.innerText = duzenlenenId !== null ? "✅ Kayıt başarıyla güncellendi!" : "✅ Başarıyla buluta kaydedildi!";
+            mesajEl.innerText = ayniTarihliKayit ? "✅ Kayıt başarıyla güncellendi!" : "✅ Başarıyla buluta kaydedildi!";
             
-            // İşlem sonrası formu sıfırla ve modu normale döndür
-            temizleForm();
-            duzenlenenId = null;
-            document.getElementById('formBaslik').innerText = "Günlük Sefer ve Gider Ekle";
-            btn.innerText = "Günü Kaydet (Buluta Gönder)";
-            btn.style.background = "var(--success)";
+            // Formu Temizle
+            document.getElementById('hasilat').value = '';
+            document.getElementById('km').value = '';
+            document.getElementById('mazotTL').value = '';
+            document.getElementById('siviBakim').value = '';
+            document.getElementById('tamir').value = '';
+            document.getElementById('parca').value = '';
+            document.getElementById('diger').value = '';
+            document.getElementById('gunlukSoforUcret').value = '';
             
             setTimeout(() => { mesajEl.innerText = ""; }, 3000);
         } catch (e) {
@@ -449,11 +423,11 @@
             mesajEl.style.color = "red";
             mesajEl.innerText = "❌ Hata oluştu, bağlantınızı kontrol edin.";
         } finally {
+            btn.innerText = "Günü Kaydet (Buluta Gönder)";
             btn.disabled = false;
         }
     }
 
-    // --- VERİLERİ DİNLEME VE RAPORLAMA ---
     window.dinleVeriler = function() {
         if(!window.firebaseHazir) {
             setTimeout(window.dinleVeriler, 500);
@@ -468,14 +442,6 @@
                 kayitlar.push({ id: doc.id, ...doc.data() });
             });
             
-            // Eğer kullanıcı şu an bir tarihi seçmişse ve veriler güncellendiyse formu tekrar kontrol et
-            const secilenTarih = document.getElementById('tarih').value;
-            if(secilenTarih && document.getElementById('giris').classList.contains('active')){
-                // Sadece form boşsa veya mod değiştiyse kontrol et (sürekli formu ezmemek için)
-                // Burada basitçe tarihKontrolEt çağırmak yerine, sadece veri varsa ve form boşsa doldur diyebiliriz.
-                // Ancak en sağlıklısı kullanıcının tarihi değiştirdiğinde bunu tetiklemesi. 
-            }
-
             if(document.getElementById('rapor').classList.contains('active')){
                 guncelleRapor();
             }
@@ -559,19 +525,20 @@
         cizGrafik(toplamMazot, toplamSivi, toplamTamir, toplamParca, toplamDiger, genelToplamSofor, toplamMuhasebe);
     }
 
-    // Tablodan Düzenle butonuna basıldığında çalışır
     function duzenle(id) {
         const kayit = kayitlar.find(k => k.id === id);
         if(!kayit) return;
 
-        // Tarihi forma yaz (bu otomatik olarak tarihKontrolEt'i tetikler)
         document.getElementById('tarih').value = kayit.tarih;
-        
-        // Formu doldur (tarihKontrolEt zaten dolduruyor ama garanti olsun diye manuel de çağırabiliriz)
-        // Ancak tarihKontrolEt içinde "mevcutKayit" bulunca zaten dolduracak.
-        tarihKontrolEt();
+        document.getElementById('hasilat').value = sayiyiFormatla(kayit.hasilat);
+        document.getElementById('km').value = sayiyiFormatla(kayit.km);
+        document.getElementById('mazotTL').value = sayiyiFormatla(kayit.mazotTL);
+        document.getElementById('siviBakim').value = sayiyiFormatla(kayit.siviBakim);
+        document.getElementById('tamir').value = sayiyiFormatla(kayit.tamir);
+        document.getElementById('parca').value = sayiyiFormatla(kayit.parca);
+        document.getElementById('diger').value = sayiyiFormatla(kayit.diger);
+        document.getElementById('gunlukSoforUcret').value = sayiyiFormatla(kayit.gunlukSoforUcret || 0);
 
-        // Sekmeyi değiştir
         switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
     }
 
@@ -579,13 +546,6 @@
         if(confirm("Bu kaydı buluttan kalıcı olarak silmek istediğinize emin misiniz?")) {
             try {
                 await window.deleteDoc(window.doc(window.db, "kayitlar", id));
-                if(duzenlenenId === id) {
-                    duzenlenenId = null;
-                    temizleForm();
-                    document.getElementById('formBaslik').innerText = "Günlük Sefer ve Gider Ekle";
-                    document.getElementById('kaydetBtn').innerText = "Günü Kaydet (Buluta Gönder)";
-                    document.getElementById('kaydetBtn').style.background = "var(--success)";
-                }
             } catch (e) {
                 alert("Silinirken hata oluştu.");
             }
