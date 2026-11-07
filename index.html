@@ -4,18 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dolmuş İşletme Paneli</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Grafikler için -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase SDK'larını yüklüyoruz -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Sizin Firebase Yapılandırmanız
+        const firebaseConfig = {
+            apiKey: "AIzaSyCI0dEOvivjT2E0Dd1wpSfOaS6_0u4lzOI",
+            authDomain: "dolmus-takip-e9569.firebaseapp.com",
+            projectId: "dolmus-takip-e9569",
+            storageBucket: "dolmus-takip-e9569.firebasestorage.app",
+            messagingSenderId: "122539009239",
+            appId: "1:122539009239:web:20fff0be54bdab3ad3bc92"
+        };
+
+        // Firebase'i Başlat
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // HTML elementlerini global yapalım ki Firebase içinden erişebilelim
+        window.db = db;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.onSnapshot = onSnapshot;
+        window.deleteDoc = deleteDoc;
+        window.doc = doc;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.firebaseHazir = true;
+        
+        // Sayfa yüklendiğinde verileri dinle
+        window.dinleVeriler();
+    </script>
     <style>
         :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
         .container { max-width: 1000px; margin: auto; }
         
-        /* Sekmeler */
         .tabs { display: flex; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .tab-btn { flex: 1; padding: 15px; border: none; background: white; cursor: pointer; font-size: 16px; font-weight: bold; color: #7f8c8d; transition: 0.3s; }
         .tab-btn.active { background: var(--primary); color: white; }
         
-        /* Form ve Paneller */
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .form-grid .full { grid-column: span 2; }
@@ -23,25 +54,22 @@
         input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
         button.btn-primary { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
         
-        /* Dashboard İstatistikleri */
         .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .stat-box h3 { margin: 0 0 5px; font-size: 14px; color: #7f8c8d; }
         .stat-box p { margin: 0; font-size: 20px; font-weight: bold; color: var(--primary); }
         
-        /* Tablo */
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
         th { background: #ecf0f1; font-weight: bold; }
         .text-danger { color: var(--danger); }
         .text-success { color: var(--success); }
         
-        /* Sekme İçerikleri (Gizle/Göster) */
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Grafik Kutusu */
         .chart-container { width: 100%; max-width: 400px; margin: 0 auto; }
+        .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
     </style>
 </head>
 <body>
@@ -49,13 +77,11 @@
 <div class="container">
     <h1 style="text-align:center; color:var(--primary)">🚐 Dolmuş İşletme Yönetim Paneli</h1>
     
-    <!-- Sekmeler -->
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('giris')">📱 Günlük Giriş (Şoför)</button>
         <button class="tab-btn" onclick="switchTab('rapor')">💻 Raporlar (Yönetici)</button>
     </div>
 
-    <!-- 1. SEKME: GÜNLÜK GİRİŞ -->
     <div id="giris" class="tab-content active">
         <div class="card">
             <h2>Günlük Sefer ve Gider Ekle</h2>
@@ -97,14 +123,12 @@
                     <input type="number" id="diger" placeholder="Örn: 300">
                 </div>
             </div>
-            <button class="btn-primary" onclick="kaydet()">Günü Kaydet</button>
+            <button class="btn-primary" onclick="kaydet()">Günü Kaydet (Buluta Gönder)</button>
+            <div id="mesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
         </div>
     </div>
 
-    <!-- 2. SEKME: RAPORLAR -->
     <div id="rapor" class="tab-content">
-        
-        <!-- Özet Kutuları -->
         <div class="stats-row">
             <div class="stat-box">
                 <h3>Toplam Kazanç</h3>
@@ -124,7 +148,6 @@
             </div>
         </div>
 
-        <!-- Sabit Giderler ve Şoför -->
         <div class="card">
             <h2>Sabit Giderler & Şoför</h2>
             <div class="form-grid">
@@ -140,7 +163,6 @@
             </div>
         </div>
 
-        <!-- Grafikler -->
         <div class="card">
             <h2>Gider Dağılımı</h2>
             <div class="chart-container">
@@ -148,9 +170,8 @@
             </div>
         </div>
 
-        <!-- Kayıt Listesi -->
         <div class="card">
-            <h2>Geçmiş Günler</h2>
+            <h2>Geçmiş Günler (Buluttan Canlı Çekiliyor)</h2>
             <table>
                 <thead>
                     <tr>
@@ -162,7 +183,7 @@
                     </tr>
                 </thead>
                 <tbody id="tabloListesi">
-                    <!-- JS ile doldurulacak -->
+                    <tr><td colspan="5" class="loading">Veriler buluttan yükleniyor...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -170,14 +191,11 @@
 </div>
 
 <script>
-    // Global Değişkenler
-    let kayitlar = JSON.parse(localStorage.getItem('dolmusTakip')) || [];
+    let kayitlar = [];
     let grafik = null;
 
-    // Bugünün tarihini varsayılan yap
     document.getElementById('tarih').valueAsDate = new Date();
 
-    // Sekme Değiştirme Fonksiyonu
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
@@ -187,10 +205,18 @@
         if(tabId === 'rapor') { guncelleRapor(); }
     }
 
-    // Veri Kaydetme
-    function kaydet() {
+    async function kaydet() {
+        if(!window.firebaseHazir) {
+            alert("Bulut sistemi henüz yüklenmedi, lütfen 1-2 saniye sonra tekrar deneyin.");
+            return;
+        }
+
+        const btn = document.querySelector('.btn-primary');
+        const mesajEl = document.getElementById('mesaj');
+        btn.innerText = "Buluta Kaydediliyor...";
+        btn.disabled = true;
+
         const kayit = {
-            id: Date.now(),
             tarih: document.getElementById('tarih').value,
             hasilat: Number(document.getElementById('hasilat').value) || 0,
             km: Number(document.getElementById('km').value) || 0,
@@ -199,66 +225,90 @@
             siviBakim: Number(document.getElementById('siviBakim').value) || 0,
             tamir: Number(document.getElementById('tamir').value) || 0,
             parca: Number(document.getElementById('parca').value) || 0,
-            diger: Number(document.getElementById('diger').value) || 0
+            diger: Number(document.getElementById('diger').value) || 0,
+            zaman: Date.now()
         };
 
-        // Toplam gideri hesapla
         kayit.toplamGider = kayit.mazotTL + kayit.siviBakim + kayit.tamir + kayit.parca + kayit.diger;
 
-        kayitlar.push(kayit);
-        localStorage.setItem('dolmusTakip', JSON.stringify(kayitlar));
-
-        alert("Gün başarıyla kaydedildi!");
-        
-        // Formu Temizle (Sadece hasılat ve giderleri, tarih ve KM kalsın)
-        document.getElementById('hasilat').value = '';
-        document.getElementById('mazotLitre').value = '';
-        document.getElementById('mazotTL').value = '';
-        document.getElementById('siviBakim').value = '';
-        document.getElementById('tamir').value = '';
-        document.getElementById('parca').value = '';
-        document.getElementById('diger').value = '';
+        try {
+            await window.addDoc(window.collection(window.db, "kayitlar"), kayit);
+            
+            mesajEl.style.color = "green";
+            mesajEl.innerText = "✅ Başarıyla buluta kaydedildi!";
+            
+            // Formu Temizle
+            document.getElementById('hasilat').value = '';
+            document.getElementById('km').value = '';
+            document.getElementById('mazotLitre').value = '';
+            document.getElementById('mazotTL').value = '';
+            document.getElementById('siviBakim').value = '';
+            document.getElementById('tamir').value = '';
+            document.getElementById('parca').value = '';
+            document.getElementById('diger').value = '';
+            
+            setTimeout(() => { mesajEl.innerText = ""; }, 3000);
+        } catch (e) {
+            console.error("Hata: ", e);
+            mesajEl.style.color = "red";
+            mesajEl.innerText = "❌ Hata oluştu, bağlantınızı kontrol edin.";
+        } finally {
+            btn.innerText = "Günü Kaydet (Buluta Gönder)";
+            btn.disabled = false;
+        }
     }
 
-    // Raporları ve Tabloyu Güncelle
+    // Buluttan veri dinleme fonksiyonu
+    window.dinleVeriler = function() {
+        if(!window.firebaseHazir) {
+            setTimeout(window.dinleVeriler, 500);
+            return;
+        }
+
+        const q = window.query(window.collection(window.db, "kayitlar"), window.orderBy("zaman", "desc"));
+        
+        window.onSnapshot(q, (snapshot) => {
+            kayitlar = [];
+            snapshot.forEach((doc) => {
+                kayitlar.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // Eğer rapor sekmesi açıksa hemen güncelle
+            if(document.getElementById('rapor').classList.contains('active')){
+                guncelleRapor();
+            }
+        });
+    }
+
     function guncelleRapor() {
         const tbody = document.getElementById('tabloListesi');
         tbody.innerHTML = '';
         
-        let toplamHasilat = 0;
-        let toplamMazot = 0;
-        let toplamSivi = 0;
-        let toplamTamir = 0;
-        let toplamParca = 0;
-        let toplamDiger = 0;
-        let toplamKM = 0;
-        let toplamMazotLitre = 0;
+        let toplamHasilat = 0, toplamMazot = 0, toplamSivi = 0, toplamTamir = 0, toplamParca = 0, toplamDiger = 0, toplamKM = 0;
 
         kayitlar.forEach(k => {
-            toplamHasilat += k.hasilat;
-            toplamMazot += k.mazotTL;
-            toplamSivi += k.siviBakim;
-            toplamTamir += k.tamir;
-            toplamParca += k.parca;
-            toplamDiger += k.diger;
-            toplamKM += k.km;
-            toplamMazotLitre += k.mazotLitre;
+            toplamHasilat += k.hasilat || 0;
+            toplamMazot += k.mazotTL || 0;
+            toplamSivi += k.siviBakim || 0;
+            toplamTamir += k.tamir || 0;
+            toplamParca += k.parca || 0;
+            toplamDiger += k.diger || 0;
+            toplamKM += k.km || 0;
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${k.tarih.split('-').reverse().join('.')}</td>
+                <td>${(k.tarih || '').split('-').reverse().join('.')}</td>
                 <td>${k.hasilat} TL</td>
                 <td class="text-danger">${k.toplamGider} TL</td>
                 <td class="${k.hasilat - k.toplamGider >= 0 ? 'text-success' : 'text-danger'}">
                     ${k.hasilat - k.toplamGider} TL
                 </td>
-                <td><button onclick="sil(${k.id})" style="background:var(--danger); color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Sil</button></td>
+                <td><button onclick="sil('${k.id}')" style="background:var(--danger); color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Sil</button></td>
             `;
             tbody.appendChild(tr);
         });
 
-        // Şoför ve Muhasebe Giderlerini Ekle
-        const gunSayisi = kayitlar.length || 1; // 0'a bölmeyi engelle
+        const gunSayisi = kayitlar.length || 1;
         const soforUcretGunluk = Number(document.getElementById('soforUcret').value) || 0;
         const toplamSofor = soforUcretGunluk * gunSayisi;
         
@@ -266,12 +316,10 @@
         const muhasebeGunluk = muhasebeAylik / 30;
         const toplamMuhasebe = muhasebeGunluk * gunSayisi;
 
-        // Genel Toplamlar
         const genelToplamGider = toplamMazot + toplamSivi + toplamTamir + toplamParca + toplamDiger + toplamSofor + toplamMuhasebe;
         const netKar = toplamHasilat - genelToplamGider;
         const kmBasiMazot = toplamKM > 0 ? (toplamMazot / toplamKM).toFixed(2) : 0;
 
-        // Panoya Yazdır
         document.getElementById('toplamKazanc').innerText = toplamHasilat.toLocaleString('tr-TR') + " TL";
         document.getElementById('toplamGider').innerText = genelToplamGider.toLocaleString('tr-TR') + " TL";
         
@@ -281,22 +329,22 @@
         
         document.getElementById('kmBasiMazot').innerText = kmBasiMazot + " TL/KM";
 
-        // Pasta Grafiği Çiz
         cizGrafik(toplamMazot, toplamSivi, toplamTamir, toplamParca, toplamDiger, toplamSofor, toplamMuhasebe);
     }
 
-    function sil(id) {
-        if(confirm("Bu kaydı silmek istediğinize emin misiniz?")) {
-            kayitlar = kayitlar.filter(k => k.id !== id);
-            localStorage.setItem('dolmusTakip', JSON.stringify(kayitlar));
-            guncelleRapor();
+    async function sil(id) {
+        if(confirm("Bu kaydı buluttan kalıcı olarak silmek istediğinize emin misiniz?")) {
+            try {
+                await window.deleteDoc(window.doc(window.db, "kayitlar", id));
+            } catch (e) {
+                alert("Silinirken hata oluştu.");
+            }
         }
     }
 
     function cizGrafik(mazot, sivi, tamir, parca, diger, sofor, muhasebe) {
         const ctx = document.getElementById('giderGrafik').getContext('2d');
-        
-        if(grafik) grafik.destroy(); // Eski grafiği temizle
+        if(grafik) grafik.destroy(); 
 
         grafik = new Chart(ctx, {
             type: 'pie',
@@ -307,18 +355,9 @@
                     backgroundColor: ['#e74c3c', '#3498db', '#f1c40f', '#9b59b6', '#95a5a6', '#2ecc71', '#34495e']
                 }]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
-            }
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
         });
     }
-
-    // Sayfa ilk açıldığında raporu hazırla
-    guncelleRapor();
 </script>
-
 </body>
 </html>
