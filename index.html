@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dolmuş İşletme Paneli</title>
+    <title>Dolmuş İşletme Yönetim Paneli</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -39,9 +39,9 @@
         window.dinleVeriler();
     </script>
     <style>
-        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; --info: #3498db; }
+        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; --info: #3498db; --purple: #8e44ad; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1200px; margin: auto; }
+        .container { max-width: 1400px; margin: auto; }
         
         .header-alani { position: relative; text-align: center; margin-bottom: 20px; }
         .header-alani h1 { color: var(--primary); margin: 0; padding: 0 60px; font-size: 24px; } 
@@ -63,45 +63,46 @@
         .form-grid .full { grid-column: span 2; }
         button.btn-primary { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
         
-        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-        .stat-box { background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .stat-box h3 { margin: 0 0 5px; font-size: 14px; color: #7f8c8d; }
-        .stat-box p { margin: 0; font-size: 20px; font-weight: bold; color: var(--primary); }
+        /* Rapor Sekmesi Özel Tasarım */
+        .rapor-filtre-alani { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; background: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .rapor-filtre-alani .input-grup { margin-top: 0; flex: 1; min-width: 150px; }
+        .rapor-filtre-alani button { padding: 12px 20px; background: var(--info); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; height: 46px; }
         
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); }
+        .stat-box h3 { margin: 0 0 10px; font-size: 14px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px;}
+        .stat-box p { margin: 0; font-size: 24px; font-weight: bold; color: var(--primary); }
+        
+        .chart-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .chart-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .chart-card h3 { margin-top: 0; margin-bottom: 15px; font-size: 16px; color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        
+        .analiz-tablo { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
+        .analiz-tablo th, .analiz-tablo td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+        .analiz-tablo th { background: #ecf0f1; font-weight: bold; }
+        
+        .text-danger { color: var(--danger); }
+        .text-success { color: var(--success); }
+        .text-muted { color: #7f8c8d; font-size: 12px; }
+
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; min-width: 1300px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
         th { background: #ecf0f1; font-weight: bold; }
-        .text-danger { color: var(--danger); }
-        .text-success { color: var(--success); }
-        .text-muted { color: #7f8c8d; font-size: 12px; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .chart-container { width: 100%; max-width: 400px; margin: 0 auto; }
         .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
 
-        /* Şık Yüzen Etiketler (Inputlar İçin) */
+        /* Şık Yüzen Etiketler */
         .input-grup { position: relative; margin-top: 10px; }
-        .input-grup input { width: 100%; padding: 22px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
-        .input-grup input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
+        .input-grup input, .input-grup select { width: 100%; padding: 22px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
+        .input-grup input:focus, .input-grup select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
         .input-grup label { position: absolute; left: 15px; top: 16px; color: #7f8c8d; font-size: 14px; font-weight: normal; pointer-events: none; transition: all 0.2s ease; margin: 0; }
         .input-grup input:focus + label, .input-grup input:not(:placeholder-shown) + label { top: 5px; font-size: 11px; font-weight: bold; color: var(--primary); }
-
-        /* Yeni: Select (Açılır Menü) Tasarımı */
-        .input-grup select {
-            width: 100%; padding: 22px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; 
-            font-size: 16px; background: white; cursor: pointer; outline: none; box-sizing: border-box;
-            appearance: none; -webkit-appearance: none; -moz-appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg fill='%237f8c8d' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
-            background-repeat: no-repeat;
-            background-position-x: 95%;
-            background-position-y: center;
-            transition: all 0.2s ease;
-        }
-        .input-grup select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
-        /* Select etiketinin konumu (her zaman yukarıda duracak) */
+        
+        .input-grup select { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg fill='%237f8c8d' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>"); background-repeat: no-repeat; background-position-x: 95%; background-position-y: center; cursor: pointer;}
         .input-grup .select-label { position: absolute; left: 15px; top: 5px; color: var(--primary); font-size: 11px; font-weight: bold; margin: 0; }
 
         .toplam-sabit { grid-column: span 2; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid var(--primary); margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
@@ -110,7 +111,7 @@
 
         .islem-btn { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; color: white; }
         .btn-duzenle { background: var(--warning); }
-        .btn-dagit { background: #8e44ad; width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
+        .btn-dagit { background: var(--purple); width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
 
         .uyari-panosu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 100px; }
@@ -123,7 +124,10 @@
         .durum-kirmizi { background-color: var(--danger); }
         .durum-gri { background-color: #95a5a6; }
 
-        /* --- MOBİL UYUMLULUK (RESPONSIVE) AYARLARI --- */
+        /* --- MOBİL UYUMLULUK --- */
+        @media (max-width: 900px) {
+            .chart-grid { grid-template-columns: 1fr; }
+        }
         @media (max-width: 768px) {
             body { padding: 10px; }
             .header-alani { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 15px; }
@@ -148,6 +152,7 @@
             .card { padding: 15px; }
             .toplam-sabit { flex-direction: column; align-items: flex-start; gap: 5px; }
             .toplam-sabit strong { font-size: 18px; }
+            .rapor-filtre-alani { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>
@@ -171,27 +176,19 @@
         <button class="tab-btn" id="raporTabBtn" onclick="switchTab('rapor', this)">💻 Raporlar (Yönetici)</button>
     </div>
 
+    <!-- ŞOFÖR EKRANI -->
     <div id="giris" class="tab-content active">
         <div class="uyari-panosu" id="uyariPanosu">
             <div class="uyari-kutu durum-gri" id="muayeneKutu">
-                <div>
-                    <h4>🚗 Araç Muayenesi</h4>
-                    <div class="uyari-alt-yazi" id="muayeneTarihYazi"></div>
-                </div>
+                <div><h4>🚗 Araç Muayenesi</h4><div class="uyari-alt-yazi" id="muayeneTarihYazi"></div></div>
                 <p id="muayeneDurum">Tarih Girilmedi</p>
             </div>
             <div class="uyari-kutu durum-gri" id="egzozKutu">
-                <div>
-                    <h4>💨 Egzoz Emisyon</h4>
-                    <div class="uyari-alt-yazi" id="egzozTarihYazi"></div>
-                </div>
+                <div><h4>💨 Egzoz Emisyon</h4><div class="uyari-alt-yazi" id="egzozTarihYazi"></div></div>
                 <p id="egzozDurum">Tarih Girilmedi</p>
             </div>
             <div class="uyari-kutu durum-gri" id="yagKutu">
-                <div>
-                    <h4>🛢️ Yağ Değişimi</h4>
-                    <div class="uyari-alt-yazi" id="yagKmYazi"></div> 
-                </div>
+                <div><h4>🛢️ Yağ Değişimi</h4><div class="uyari-alt-yazi" id="yagKmYazi"></div></div>
                 <p id="yagDurum">KM Girilmedi</p>
             </div>
         </div>
@@ -203,8 +200,6 @@
                     <input type="date" id="tarih">
                     <label for="tarih">Tarih (Seferin Yapıldığı Gün)</label>
                 </div>
-                
-                <!-- YENİ: GÜZERGAH SEÇİMİ -->
                 <div class="input-grup">
                     <label for="guzergah" class="select-label">Güzergah Seçimi</label>
                     <select id="guzergah">
@@ -213,8 +208,6 @@
                         <option value="Dağdibi">Dağdibi</option>
                     </select>
                 </div>
-                <!-- ------------------------ -->
-
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="hasilat" class="para" placeholder="">
                     <label for="hasilat">Günlük Kazanç (TL)</label>
@@ -253,28 +246,123 @@
         </div>
     </div>
 
+    <!-- YÖNETİCİ / RAPOR EKRANI -->
     <div id="rapor" class="tab-content">
+        
+        <!-- Filtreleme Alanı -->
+        <div class="rapor-filtre-alani">
+            <div class="input-grup">
+                <input type="date" id="filtreBaslangic">
+                <label for="filtreBaslangic">Başlangıç Tarihi</label>
+            </div>
+            <div class="input-grup">
+                <input type="date" id="filtreBitis">
+                <label for="filtreBitis">Bitiş Tarihi</label>
+            </div>
+            <div class="input-grup">
+                <label for="filtreGuzergah" class="select-label">Güzergah Filtresi</label>
+                <select id="filtreGuzergah">
+                    <option value="Tumu">Tümü</option>
+                    <option value="Kumluca">Kumluca</option>
+                    <option value="Turunçova">Turunçova</option>
+                    <option value="Dağdibi">Dağdibi</option>
+                </select>
+            </div>
+            <button onclick="filtreleRapor()">Filtrele / Raporla</button>
+        </div>
+
+        <!-- İstatistik Kartları -->
         <div class="stats-row">
             <div class="stat-box">
                 <h3>Toplam Kazanç</h3>
-                <p id="toplamKazanc">0 TL</p>
+                <p id="rKazanc" class="text-success">0 TL</p>
             </div>
             <div class="stat-box">
                 <h3>Toplam Gider</h3>
-                <p id="toplamGider" class="text-danger">0 TL</p>
+                <p id="rGider" class="text-danger">0 TL</p>
             </div>
             <div class="stat-box">
                 <h3>Net Kâr</h3>
-                <p id="netKar" class="text-success">0 TL</p>
+                <p id="rKar">0 TL</p>
             </div>
-            <div class="stat-box">
-                <h3>KM Başına Yakıt</h3>
-                <p id="kmBasiMazot">0 TL/KM</p>
+            <div class="stat-box" style="border-top-color: var(--info);">
+                <h3>Günlük Ortalama Kâr</h3>
+                <p id="rOrtKar">0 TL</p>
+            </div>
+            <div class="stat-box" style="border-top-color: var(--warning);">
+                <h3>Toplam Sefer (Gün)</h3>
+                <p id="rSeferSayisi">0</p>
             </div>
         </div>
 
+        <!-- Grafik Alanı -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <h3>📈 Kazanç - Gider Trendi (Günlük)</h3>
+                <canvas id="trendGrafik" height="100"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>🍕 Gider Dağılımı (Genel)</h3>
+                <canvas id="giderGrafik" height="200"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-card">
+                <h3>📊 Haftanın Günlerine Göre Ortalama Kâr</h3>
+                <canvas id="haftalikGrafik" height="120"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>🛣️ Güzergah Verimlilik Analizi</h3>
+                <table class="analiz-tablo" style="margin-bottom:0;">
+                    <thead>
+                        <tr>
+                            <th>Güzergah</th>
+                            <th>Sefer</th>
+                            <th>Toplam Kâr</th>
+                            <th>Ort. Kâr/Sefer</th>
+                        </tr>
+                    </thead>
+                    <tbody id="guzergahAnalizTablo">
+                        <!-- JS ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Detaylı Kayıt Tablosu -->
         <div class="card">
-            <h2>🚗 Araç Takip Ayarları</h2>
+            <h2>Filtrelenen Kayıtlar (Detaylı)</h2>
+            <div class="tablo-kapsayici">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Güzergah</th>
+                            <th>Hasılat</th>
+                            <th>KM</th>
+                            <th>Mazot</th>
+                            <th>Sıvı Bakım</th>
+                            <th>Tamir</th>
+                            <th>Parça</th>
+                            <th>Diğer</th>
+                            <th>Şoför</th>
+                            <th>Sabit Gid.</th>
+                            <th>Toplam Gider</th>
+                            <th>Net</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabloListesi">
+                        <tr><td colspan="14" class="loading">Veriler buluttan yükleniyor...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Araç ve Sabit Gider Ayarları (En Alta Aldık) -->
+        <div class="card">
+            <h2>⚙️ Sistem Ayarları (Araç & Sabit Giderler)</h2>
             <div class="form-grid">
                 <div class="input-grup">
                     <input type="date" id="ayarMuayeneTarihi" onchange="aracAyarlariniKaydet()">
@@ -290,18 +378,11 @@
                 </div>
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="ayarYagOmru" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
-                    <label for="ayarYagOmru">Yağ Değişim Ömrü (Örn: 10.000 KM)</label>
+                    <label for="ayarYagOmru">Yağ Değişim Ömrü (KM)</label>
                 </div>
-            </div>
-            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Girdiğiniz tarihlerin üzerine sistem otomatik olarak <b>+1 Yıl</b> ekler. Yağ ömrü için belirlediğiniz KM, şoförün girdiği <b>en güncel tarihli</b> KM'den düşülerek hesaplanır.</p>
-        </div>
-
-        <div class="card">
-            <h2>Sabit Giderler (Fişteki Kalemler)</h2>
-            <div class="form-grid">
                 <div class="input-grup">
                     <input type="date" id="sabitGiderTarih">
-                    <label for="sabitGiderTarih">Fişin Ait Olduğu Tarih</label>
+                    <label for="sabitGiderTarih">Fişin Ait Olduğu Tarih (Aylık Gider Dağıtımı İçin)</label>
                 </div>
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="pesinVergi" class="para" placeholder="" onchange="guncelleRapor()">
@@ -346,52 +427,25 @@
                 <button class="btn-dagit" onclick="sabitGiderleriDagit()">Sabit Giderleri O Ayın Günlerine Dağıt</button>
             </div>
         </div>
-
-        <div class="card">
-            <h2>Gider Dağılımı</h2>
-            <div class="chart-container">
-                <canvas id="giderGrafik"></canvas>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Geçmiş Günler (Detaylı Tablo)</h2>
-            <div class="tablo-kapsayici">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Sefer Tarihi</th>
-                            <th>Güzergah</th> <!-- YENİ SÜTUN -->
-                            <th>İlk Giriş</th>
-                            <th>Son Giriş</th>
-                            <th>Hasılat</th>
-                            <th>KM</th>
-                            <th>Mazot (TL)</th>
-                            <th>Sıvı Bakım</th>
-                            <th>Tamir</th>
-                            <th>Parça</th>
-                            <th>Diğer</th>
-                            <th>Şoför (TL)</th>
-                            <th>Günlük Sabit Gid.</th>
-                            <th>Toplam Günlük Gider</th>
-                            <th>Net</th>
-                            <th>İşlem</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabloListesi">
-                        <tr><td colspan="16" class="loading">Veriler buluttan yükleniyor...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </div>
 </div>
 
 <script>
     let kayitlar = [];
-    let grafik = null;
+    let filtrelenmisKayitlar = [];
+    
+    // Grafik Objelerini tut
+    let chartTrend = null;
+    let chartGider = null;
+    let chartHaftalik = null;
 
     document.getElementById('tarih').valueAsDate = new Date();
+    
+    // Filtre alanlarına varsayılan olarak bu ayın başını ve bugünü ata
+    const bugun = new Date();
+    const ayBasi = new Date(bugun.getFullYear(), bugun.getMonth(), 1);
+    document.getElementById('filtreBaslangic').valueAsDate = ayBasi;
+    document.getElementById('filtreBitis').valueAsDate = bugun;
 
     const YONETICI_SIFRESI = "Hb.123-"; 
     const SOFOR_SIFRESI = "";    
@@ -412,9 +466,7 @@
     function tarihSaatFormatla(timestamp) {
         if(!timestamp) return "-";
         const d = new Date(timestamp);
-        const tarih = d.toLocaleDateString('tr-TR');
-        const saat = d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-        return `<span class="text-muted">${tarih} <br> ${saat}</span>`;
+        return `<span class="text-muted">${d.toLocaleDateString('tr-TR')} <br> ${d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}</span>`;
     }
 
     document.querySelectorAll('.para').forEach(input => {
@@ -424,9 +476,7 @@
             this.value = sayiyiFormatla(this.value);
             let yeniDeger = this.value;
             let fark = yeniDeger.length - eskiDeger.length;
-            if(imlecPozisyonu > 0) {
-                this.setSelectionRange(imlecPozisyonu + fark, imlecPozisyonu + fark);
-            }
+            if(imlecPozisyonu > 0) this.setSelectionRange(imlecPozisyonu + fark, imlecPozisyonu + fark);
         });
         input.addEventListener('blur', function() {
             if (this.value === "0") this.value = "";
@@ -456,37 +506,30 @@
         }
     }
 
-    function cikisYap() {
-        location.reload();
-    }
+    function cikisYap() { location.reload(); }
 
     function switchTab(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-        
         document.getElementById(tabId).classList.add('active');
         if(btnElement) btnElement.classList.add('active');
         
-        if(tabId === 'rapor') { guncelleRapor(); }
+        if(tabId === 'rapor') { filtreleRapor(); }
         if(tabId === 'giris') { aracUyarilariniGuncelle(); }
     }
 
+    // --- ARAÇ AYARLARI ---
     async function aracAyarlariniKaydet() {
         if(!window.firebaseHazir) return;
-        
         const muayene = document.getElementById('ayarMuayeneTarihi').value;
         const egzoz = document.getElementById('ayarEgzozTarihi').value;
         const yagKm = formatiCoz(document.getElementById('ayarYagKm').value);
         const yagOmru = formatiCoz(document.getElementById('ayarYagOmru').value); 
-
         const ayarlar = { muayene, egzoz, yagKm, yagOmru };
-        
         try {
             await window.setDoc(window.doc(window.db, "sistem", "aracAyarlari"), ayarlar);
             aracUyarilariniGuncelle(); 
-        } catch (e) {
-            console.error("Ayarlar kaydedilemedi: ", e);
-        }
+        } catch (e) { console.error(e); }
     }
 
     async function aracAyarlariniBuluttanYukle() {
@@ -494,7 +537,6 @@
         try {
             const docRef = window.doc(window.db, "sistem", "aracAyarlari");
             const docSnap = await window.getDoc(docRef);
-            
             if (docSnap.exists()) {
                 const ayarlar = docSnap.data();
                 if(document.getElementById('ayarMuayeneTarihi')) {
@@ -505,9 +547,7 @@
                 }
                 aracUyarilariniGuncelle(ayarlar);
             }
-        } catch(e) {
-            console.error("Ayarlar yüklenemedi: ", e);
-        }
+        } catch(e) { console.error(e); }
     }
 
     function aracUyarilariniGuncelle(gelenAyarlar = null) {
@@ -518,93 +558,56 @@
             yagOmru: document.getElementById('ayarYagOmru') ? formatiCoz(document.getElementById('ayarYagOmru').value) : (gelenAyarlar ? gelenAyarlar.yagOmru : 10000) 
         };
 
-        const bugun = new Date();
-        bugun.setHours(0,0,0,0);
+        const bugun = new Date(); bugun.setHours(0,0,0,0);
 
+        // Muayene
         const muayeneKutu = document.getElementById('muayeneKutu');
         const muayeneDurum = document.getElementById('muayeneDurum');
         const muayeneTarihYazi = document.getElementById('muayeneTarihYazi');
-        
         if(ayarlar.muayene) {
             const muayeneTarihi = new Date(ayarlar.muayene);
             muayeneTarihi.setFullYear(muayeneTarihi.getFullYear() + 1); 
-
-            const farkMs = muayeneTarihi - bugun;
-            const kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
-
+            const kalanGun = Math.ceil((muayeneTarihi - bugun) / (1000 * 60 * 60 * 24));
             muayeneKutu.className = 'uyari-kutu'; 
             muayeneTarihYazi.innerText = "Bitiş: " + muayeneTarihi.toLocaleDateString('tr-TR');
-
-            if(kalanGun < 0) {
-                muayeneKutu.classList.add('durum-kirmizi');
-                muayeneDurum.innerText = `SÜRESİ GEÇTİ!`;
-            } else if(kalanGun <= 30) {
-                muayeneKutu.classList.add('durum-sari');
-                muayeneDurum.innerText = `${kalanGun} Gün Kaldı!`;
-            } else {
-                muayeneKutu.classList.add('durum-yesil');
-                muayeneDurum.innerText = `${kalanGun} Gün Kaldı`;
-            }
+            if(kalanGun < 0) { muayeneKutu.classList.add('durum-kirmizi'); muayeneDurum.innerText = `SÜRESİ GEÇTİ!`; }
+            else if(kalanGun <= 30) { muayeneKutu.classList.add('durum-sari'); muayeneDurum.innerText = `${kalanGun} Gün Kaldı!`; }
+            else { muayeneKutu.classList.add('durum-yesil'); muayeneDurum.innerText = `${kalanGun} Gün Kaldı`; }
         }
 
+        // Egzoz
         const egzozKutu = document.getElementById('egzozKutu');
         const egzozDurum = document.getElementById('egzozDurum');
         const egzozTarihYazi = document.getElementById('egzozTarihYazi');
-
         if(ayarlar.egzoz) {
             const egzozTarihi = new Date(ayarlar.egzoz);
             egzozTarihi.setFullYear(egzozTarihi.getFullYear() + 1); 
-
-            const farkMs = egzozTarihi - bugun;
-            const kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
-
+            const kalanGun = Math.ceil((egzozTarihi - bugun) / (1000 * 60 * 60 * 24));
             egzozKutu.className = 'uyari-kutu';
             egzozTarihYazi.innerText = "Bitiş: " + egzozTarihi.toLocaleDateString('tr-TR');
-
-            if(kalanGun < 0) {
-                egzozKutu.classList.add('durum-kirmizi');
-                egzozDurum.innerText = `SÜRESİ GEÇTİ!`;
-            } else if(kalanGun <= 30) {
-                egzozKutu.classList.add('durum-sari');
-                egzozDurum.innerText = `${kalanGun} Gün Kaldı!`;
-            } else {
-                egzozKutu.classList.add('durum-yesil');
-                egzozDurum.innerText = `${kalanGun} Gün Kaldı`;
-            }
+            if(kalanGun < 0) { egzozKutu.classList.add('durum-kirmizi'); egzozDurum.innerText = `SÜRESİ GEÇTİ!`; }
+            else if(kalanGun <= 30) { egzozKutu.classList.add('durum-sari'); egzozDurum.innerText = `${kalanGun} Gün Kaldı!`; }
+            else { egzozKutu.classList.add('durum-yesil'); egzozDurum.innerText = `${kalanGun} Gün Kaldı`; }
         }
 
+        // Yağ
         const yagKutu = document.getElementById('yagKutu');
         const yagDurum = document.getElementById('yagDurum');
         const yagKmYazi = document.getElementById('yagKmYazi'); 
-        
         if(ayarlar.yagKm > 0) {
             let enGuncelKayit = null;
-            
             for (let i = 0; i < kayitlar.length; i++) {
-                if (kayitlar[i].km && kayitlar[i].km > 0) {
-                    enGuncelKayit = kayitlar[i];
-                    break; 
-                }
+                if (kayitlar[i].km && kayitlar[i].km > 0) { enGuncelKayit = kayitlar[i]; break; }
             }
-
             if(enGuncelKayit) {
                 const sonKm = enGuncelKayit.km;
                 const hedefKm = ayarlar.yagKm + ayarlar.yagOmru; 
                 const kalanKm = hedefKm - sonKm; 
-                
                 yagKmYazi.innerText = "Değişim: " + hedefKm.toLocaleString('tr-TR') + " KM";
-
                 yagKutu.className = 'uyari-kutu';
-                if(kalanKm <= 0) {
-                    yagKutu.classList.add('durum-kirmizi');
-                    yagDurum.innerText = `DEĞİŞİM ZAMANI!`;
-                } else if(kalanKm <= 1500) {
-                    yagKutu.classList.add('durum-sari');
-                    yagDurum.innerText = `${kalanKm.toLocaleString('tr-TR')} KM Kaldı!`;
-                } else {
-                    yagKutu.classList.add('durum-yesil');
-                    yagDurum.innerText = `${kalanKm.toLocaleString('tr-TR')} KM Kaldı`;
-                }
+                if(kalanKm <= 0) { yagKutu.classList.add('durum-kirmizi'); yagDurum.innerText = `DEĞİŞİM ZAMANI!`; }
+                else if(kalanKm <= 1500) { yagKutu.classList.add('durum-sari'); yagDurum.innerText = `${kalanKm.toLocaleString('tr-TR')} KM Kaldı!`; }
+                else { yagKutu.classList.add('durum-yesil'); yagDurum.innerText = `${kalanKm.toLocaleString('tr-TR')} KM Kaldı`; }
             } else {
                 yagKutu.className = 'uyari-kutu durum-gri';
                 yagDurum.innerText = "KM Girilmedi";
@@ -613,6 +616,7 @@
         }
     }
 
+    // --- KAYIT İŞLEMLERİ ---
     async function kaydet() {
         if(!window.firebaseHazir) { alert("Bulut sistemi henüz yüklenmedi..."); return; }
         const secilenTarih = document.getElementById('tarih').value;
@@ -622,9 +626,8 @@
         const kmDeger = formatiCoz(document.getElementById('km').value);
 
         if (siviBakimDeger > 0 && kmDeger === 0) {
-            alert("⚠️ DİKKAT: Sıvı Bakım (Yağ Değişimi vs.) tutarı girdiniz. Lütfen aracın o anki Güncel KM'sini de giriniz!");
-            document.getElementById('km').focus();
-            return; 
+            alert("⚠️ DİKKAT: Sıvı Bakım tutarı girdiniz. Lütfen Güncel KM'yi de giriniz!");
+            document.getElementById('km').focus(); return; 
         }
 
         const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
@@ -652,75 +655,50 @@
             gunlukSoforUcret: document.getElementById('gunlukSoforUcret').value !== "" ? formatiCoz(document.getElementById('gunlukSoforUcret').value) : null,
         };
 
-        const ilkGirisZamani = ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now();
-        const sonGirisZamani = Date.now();
-
         let kayit = {
             tarih: secilenTarih,
-            zaman: ilkGirisZamani,
-            kayitSaati: sonGirisZamani,
+            zaman: ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now(),
+            kayitSaati: Date.now(),
             sabitGiderPayi: ayniTarihliKayit ? (ayniTarihliKayit.sabitGiderPayi || 0) : 0
         };
 
         const alanlar = ['guzergah', 'hasilat', 'km', 'mazotTL', 'siviBakim', 'tamir', 'parca', 'diger', 'gunlukSoforUcret'];
-        
         alanlar.forEach(alan => {
-            if (yeniDegerler[alan] !== null) {
-                kayit[alan] = yeniDegerler[alan];
-            } else if (ayniTarihliKayit) {
-                kayit[alan] = ayniTarihliKayit[alan] || 0;
-            } else {
-                if(alan === 'guzergah') kayit[alan] = "Belirtilmedi";
-                else kayit[alan] = 0;
-            }
+            if (yeniDegerler[alan] !== null) { kayit[alan] = yeniDegerler[alan]; }
+            else if (ayniTarihliKayit) { kayit[alan] = ayniTarihliKayit[alan] || 0; }
+            else { kayit[alan] = (alan === 'guzergah') ? "Belirtilmedi" : 0; }
         });
 
         kayit.toplamGider = kayit.mazotTL + kayit.siviBakim + kayit.tamir + kayit.parca + kayit.diger + kayit.gunlukSoforUcret + kayit.sabitGiderPayi;
 
         try {
-            if (ayniTarihliKayit) {
-                await window.deleteDoc(window.doc(window.db, "kayitlar", ayniTarihliKayit.id));
-            }
+            if (ayniTarihliKayit) { await window.deleteDoc(window.doc(window.db, "kayitlar", ayniTarihliKayit.id)); }
             await window.addDoc(window.collection(window.db, "kayitlar"), kayit);
             
             if (siviBakimDeger > 0 && kmDeger > 0) {
                 const ayarDocRef = window.doc(window.db, "sistem", "aracAyarlari");
                 const ayarDocSnap = await window.getDoc(ayarDocRef);
-                
                 if (ayarDocSnap.exists()) {
                     const mevcutAyarlar = ayarDocSnap.data();
                     mevcutAyarlar.yagKm = kmDeger; 
-                    
                     await window.setDoc(ayarDocRef, mevcutAyarlar);
-                    
-                    if(document.getElementById('ayarYagKm')) {
-                        document.getElementById('ayarYagKm').value = sayiyiFormatla(kmDeger);
-                    }
+                    if(document.getElementById('ayarYagKm')) document.getElementById('ayarYagKm').value = sayiyiFormatla(kmDeger);
                     aracUyarilariniGuncelle(mevcutAyarlar);
                 }
             }
 
             mesajEl.style.color = "green";
-            mesajEl.innerText = ayniTarihliKayit ? "✅ Kayıt başarıyla güncellendi!" : "✅ Başarıyla buluta kaydedildi!";
+            mesajEl.innerText = ayniTarihliKayit ? "✅ Kayıt güncellendi!" : "✅ Başarıyla kaydedildi!";
             
-            document.getElementById('hasilat').value = '';
-            document.getElementById('km').value = '';
-            document.getElementById('mazotTL').value = '';
-            document.getElementById('siviBakim').value = '';
-            document.getElementById('tamir').value = '';
-            document.getElementById('parca').value = '';
-            document.getElementById('diger').value = '';
-            document.getElementById('gunlukSoforUcret').value = '';
+            document.getElementById('hasilat').value = ''; document.getElementById('km').value = '';
+            document.getElementById('mazotTL').value = ''; document.getElementById('siviBakim').value = '';
+            document.getElementById('tamir').value = ''; document.getElementById('parca').value = '';
+            document.getElementById('diger').value = ''; document.getElementById('gunlukSoforUcret').value = '';
             
             setTimeout(() => { mesajEl.innerText = ""; }, 3000);
         } catch (e) {
-            console.error("Hata: ", e);
-            mesajEl.style.color = "red";
-            mesajEl.innerText = "❌ Hata oluştu, bağlantınızı kontrol edin.";
-        } finally {
-            btn.innerText = "Günü Kaydet (Buluta Gönder)";
-            btn.disabled = false;
-        }
+            console.error(e); mesajEl.style.color = "red"; mesajEl.innerText = "❌ Hata oluştu!";
+        } finally { btn.innerText = "Günü Kaydet (Buluta Gönder)"; btn.disabled = false; }
     }
 
     window.dinleVeriler = function() {
@@ -729,21 +707,14 @@
         
         window.onSnapshot(q, (snapshot) => {
             kayitlar = [];
-            snapshot.forEach((doc) => {
-                kayitlar.push({ id: doc.id, ...doc.data() });
-            });
-            if(document.getElementById('rapor').classList.contains('active')){
-                guncelleRapor();
-            }
-            if(document.getElementById('giris').classList.contains('active')){
-                aracUyarilariniGuncelle();
-            }
+            snapshot.forEach((doc) => { kayitlar.push({ id: doc.id, ...doc.data() }); });
+            if(document.getElementById('rapor').classList.contains('active')){ filtreleRapor(); }
+            if(document.getElementById('giris').classList.contains('active')){ aracUyarilariniGuncelle(); }
         });
     }
 
     async function sabitGiderleriDagit() {
-        if(!window.firebaseHazir) { alert("Sistem hazır değil."); return; }
-
+        if(!window.firebaseHazir) return;
         const secilenTarihStr = document.getElementById('sabitGiderTarih').value;
         if(!secilenTarihStr) { alert("Lütfen fişin ait olduğu tarihi seçin!"); return; }
 
@@ -758,8 +729,7 @@
         const sabitDigerGider = formatiCoz(document.getElementById('sabitDigerGider').value);
 
         const toplamDagitilacakTutar = pesinVergi + stopaj + kdv + gelirVergisi + bagKur + sigorta + matbaaNoter + muhasebe + sabitDigerGider;
-
-        if(toplamDagitilacakTutar <= 0) { alert("Dağıtılacak bir gider tutarı girmediniz!"); return; }
+        if(toplamDagitilacakTutar <= 0) { alert("Dağıtılacak tutar girmediniz!"); return; }
 
         const secilenTarihObj = new Date(secilenTarihStr);
         const secilenYil = secilenTarihObj.getFullYear();
@@ -771,73 +741,104 @@
             return kTarihObj.getFullYear() === secilenYil && kTarihObj.getMonth() === secilenAy;
         });
 
-        if(oAyinKayitlari.length === 0) { alert("Seçilen tarihin ait olduğu ayda şoförün girdiği hiçbir veri bulunamadı!"); return; }
-
+        if(oAyinKayitlari.length === 0) { alert("Seçilen ayda kayıt yok!"); return; }
         const gunSayisi = oAyinKayitlari.length;
         const gunlukPay = toplamDagitilacakTutar / gunSayisi;
 
-        const onay = confirm(`Toplam ${toplamDagitilacakTutar.toLocaleString('tr-TR')} TL gider, seçilen ay içindeki ${gunSayisi} güne bölünecek.\n\nGünlük pay: ${gunlukPay.toLocaleString('tr-TR')} TL\n\nBu işlemi onaylıyor musunuz?`);
-        if(!onay) return;
+        if(!confirm(`Toplam ${toplamDagitilacakTutar.toLocaleString('tr-TR')} TL gider, ${gunSayisi} güne bölünecek.\nGünlük pay: ${gunlukPay.toLocaleString('tr-TR')} TL\n\nOnaylıyor musunuz?`)) return;
 
         const batch = window.writeBatch(window.db);
-        
         oAyinKayitlari.forEach(kayit => {
-            const yeniSabitPay = gunlukPay;
             const eskiSabitPay = kayit.sabitGiderPayi || 0;
-            const yeniToplamGider = (kayit.toplamGider - eskiSabitPay) + yeniSabitPay;
-
-            const kayitRef = window.doc(window.db, "kayitlar", kayit.id);
-            batch.update(kayitRef, {
-                sabitGiderPayi: yeniSabitPay,
-                toplamGider: yeniToplamGider
-            });
+            const yeniToplamGider = (kayit.toplamGider - eskiSabitPay) + gunlukPay;
+            batch.update(window.doc(window.db, "kayitlar", kayit.id), { sabitGiderPayi: gunlukPay, toplamGider: yeniToplamGider });
         });
-
         try {
             await batch.commit();
-            alert(`✅ Başarılı! ${toplamDagitilacakTutar.toLocaleString('tr-TR')} TL gider, ${gunSayisi} güne bölünerek her güne ${gunlukPay.toLocaleString('tr-TR')} TL olarak eklendi.`);
-            guncelleRapor();
-        } catch(e) {
-            console.error(e);
-            alert("Dağıtım sırasında hata oluştu!");
-        }
+            alert(`✅ Başarılı! Her güne ${gunlukPay.toLocaleString('tr-TR')} TL eklendi.`);
+            filtreleRapor();
+        } catch(e) { alert("Hata!"); }
     }
 
-    function guncelleRapor() {
+    // --- YENİ: GELİŞMİŞ RAPORLAMA VE FİLTRELEME ---
+    function filtreleRapor() {
+        const baslangicStr = document.getElementById('filtreBaslangic').value;
+        const bitisStr = document.getElementById('filtreBitis').value;
+        const secilenGuzergah = document.getElementById('filtreGuzergah').value;
+
+        if(!baslangicStr || !bitisStr) { alert("Lütfen tarih aralığı seçin!"); return; }
+
+        const baslangic = new Date(baslangicStr);
+        const bitis = new Date(bitisStr);
+        bitis.setHours(23, 59, 59);
+
+        // 1. Filtreleme İşlemi
+        filtrelenmisKayitlar = kayitlar.filter(k => {
+            const kTarih = new Date(k.tarih);
+            const tarihUygun = kTarih >= baslangic && kTarih <= bitis;
+            const guzergahUygun = (secilenGuzergah === 'Tumu') || (k.guzergah === secilenGuzergah);
+            return tarihUygun && guzergahUygun;
+        });
+
+        // 2. İstatistikleri Hesapla
+        let tKazanc = 0, tGider = 0, tSofor = 0, tMazot = 0, tSivi = 0, tTamir = 0, tParca = 0, tDiger = 0, tSabit = 0;
+        
+        filtrelenmisKayitlar.forEach(k => {
+            tKazanc += k.hasilat || 0;
+            tGider += k.toplamGider || 0;
+            tSofor += k.gunlukSoforUcret || 0;
+            tMazot += k.mazotTL || 0;
+            tSivi += k.siviBakim || 0;
+            tTamir += k.tamir || 0;
+            tParca += k.parca || 0;
+            tDiger += k.diger || 0;
+            tSabit += k.sabitGiderPayi || 0;
+        });
+
+        const netKar = tKazanc - tGider;
+        const gunSayisi = filtrelenmisKayitlar.length;
+        const ortKar = gunSayisi > 0 ? netKar / gunSayisi : 0;
+
+        // Ekrana Yazdır
+        document.getElementById('rKazanc').innerText = tKazanc.toLocaleString('tr-TR') + " TL";
+        document.getElementById('rGider').innerText = tGider.toLocaleString('tr-TR') + " TL";
+        document.getElementById('rKar').innerText = netKar.toLocaleString('tr-TR') + " TL";
+        document.getElementById('rKar').className = netKar >= 0 ? 'text-success' : 'text-danger';
+        document.getElementById('rOrtKar').innerText = ortKar.toLocaleString('tr-TR', {maximumFractionDigits: 2}) + " TL";
+        document.getElementById('rSeferSayisi').innerText = gunSayisi + " Gün";
+
+        // 3. Grafikleri Çiz
+        cizTrendGrafigi(filtrelenmisKayitlar);
+        cizGiderGrafigi(tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tSabit);
+        cizHaftalikGrafigi(filtrelenmisKayitlar);
+
+        // 4. Güzergah Analiz Tablosunu Doldur
+        guzergahAnaliziYap(filtrelenmisKayitlar);
+
+        // 5. Detaylı Tabloyu Doldur
+        tabloyuDoldur(filtrelenmisKayitlar);
+    }
+
+    function tabloyuDoldur(liste) {
         const tbody = document.getElementById('tabloListesi');
         tbody.innerHTML = '';
-        
-        let toplamHasilat = 0, toplamMazot = 0, toplamSivi = 0, toplamTamir = 0, toplamParca = 0, toplamDiger = 0, toplamKM = 0, toplamSoforGunluk = 0, toplamSabitGiderPayi = 0;
-
-        kayitlar.forEach(k => {
-            toplamHasilat += k.hasilat || 0;
-            toplamMazot += k.mazotTL || 0;
-            toplamSivi += k.siviBakim || 0;
-            toplamTamir += k.tamir || 0;
-            toplamParca += k.parca || 0;
-            toplamDiger += k.diger || 0;
-            toplamKM += k.km || 0;
-            toplamSoforGunluk += k.gunlukSoforUcret || 0;
-            toplamSabitGiderPayi += k.sabitGiderPayi || 0;
-
+        liste.forEach(k => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${(k.tarih || '').split('-').reverse().join('.')}</td>
-                <td>${k.guzergah || 'Belirtilmedi'}</td> <!-- Güzergah buraya yazdırılıyor -->
-                <td>${tarihSaatFormatla(k.zaman)}</td>
-                <td>${tarihSaatFormatla(k.kayitSaati)}</td>
-                <td>${k.hasilat.toLocaleString('tr-TR')} TL</td>
-                <td>${k.km.toLocaleString('tr-TR')}</td>
-                <td>${k.mazotTL.toLocaleString('tr-TR')} TL</td>
-                <td>${k.siviBakim.toLocaleString('tr-TR')} TL</td>
-                <td>${k.tamir.toLocaleString('tr-TR')} TL</td>
-                <td>${k.parca.toLocaleString('tr-TR')} TL</td>
-                <td>${k.diger.toLocaleString('tr-TR')} TL</td>
-                <td>${(k.gunlukSoforUcret || 0).toLocaleString('tr-TR')} TL</td>
-                <td style="color: #8e44ad; font-weight:bold;">${(k.sabitGiderPayi || 0).toLocaleString('tr-TR')} TL</td>
-                <td class="text-danger">${k.toplamGider.toLocaleString('tr-TR')} TL</td>
-                <td class="${k.hasilat - k.toplamGider >= 0 ? 'text-success' : 'text-danger'}">
-                    ${(k.hasilat - k.toplamGider).toLocaleString('tr-TR')} TL
+                <td><span style="background:#ecf0f1; padding:3px 8px; border-radius:4px; font-weight:bold;">${k.guzergah || '-'}</span></td>
+                <td>${(k.hasilat||0).toLocaleString('tr-TR')} TL</td>
+                <td>${(k.km||0).toLocaleString('tr-TR')}</td>
+                <td>${(k.mazotTL||0).toLocaleString('tr-TR')}</td>
+                <td>${(k.siviBakim||0).toLocaleString('tr-TR')}</td>
+                <td>${(k.tamir||0).toLocaleString('tr-TR')}</td>
+                <td>${(k.parca||0).toLocaleString('tr-TR')}</td>
+                <td>${(k.diger||0).toLocaleString('tr-TR')}</td>
+                <td>${(k.gunlukSoforUcret||0).toLocaleString('tr-TR')}</td>
+                <td style="color:var(--purple); font-weight:bold;">${(k.sabitGiderPayi||0).toLocaleString('tr-TR')}</td>
+                <td class="text-danger">${(k.toplamGider||0).toLocaleString('tr-TR')} TL</td>
+                <td class="${(k.hasilat - k.toplamGider) >= 0 ? 'text-success' : 'text-danger'}" style="font-weight:bold;">
+                    ${((k.hasilat||0) - (k.toplamGider||0)).toLocaleString('tr-TR')} TL
                 </td>
                 <td>
                     <button onclick="duzenle('${k.id}')" class="islem-btn btn-duzenle">Düzenle</button>
@@ -846,33 +847,108 @@
             `;
             tbody.appendChild(tr);
         });
+    }
 
-        const pesinVergi = formatiCoz(document.getElementById('pesinVergi').value);
-        const stopaj = formatiCoz(document.getElementById('stopaj').value);
-        const kdv = formatiCoz(document.getElementById('kdv').value);
-        const gelirVergisi = formatiCoz(document.getElementById('gelirVergisi').value);
-        const bagKur = formatiCoz(document.getElementById('bagKur').value);
-        const sigorta = formatiCoz(document.getElementById('sigorta').value);
-        const matbaaNoter = formatiCoz(document.getElementById('matbaaNoter').value);
-        const muhasebe = formatiCoz(document.getElementById('muhasebe').value);
-        const sabitDigerGider = formatiCoz(document.getElementById('sabitDigerGider').value);
-        const toplamAylikSabit = pesinVergi + stopaj + kdv + gelirVergisi + bagKur + sigorta + matbaaNoter + muhasebe + sabitDigerGider;
-        document.getElementById('toplamAylikSabit').innerText = toplamAylikSabit.toLocaleString('tr-TR') + " TL";
+    function cizTrendGrafigi(liste) {
+        const ctx = document.getElementById('trendGrafik').getContext('2d');
+        if(chartTrend) chartTrend.destroy();
 
-        const genelToplamGider = toplamMazot + toplamSivi + toplamTamir + toplamParca + toplamDiger + toplamSoforGunluk + toplamSabitGiderPayi;
-        const netKar = toplamHasilat - genelToplamGider;
-        const kmBasiMazot = toplamKM > 0 ? (toplamMazot / toplamKM).toFixed(2) : 0;
-
-        document.getElementById('toplamKazanc').innerText = toplamHasilat.toLocaleString('tr-TR') + " TL";
-        document.getElementById('toplamGider').innerText = genelToplamGider.toLocaleString('tr-TR') + " TL";
+        // Tarihe göre eskiden yeniye sırala
+        const siraliListe = [...liste].sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
         
-        const netEl = document.getElementById('netKar');
-        netEl.innerText = netKar.toLocaleString('tr-TR') + " TL";
-        netEl.className = netKar >= 0 ? 'text-success' : 'text-danger';
-        
-        document.getElementById('kmBasiMazot').innerText = kmBasiMazot + " TL/KM";
+        const etiketler = siraliListe.map(k => k.tarih.split('-').reverse().join('.'));
+        const kazancData = siraliListe.map(k => k.hasilat || 0);
+        const giderData = siraliListe.map(k => k.toplamGider || 0);
 
-        cizGrafik(toplamMazot, toplamSivi, toplamTamir, toplamParca, toplamDiger, toplamSoforGunluk, toplamSabitGiderPayi);
+        chartTrend = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: etiketler,
+                datasets: [
+                    { label: 'Kazanç (TL)', data: kazancData, borderColor: '#27ae60', backgroundColor: 'rgba(39, 174, 96, 0.1)', tension: 0.3, fill: true },
+                    { label: 'Gider (TL)', data: giderData, borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.1)', tension: 0.3, fill: true }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    function cizGiderGrafigi(mazot, sivi, tamir, parca, diger, sofor, sabit) {
+        const ctx = document.getElementById('giderGrafik').getContext('2d');
+        if(chartGider) chartGider.destroy();
+
+        chartGider = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Mazot', 'Sıvı Bakım', 'Tamir', 'Parça', 'Diğer', 'Şoför', 'Vergi/Sabit'],
+                datasets: [{
+                    data: [mazot, sivi, tamir, parca, diger, sofor, sabit],
+                    backgroundColor: ['#e74c3c', '#3498db', '#f1c40f', '#9b59b6', '#95a5a6', '#2ecc71', '#34495e']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+        });
+    }
+
+    function cizHaftalikGrafigi(liste) {
+        const ctx = document.getElementById('haftalikGrafik').getContext('2d');
+        if(chartHaftalik) chartHaftalik.destroy();
+
+        const gunler = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        const gunlukToplamKar = [0,0,0,0,0,0,0];
+        const gunlukSayi = [0,0,0,0,0,0,0];
+
+        liste.forEach(k => {
+            const d = new Date(k.tarih);
+            const gunIdx = d.getDay();
+            gunlukToplamKar[gunIdx] += (k.hasilat - k.toplamGider);
+            gunlukSayi[gunIdx] += 1;
+        });
+
+        const ortalamaKar = gunlukToplamKar.map((kar, i) => gunlukSayi[i] > 0 ? kar / gunlukSayi[i] : 0);
+
+        chartHaftalik = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: gunler,
+                datasets: [{
+                    label: 'Ortalama Günlük Kâr (TL)',
+                    data: ortalamaKar,
+                    backgroundColor: '#3498db',
+                    borderRadius: 5
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    function guzergahAnaliziYap(liste) {
+        const tbody = document.getElementById('guzergahAnalizTablo');
+        tbody.innerHTML = '';
+
+        const analiz = {};
+        liste.forEach(k => {
+            const g = k.guzergah || 'Belirtilmedi';
+            if(!analiz[g]) analiz[g] = { sefer: 0, toplamKar: 0 };
+            analiz[g].sefer += 1;
+            analiz[g].toplamKar += (k.hasilat - k.toplamGider);
+        });
+
+        // Kâra göre büyükten küçüğe sırala
+        const siraliGuzergahlar = Object.keys(analiz).sort((a,b) => analiz[b].toplamKar - analiz[a].toplamKar);
+
+        siraliGuzergahlar.forEach(g => {
+            const veri = analiz[g];
+            const ortKar = veri.sefer > 0 ? veri.toplamKar / veri.sefer : 0;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="font-weight:bold;">${g}</td>
+                <td>${veri.sefer}</td>
+                <td class="${veri.toplamKar >= 0 ? 'text-success' : 'text-danger'}" style="font-weight:bold;">${veri.toplamKar.toLocaleString('tr-TR')} TL</td>
+                <td>${ortKar.toLocaleString('tr-TR')} TL</td>
+            `;
+            tbody.appendChild(tr);
+        });
     }
 
     function duzenle(id) {
@@ -880,12 +956,7 @@
         if(!kayit) return;
 
         document.getElementById('tarih').value = kayit.tarih;
-        
-        // Güzergah menüsünü eski veriye göre ayarla
-        if(kayit.guzergah) {
-            document.getElementById('guzergah').value = kayit.guzergah;
-        }
-
+        if(kayit.guzergah) document.getElementById('guzergah').value = kayit.guzergah;
         document.getElementById('hasilat').value = sayiyiFormatla(kayit.hasilat);
         document.getElementById('km').value = sayiyiFormatla(kayit.km);
         document.getElementById('mazotTL').value = sayiyiFormatla(kayit.mazotTL);
@@ -900,35 +971,13 @@
 
     async function sil(id) {
         if(confirm("Bu kaydı buluttan kalıcı olarak silmek istediğinize emin misiniz?")) {
-            try {
-                await window.deleteDoc(window.doc(window.db, "kayitlar", id));
-            } catch (e) {
-                alert("Silinirken hata oluştu.");
-            }
+            try { await window.deleteDoc(window.doc(window.db, "kayitlar", id)); } 
+            catch (e) { alert("Hata!"); }
         }
     }
 
-    function cizGrafik(mazot, sivi, tamir, parca, diger, sofor, muhasebe) {
-        const ctx = document.getElementById('giderGrafik').getContext('2d');
-        if(grafik) grafik.destroy(); 
-
-        grafik = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: ['Mazot', 'Sıvı Bakım', 'Tamir', 'Parça', 'Diğer', 'Şoför', 'Vergi/Sigorta/Muhasebe'],
-                datasets: [{
-                    data: [mazot, sivi, tamir, parca, diger, sofor, muhasebe],
-                    backgroundColor: ['#e74c3c', '#3498db', '#f1c40f', '#9b59b6', '#95a5a6', '#2ecc71', '#34495e']
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-        });
-    }
-    
     window.onload = function() {
-        setTimeout(() => {
-            aracAyarlariniBuluttanYukle();
-        }, 1000); 
+        setTimeout(() => { aracAyarlariniBuluttanYukle(); }, 1000); 
     };
 </script>
 </body>
