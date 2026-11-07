@@ -60,11 +60,12 @@
         .stat-box p { margin: 0; font-size: 20px; font-weight: bold; color: var(--primary); }
         
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; min-width: 1000px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        table { width: 100%; min-width: 1100px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
         th { background: #ecf0f1; font-weight: bold; }
         .text-danger { color: var(--danger); }
         .text-success { color: var(--success); }
+        .text-muted { color: #7f8c8d; font-size: 12px; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -112,7 +113,7 @@
                 
                 <div class="input-grup">
                     <input type="date" id="tarih">
-                    <label for="tarih">Tarih</label>
+                    <label for="tarih">Tarih (Seferin Yapıldığı Gün)</label>
                 </div>
                 
                 <div class="input-grup">
@@ -240,7 +241,8 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Tarih</th>
+                            <th>Sefer Tarihi</th>
+                            <th>Giriş Saati</th> <!-- Yeni Sütun -->
                             <th>Hasılat</th>
                             <th>KM</th>
                             <th>Mazot (TL)</th>
@@ -255,7 +257,7 @@
                         </tr>
                     </thead>
                     <tbody id="tabloListesi">
-                        <tr><td colspan="12" class="loading">Veriler buluttan yükleniyor...</td></tr>
+                        <tr><td colspan="13" class="loading">Veriler buluttan yükleniyor...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -272,7 +274,6 @@
     const YONETICI_SIFRESI = "Hb.123-"; 
     const SOFOR_SIFRESI = "";    
 
-    // --- FORMATLAMA FONKSİYONLARI ---
     function sayiyiFormatla(deger) {
         if (!deger) return "";
         let sadeceRakam = deger.toString().replace(/\D/g, '');
@@ -284,6 +285,15 @@
         if (!deger) return 0;
         let sadeceRakam = deger.toString().replace(/\D/g, '');
         return Number(sadeceRakam) || 0;
+    }
+
+    // Tarih ve saat formatlayıcı (Giriş saati için)
+    function tarihSaatFormatla(timestamp) {
+        if(!timestamp) return "-";
+        const d = new Date(timestamp);
+        const tarih = d.toLocaleDateString('tr-TR');
+        const saat = d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+        return `<span class="text-muted">${tarih} <br> ${saat}</span>`;
     }
 
     document.querySelectorAll('.para').forEach(input => {
@@ -349,7 +359,6 @@
             return;
         }
 
-        // Aynı tarihte kayıt var mı diye kontrol et
         const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
 
         if (ayniTarihliKayit) {
@@ -362,7 +371,6 @@
         btn.innerText = "Buluta Kaydediliyor...";
         btn.disabled = true;
 
-        // Yeni girilen değerler (boşsa "null" kabul edeceğiz)
         const yeniDegerler = {
             hasilat: document.getElementById('hasilat').value !== "" ? formatiCoz(document.getElementById('hasilat').value) : null,
             km: document.getElementById('km').value !== "" ? formatiCoz(document.getElementById('km').value) : null,
@@ -374,40 +382,38 @@
             gunlukSoforUcret: document.getElementById('gunlukSoforUcret').value !== "" ? formatiCoz(document.getElementById('gunlukSoforUcret').value) : null,
         };
 
-        // Kayıt objesini hazırla
         let kayit = {
             tarih: secilenTarih,
-            zaman: ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now() // Eski kayıtsa eski zamanı koru
+            // Eğer eski kayıt varsa onun zamanını koru, yoksa şu anki zamanı al
+            zaman: ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now(),
+            // Her kaydetme/güncelleme işleminde işlem anını (giriş saatini) güncelle
+            kayitSaati: Date.now() 
         };
 
-        // Mantık: Eğer eski kayıt varsa, boş bırakılan yerler eskisinden alınır. Yoksa 0 kabul edilir.
         const alanlar = ['hasilat', 'km', 'mazotTL', 'siviBakim', 'tamir', 'parca', 'diger', 'gunlukSoforUcret'];
         
         alanlar.forEach(alan => {
             if (yeniDegerler[alan] !== null) {
-                kayit[alan] = yeniDegerler[alan]; // Yeni değer girildiyse onu kullan
+                kayit[alan] = yeniDegerler[alan];
             } else if (ayniTarihliKayit) {
-                kayit[alan] = ayniTarihliKayit[alan] || 0; // Boş bırakıldıysa eski kayıttan al
+                kayit[alan] = ayniTarihliKayit[alan] || 0;
             } else {
-                kayit[alan] = 0; // Yeni kayıtsa ve boşsa 0 kabul et
+                kayit[alan] = 0;
             }
         });
 
         kayit.toplamGider = kayit.mazotTL + kayit.siviBakim + kayit.tamir + kayit.parca + kayit.diger + kayit.gunlukSoforUcret;
 
         try {
-            // Eski kayıt varsa sil
             if (ayniTarihliKayit) {
                 await window.deleteDoc(window.doc(window.db, "kayitlar", ayniTarihliKayit.id));
             }
 
-            // Yeni birleştirilmiş kaydı ekle
             await window.addDoc(window.collection(window.db, "kayitlar"), kayit);
             
             mesajEl.style.color = "green";
             mesajEl.innerText = ayniTarihliKayit ? "✅ Kayıt başarıyla güncellendi!" : "✅ Başarıyla buluta kaydedildi!";
             
-            // Formu Temizle
             document.getElementById('hasilat').value = '';
             document.getElementById('km').value = '';
             document.getElementById('mazotTL').value = '';
@@ -467,6 +473,7 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${(k.tarih || '').split('-').reverse().join('.')}</td>
+                <td>${tarihSaatFormatla(k.kayitSaati)}</td>
                 <td>${k.hasilat.toLocaleString('tr-TR')} TL</td>
                 <td>${k.km.toLocaleString('tr-TR')}</td>
                 <td>${k.mazotTL.toLocaleString('tr-TR')} TL</td>
