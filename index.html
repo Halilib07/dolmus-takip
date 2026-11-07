@@ -34,7 +34,7 @@
         window.dinleVeriler();
     </script>
     <style>
-        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --bg: #f4f7f6; }
+        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
         .container { max-width: 1200px; margin: auto; }
         
@@ -73,33 +73,18 @@
         .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
         .cikis-btn { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; float: right; margin-bottom: 10px; font-weight: bold; }
 
-        /* Şık Yüzen Etiket Tasarımı */
         .input-grup { position: relative; margin-top: 10px; }
-        
-        /* type="text" yaptığımız için stilleri güncelledik */
-        .input-grup input { 
-            width: 100%; 
-            padding: 20px 15px 10px 15px; 
-            border: 1px solid #ccc; 
-            border-radius: 8px; 
-            font-size: 16px; 
-            background: white; 
-            transition: all 0.2s ease; 
-            box-sizing: border-box; 
-        }
+        .input-grup input { width: 100%; padding: 20px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
         .input-grup input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
-        .input-grup label { 
-            position: absolute; left: 15px; top: 15px; 
-            color: #7f8c8d; font-size: 14px; font-weight: normal; 
-            pointer-events: none; transition: all 0.2s ease; margin: 0; 
-        }
-        .input-grup input:focus + label, .input-grup input:not(:placeholder-shown) + label { 
-            top: 4px; font-size: 11px; font-weight: bold; color: var(--primary); 
-        }
+        .input-grup label { position: absolute; left: 15px; top: 15px; color: #7f8c8d; font-size: 14px; font-weight: normal; pointer-events: none; transition: all 0.2s ease; margin: 0; }
+        .input-grup input:focus + label, .input-grup input:not(:placeholder-shown) + label { top: 4px; font-size: 11px; font-weight: bold; color: var(--primary); }
 
         .toplam-sabit { grid-column: span 2; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid var(--primary); margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
         .toplam-sabit span { font-weight: bold; font-size: 16px; }
         .toplam-sabit strong { font-size: 20px; color: var(--primary); }
+
+        .islem-btn { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; color: white; }
+        .btn-duzenle { background: var(--warning); }
     </style>
 </head>
 <body>
@@ -122,7 +107,7 @@
 
     <div id="giris" class="tab-content active">
         <div class="card">
-            <h2>Günlük Sefer ve Gider Ekle</h2>
+            <h2 id="formBaslik">Günlük Sefer ve Gider Ekle</h2>
             <div class="form-grid">
                 
                 <div class="input-grup">
@@ -130,7 +115,6 @@
                     <label for="tarih">Tarih</label>
                 </div>
                 
-                <!-- input type="text" yapıldı ve class="para" eklendi -->
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="hasilat" class="para" placeholder="">
                     <label for="hasilat">Günlük Kazanç (TL)</label>
@@ -172,7 +156,7 @@
                 </div>
 
             </div>
-            <button class="btn-primary" onclick="kaydet()">Günü Kaydet (Buluta Gönder)</button>
+            <button class="btn-primary" id="kaydetBtn" onclick="kaydet()">Günü Kaydet (Buluta Gönder)</button>
             <div id="mesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
         </div>
     </div>
@@ -282,47 +266,42 @@
 <script>
     let kayitlar = [];
     let grafik = null;
+    let duzenlenenId = null; // Düzenleme modunda olup olmadığımızı tutar
 
     document.getElementById('tarih').valueAsDate = new Date();
 
     const YONETICI_SIFRESI = "Hb.123-"; 
     const SOFOR_SIFRESI = "";    
 
-    // --- BİNLİK AYIRICI FORMATLAMA FONKSİYONLARI ---
+    // --- FORMATLAMA FONKSİYONLARI ---
     function sayiyiFormatla(deger) {
         if (!deger) return "";
-        let sadeceRakam = deger.toString().replace(/\D/g, ''); // Harf ve noktaları sil, sadece rakam bırak
+        let sadeceRakam = deger.toString().replace(/\D/g, '');
         if (sadeceRakam === "") return "";
-        return Number(sadeceRakam).toLocaleString('tr-TR'); // Türkiye formatında (1.000) ayır
+        return Number(sadeceRakam).toLocaleString('tr-TR');
     }
 
     function formatiCoz(deger) {
         if (!deger) return 0;
-        let sadeceRakam = deger.toString().replace(/\D/g, ''); // Noktaları sil
+        let sadeceRakam = deger.toString().replace(/\D/g, '');
         return Number(sadeceRakam) || 0;
     }
 
-    // Tüm .para sınıfına sahip inputları bul ve onlara formatlama özelliği ekle
     document.querySelectorAll('.para').forEach(input => {
         input.addEventListener('input', function(e) {
-            let imlecPozisyonu = this.selectionStart; // İmlecin nerede olduğunu hatırla
+            let imlecPozisyonu = this.selectionStart;
             let eskiDeger = this.value;
-            this.value = sayiyiFormatla(this.value); // Formatla
-            
-            // İmleci yerinde tut (nokta eklendiğinde imleç en sona atmasın)
+            this.value = sayiyiFormatla(this.value);
             let yeniDeger = this.value;
             let fark = yeniDeger.length - eskiDeger.length;
             if(imlecPozisyonu > 0) {
                 this.setSelectionRange(imlecPozisyonu + fark, imlecPozisyonu + fark);
             }
         });
-        
-        // Kutudan çıkıldığında boşsa 0 yazmasın, boş kalsın
         input.addEventListener('blur', function() {
             if (this.value === "0") this.value = "";
         });
     });
-    // -----------------------------------------------
 
     function girisYap() {
         const girilenSifre = document.getElementById('sifre').value;
@@ -359,19 +338,68 @@
         if(tabId === 'rapor') { guncelleRapor(); }
     }
 
+    // Düzenleme Fonksiyonu
+    function duzenle(id) {
+        const kayit = kayitlar.find(k => k.id === id);
+        if(!kayit) return;
+
+        // Formu doldur
+        document.getElementById('tarih').value = kayit.tarih;
+        document.getElementById('hasilat').value = sayiyiFormatla(kayit.hasilat);
+        document.getElementById('km').value = sayiyiFormatla(kayit.km);
+        document.getElementById('mazotTL').value = sayiyiFormatla(kayit.mazotTL);
+        document.getElementById('siviBakim').value = sayiyiFormatla(kayit.siviBakim);
+        document.getElementById('tamir').value = sayiyiFormatla(kayit.tamir);
+        document.getElementById('parca').value = sayiyiFormatla(kayit.parca);
+        document.getElementById('diger').value = sayiyiFormatla(kayit.diger);
+        document.getElementById('gunlukSoforUcret').value = sayiyiFormatla(kayit.gunlukSoforUcret || 0);
+
+        // Modu değiştir
+        duzenlenenId = id;
+        document.getElementById('formBaslik').innerText = "Günü Düzenle (ID: " + id.substring(0,5) + "...)";
+        document.getElementById('kaydetBtn').innerText = "Değişiklikleri Güncelle";
+        document.getElementById('kaydetBtn').style.background = "var(--warning)";
+
+        // Giriş sekmesine dön
+        switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
+    }
+
     async function kaydet() {
         if(!window.firebaseHazir) {
             alert("Bulut sistemi henüz yüklenmedi, lütfen 1-2 saniye sonra tekrar deneyin.");
             return;
         }
 
-        const btn = document.querySelector('.btn-primary');
+        const secilenTarih = document.getElementById('tarih').value;
+        if(!secilenTarih) {
+            alert("Lütfen bir tarih seçin!");
+            return;
+        }
+
+        // Eğer düzenleme modunda DEĞİLSEK, aynı tarihte kayıt var mı diye kontrol et
+        if (duzenlenenId === null) {
+            const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
+            if (ayniTarihliKayit) {
+                const onay = confirm("⚠️ DİKKAT: " + secilenTarih + " tarihinde zaten bir kayıt var!\n\nEski kaydın üzerine yazmak (güncellemek) istiyor musunuz?");
+                if (!onay) return; // Kullanıcı hayır derse işlemi iptal et
+                
+                // Kullanıcı evet dediyse, eski kaydı sil
+                try {
+                    await window.deleteDoc(window.doc(window.db, "kayitlar", ayniTarihliKayit.id));
+                } catch(e) {
+                    alert("Eski kayıt silinirken hata oluştu.");
+                    return;
+                }
+            }
+        }
+
+        const btn = document.getElementById('kaydetBtn');
         const mesajEl = document.getElementById('mesaj');
         btn.innerText = "Buluta Kaydediliyor...";
         btn.disabled = true;
 
         const kayit = {
-            tarih: document.getElementById('tarih').value,
+            tarih: secilenTarih,
             hasilat: formatiCoz(document.getElementById('hasilat').value),
             km: formatiCoz(document.getElementById('km').value),
             mazotTL: formatiCoz(document.getElementById('mazotTL').value),
@@ -386,11 +414,17 @@
         kayit.toplamGider = kayit.mazotTL + kayit.siviBakim + kayit.tamir + kayit.parca + kayit.diger + kayit.gunlukSoforUcret;
 
         try {
+            // Düzenleme modundaysak önce eski kaydı sil
+            if (duzenlenenId !== null) {
+                await window.deleteDoc(window.doc(window.db, "kayitlar", duzenlenenId));
+            }
+
             await window.addDoc(window.collection(window.db, "kayitlar"), kayit);
             
             mesajEl.style.color = "green";
-            mesajEl.innerText = "✅ Başarıyla buluta kaydedildi!";
+            mesajEl.innerText = duzenlenenId !== null ? "✅ Kayıt başarıyla güncellendi!" : "✅ Başarıyla buluta kaydedildi!";
             
+            // Formu Temizle ve Modu Sıfırla
             document.getElementById('hasilat').value = '';
             document.getElementById('km').value = '';
             document.getElementById('mazotTL').value = '';
@@ -400,13 +434,17 @@
             document.getElementById('diger').value = '';
             document.getElementById('gunlukSoforUcret').value = '';
             
+            duzenlenenId = null;
+            document.getElementById('formBaslik').innerText = "Günlük Sefer ve Gider Ekle";
+            btn.innerText = "Günü Kaydet (Buluta Gönder)";
+            btn.style.background = "var(--success)";
+            
             setTimeout(() => { mesajEl.innerText = ""; }, 3000);
         } catch (e) {
             console.error("Hata: ", e);
             mesajEl.style.color = "red";
             mesajEl.innerText = "❌ Hata oluştu, bağlantınızı kontrol edin.";
         } finally {
-            btn.innerText = "Günü Kaydet (Buluta Gönder)";
             btn.disabled = false;
         }
     }
@@ -462,7 +500,10 @@
                 <td class="${k.hasilat - k.toplamGider >= 0 ? 'text-success' : 'text-danger'}">
                     ${(k.hasilat - k.toplamGider).toLocaleString('tr-TR')} TL
                 </td>
-                <td><button onclick="sil('${k.id}')" style="background:var(--danger); color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Sil</button></td>
+                <td>
+                    <button onclick="duzenle('${k.id}')" class="islem-btn btn-duzenle">Düzenle</button>
+                    <button onclick="sil('${k.id}')" class="islem-btn" style="background:var(--danger);">Sil</button>
+                </td>
             `;
             tbody.appendChild(tr);
         });
@@ -498,39 +539,4 @@
         
         const netEl = document.getElementById('netKar');
         netEl.innerText = netKar.toLocaleString('tr-TR') + " TL";
-        netEl.className = netKar >= 0 ? 'text-success' : 'text-danger';
-        
-        document.getElementById('kmBasiMazot').innerText = kmBasiMazot + " TL/KM";
-
-        cizGrafik(toplamMazot, toplamSivi, toplamTamir, toplamParca, toplamDiger, genelToplamSofor, toplamMuhasebe);
-    }
-
-    async function sil(id) {
-        if(confirm("Bu kaydı buluttan kalıcı olarak silmek istediğinize emin misiniz?")) {
-            try {
-                await window.deleteDoc(window.doc(window.db, "kayitlar", id));
-            } catch (e) {
-                alert("Silinirken hata oluştu.");
-            }
-        }
-    }
-
-    function cizGrafik(mazot, sivi, tamir, parca, diger, sofor, muhasebe) {
-        const ctx = document.getElementById('giderGrafik').getContext('2d');
-        if(grafik) grafik.destroy(); 
-
-        grafik = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: ['Mazot', 'Sıvı Bakım', 'Tamir', 'Parça', 'Diğer', 'Şoför', 'Vergi/Sigorta/Muhasebe'],
-                datasets: [{
-                    data: [mazot, sivi, tamir, parca, diger, sofor, muhasebe],
-                    backgroundColor: ['#e74c3c', '#3498db', '#f1c40f', '#9b59b6', '#95a5a6', '#2ecc71', '#34495e']
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-        });
-    }
-</script>
-</body>
-</html>
+        netEl.className = netKar >= 0 ? 'text-success' : 'text-danger
