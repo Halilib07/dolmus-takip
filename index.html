@@ -98,9 +98,12 @@
 
         /* --- ARAÇ UYARI PANOSU (DASHBOARD) --- */
         .uyari-panosu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; }
+        .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 80px; }
         .uyari-kutu h4 { margin: 0 0 5px 0; font-size: 14px; opacity: 0.9; }
         .uyari-kutu p { margin: 0; font-size: 20px; font-weight: bold; }
+        
+        /* Yeni Eklenen: Uyarı Kutusu Altındaki Tarih Yazısı */
+        .uyari-alt-yazi { margin-top: 5px; font-size: 12px; font-weight: normal; opacity: 0.85; }
         
         .durum-yesil { background-color: var(--success); }
         .durum-sari { background-color: var(--warning); }
@@ -129,15 +132,17 @@
     <!-- ŞOFÖR EKRANI -->
     <div id="giris" class="tab-content active">
         
-        <!-- YENİ: ARAÇ UYARI PANOSU -->
+        <!-- ARAÇ UYARI PANOSU -->
         <div class="uyari-panosu" id="uyariPanosu">
             <div class="uyari-kutu durum-gri" id="muayeneKutu">
                 <h4>🚗 Araç Muayenesi</h4>
                 <p id="muayeneDurum">Tarih Girilmedi</p>
+                <div class="uyari-alt-yazi" id="muayeneTarihYazi"></div> <!-- YENİ: Tarih buraya yazılacak -->
             </div>
             <div class="uyari-kutu durum-gri" id="egzozKutu">
                 <h4>💨 Egzoz Emisyon</h4>
                 <p id="egzozDurum">Tarih Girilmedi</p>
+                <div class="uyari-alt-yazi" id="egzozTarihYazi"></div> <!-- YENİ: Tarih buraya yazılacak -->
             </div>
             <div class="uyari-kutu durum-gri" id="yagKutu">
                 <h4>🛢️ Yağ Değişimi</h4>
@@ -221,7 +226,7 @@
             </div>
         </div>
 
-        <!-- YENİ: ARAÇ TAKİP AYARLARI -->
+        <!-- ARAÇ TAKİP AYARLARI -->
         <div class="card">
             <h2>🚗 Araç Takip Ayarları (Şoför Ekranına Yansır)</h2>
             <div class="form-grid">
@@ -420,12 +425,11 @@
         const yagKm = formatiCoz(document.getElementById('ayarYagKm').value);
 
         const ayarlar = { muayene, egzoz, yagKm };
-        localStorage.setItem('aracAyarlari', JSON.stringify(ayarlar)); // Tarayıcı hafızasına kaydet
-        aracUyarilariniGuncelle(); // Hemen güncelle
+        localStorage.setItem('aracAyarlari', JSON.stringify(ayarlar)); 
+        aracUyarilariniGuncelle(); 
     }
 
     function aracUyarilariniGuncelle() {
-        // Ayarları hafızadan oku
         const ayarlarStr = localStorage.getItem('aracAyarlari');
         if(!ayarlarStr) return;
         
@@ -444,15 +448,21 @@
         // 1. MUAYENE KONTROLÜ
         const muayeneKutu = document.getElementById('muayeneKutu');
         const muayeneDurum = document.getElementById('muayeneDurum');
+        const muayeneTarihYazi = document.getElementById('muayeneTarihYazi'); // Yeni alt yazı alanı
+        
         if(ayarlar.muayene) {
             const muayeneTarihi = new Date(ayarlar.muayene);
             const farkMs = muayeneTarihi - bugun;
             const kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
 
-            muayeneKutu.className = 'uyari-kutu'; // Sıfırla
+            muayeneKutu.className = 'uyari-kutu'; 
+            
+            // Tarihi alt yazıya ekle (GG.AA.YYYY formatında)
+            muayeneTarihYazi.innerText = "Bitiş: " + muayeneTarihi.toLocaleDateString('tr-TR');
+
             if(kalanGun < 0) {
                 muayeneKutu.classList.add('durum-kirmizi');
-                muayeneDurum.innerText = `SÜRESİ GEÇTİ! (${Math.abs(kalanGun)} gün)`;
+                muayeneDurum.innerText = `SÜRESİ GEÇTİ!`;
             } else if(kalanGun <= 30) {
                 muayeneKutu.classList.add('durum-sari');
                 muayeneDurum.innerText = `${kalanGun} Gün Kaldı!`;
@@ -465,15 +475,21 @@
         // 2. EGZOZ KONTROLÜ
         const egzozKutu = document.getElementById('egzozKutu');
         const egzozDurum = document.getElementById('egzozDurum');
+        const egzozTarihYazi = document.getElementById('egzozTarihYazi'); // Yeni alt yazı alanı
+
         if(ayarlar.egzoz) {
             const egzozTarihi = new Date(ayarlar.egzoz);
             const farkMs = egzozTarihi - bugun;
             const kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
 
             egzozKutu.className = 'uyari-kutu';
+
+            // Tarihi alt yazıya ekle
+            egzozTarihYazi.innerText = "Bitiş: " + egzozTarihi.toLocaleDateString('tr-TR');
+
             if(kalanGun < 0) {
                 egzozKutu.classList.add('durum-kirmizi');
-                egzozDurum.innerText = `SÜRESİ GEÇTİ! (${Math.abs(kalanGun)} gün)`;
+                egzozDurum.innerText = `SÜRESİ GEÇTİ!`;
             } else if(kalanGun <= 30) {
                 egzozKutu.classList.add('durum-sari');
                 egzozDurum.innerText = `${kalanGun} Gün Kaldı!`;
@@ -483,30 +499,32 @@
             }
         }
 
-        // 3. YAĞ DEĞİŞİMİ KONTROLÜ (Son bilinen KM'ye göre)
+        // 3. YAĞ DEĞİŞİMİ KONTROLÜ
         const yagKutu = document.getElementById('yagKutu');
         const yagDurum = document.getElementById('yagDurum');
         
         if(ayarlar.yagKm > 0) {
-            // Son girilen KM'yi bul (kayitlar en son girene göre desc sıralı, ilk eleman en güncel)
+            // Son girilen KM'yi bul
             let sonKm = 0;
             if(kayitlar.length > 0 && kayitlar[0].km) {
                 sonKm = kayitlar[0].km;
             }
 
             if(sonKm > 0) {
-                const kalanKm = (ayarlar.yagKm + 10000) - sonKm; // 10.000 km ömür biçtik (isteğe göre değiştirilebilir)
+                // Yağ değişim ömrü 10.000 KM
+                const hedefKm = ayarlar.yagKm + 10000;
+                const kalanKm = hedefKm - sonKm; 
                 
                 yagKutu.className = 'uyari-kutu';
                 if(kalanKm <= 0) {
                     yagKutu.classList.add('durum-kirmizi');
-                    yagDurum.innerText = `DEĞİŞİM ZAMANI! (${Math.abs(kalanKm)} km geçti)`;
+                    yagDurum.innerText = `DEĞİŞİM ZAMANI! (${Math.abs(kalanKm).toLocaleString('tr-TR')} km geçti)`;
                 } else if(kalanKm <= 1500) {
                     yagKutu.classList.add('durum-sari');
-                    yagDurum.innerText = `${kalanKm} KM Kaldı!`;
+                    yagDurum.innerText = `${kalanKm.toLocaleString('tr-TR')} KM Kaldı!`;
                 } else {
                     yagKutu.classList.add('durum-yesil');
-                    yagDurum.innerText = `${kalanKm} KM Kaldı`;
+                    yagDurum.innerText = `${kalanKm.toLocaleString('tr-TR')} KM Kaldı`;
                 }
             } else {
                 yagKutu.className = 'uyari-kutu durum-gri';
@@ -609,7 +627,7 @@
                 guncelleRapor();
             }
             if(document.getElementById('giris').classList.contains('active')){
-                aracUyarilariniGuncelle(); // KM'ye göre yağ uyarısını güncellemek için
+                aracUyarilariniGuncelle();
             }
         });
     }
