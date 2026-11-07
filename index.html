@@ -60,7 +60,7 @@
         .stat-box p { margin: 0; font-size: 20px; font-weight: bold; color: var(--primary); }
         
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; min-width: 1100px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        table { width: 100%; min-width: 1200px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
         th { background: #ecf0f1; font-weight: bold; }
         .text-danger { color: var(--danger); }
@@ -242,7 +242,8 @@
                     <thead>
                         <tr>
                             <th>Sefer Tarihi</th>
-                            <th>Giriş Saati</th> <!-- Yeni Sütun -->
+                            <th>İlk Giriş</th>    <!-- Yeni Sütun -->
+                            <th>Son Giriş</th>    <!-- Yeni Sütun -->
                             <th>Hasılat</th>
                             <th>KM</th>
                             <th>Mazot (TL)</th>
@@ -257,7 +258,7 @@
                         </tr>
                     </thead>
                     <tbody id="tabloListesi">
-                        <tr><td colspan="13" class="loading">Veriler buluttan yükleniyor...</td></tr>
+                        <tr><td colspan="14" class="loading">Veriler buluttan yükleniyor...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -287,7 +288,7 @@
         return Number(sadeceRakam) || 0;
     }
 
-    // Tarih ve saat formatlayıcı (Giriş saati için)
+    // Tarih ve saat formatlayıcı
     function tarihSaatFormatla(timestamp) {
         if(!timestamp) return "-";
         const d = new Date(timestamp);
@@ -382,12 +383,16 @@
             gunlukSoforUcret: document.getElementById('gunlukSoforUcret').value !== "" ? formatiCoz(document.getElementById('gunlukSoforUcret').value) : null,
         };
 
+        // İlk giriş zamanı: Eğer eski kayıt varsa onun zamanını koru. Yoksa şu anki zaman.
+        const ilkGirisZamani = ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now();
+        
+        // Son giriş zamanı: Her kaydetme anında şu anki zaman.
+        const sonGirisZamani = Date.now();
+
         let kayit = {
             tarih: secilenTarih,
-            // Eğer eski kayıt varsa onun zamanını koru, yoksa şu anki zamanı al
-            zaman: ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now(),
-            // Her kaydetme/güncelleme işleminde işlem anını (giriş saatini) güncelle
-            kayitSaati: Date.now() 
+            zaman: ilkGirisZamani, // İlk giriş tarihi (sıralama için kullanılıyor)
+            kayitSaati: sonGirisZamani // Son güncelleme/giriş tarihi
         };
 
         const alanlar = ['hasilat', 'km', 'mazotTL', 'siviBakim', 'tamir', 'parca', 'diger', 'gunlukSoforUcret'];
@@ -473,7 +478,8 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${(k.tarih || '').split('-').reverse().join('.')}</td>
-                <td>${tarihSaatFormatla(k.kayitSaati)}</td>
+                <td>${tarihSaatFormatla(k.zaman)}</td>          <!-- İlk Giriş -->
+                <td>${tarihSaatFormatla(k.kayitSaati)}</td>     <!-- Son Giriş -->
                 <td>${k.hasilat.toLocaleString('tr-TR')} TL</td>
                 <td>${k.km.toLocaleString('tr-TR')}</td>
                 <td>${k.mazotTL.toLocaleString('tr-TR')} TL</td>
