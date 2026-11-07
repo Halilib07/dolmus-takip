@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, where, getDocs, writeBatch, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCI0dEOvivjT2E0Dd1wpSfOaS6_0u4lzOI",
@@ -32,6 +32,8 @@
         window.where = where;
         window.getDocs = getDocs;
         window.writeBatch = writeBatch;
+        window.setDoc = setDoc; // Ayarları buluta kaydetmek için
+        window.getDoc = getDoc; // Ayarları buluttan okumak için
         window.firebaseHazir = true;
         
         window.dinleVeriler();
@@ -41,14 +43,12 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
         .container { max-width: 1200px; margin: auto; }
         
-        /* Giriş Ekranı */
         #loginEkrani { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
         #loginEkrani h2 { color: var(--primary); margin-bottom: 20px; }
         #loginEkrani input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
         #loginEkrani button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
         #loginHata { color: var(--danger); font-weight: bold; margin-top: 10px; display: none; }
 
-        /* Ana Ekran */
         #uygulamaEkrani { display: none; }
         .tabs { display: flex; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .tab-btn { flex: 1; padding: 15px; border: none; background: white; cursor: pointer; font-size: 16px; font-weight: bold; color: #7f8c8d; transition: 0.3s; }
@@ -59,13 +59,11 @@
         .form-grid .full { grid-column: span 2; }
         button.btn-primary { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
         
-        /* İstatistik Kutuları */
         .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .stat-box h3 { margin: 0 0 5px; font-size: 14px; color: #7f8c8d; }
         .stat-box p { margin: 0; font-size: 20px; font-weight: bold; color: var(--primary); }
         
-        /* Tablo */
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; min-width: 1200px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
@@ -81,7 +79,6 @@
         .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
         .cikis-btn { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; float: right; margin-bottom: 10px; font-weight: bold; }
 
-        /* Şık Yüzen Etiketler */
         .input-grup { position: relative; margin-top: 10px; }
         .input-grup input { width: 100%; padding: 20px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
         .input-grup input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
@@ -96,13 +93,10 @@
         .btn-duzenle { background: var(--warning); }
         .btn-dagit { background: #8e44ad; width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
 
-        /* --- ARAÇ UYARI PANOSU (DASHBOARD) --- */
         .uyari-panosu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 80px; }
         .uyari-kutu h4 { margin: 0 0 5px 0; font-size: 14px; opacity: 0.9; }
         .uyari-kutu p { margin: 0; font-size: 20px; font-weight: bold; }
-        
-        /* Yeni Eklenen: Uyarı Kutusu Altındaki Tarih Yazısı */
         .uyari-alt-yazi { margin-top: 5px; font-size: 12px; font-weight: normal; opacity: 0.85; }
         
         .durum-yesil { background-color: var(--success); }
@@ -129,20 +123,17 @@
         <button class="tab-btn" id="raporTabBtn" onclick="switchTab('rapor', this)">💻 Raporlar (Yönetici)</button>
     </div>
 
-    <!-- ŞOFÖR EKRANI -->
     <div id="giris" class="tab-content active">
-        
-        <!-- ARAÇ UYARI PANOSU -->
         <div class="uyari-panosu" id="uyariPanosu">
             <div class="uyari-kutu durum-gri" id="muayeneKutu">
                 <h4>🚗 Araç Muayenesi</h4>
                 <p id="muayeneDurum">Tarih Girilmedi</p>
-                <div class="uyari-alt-yazi" id="muayeneTarihYazi"></div> <!-- YENİ: Tarih buraya yazılacak -->
+                <div class="uyari-alt-yazi" id="muayeneTarihYazi"></div>
             </div>
             <div class="uyari-kutu durum-gri" id="egzozKutu">
                 <h4>💨 Egzoz Emisyon</h4>
                 <p id="egzozDurum">Tarih Girilmedi</p>
-                <div class="uyari-alt-yazi" id="egzozTarihYazi"></div> <!-- YENİ: Tarih buraya yazılacak -->
+                <div class="uyari-alt-yazi" id="egzozTarihYazi"></div>
             </div>
             <div class="uyari-kutu durum-gri" id="yagKutu">
                 <h4>🛢️ Yağ Değişimi</h4>
@@ -153,59 +144,48 @@
         <div class="card">
             <h2 id="formBaslik">Günlük Sefer ve Gider Ekle</h2>
             <div class="form-grid">
-                
                 <div class="input-grup">
                     <input type="date" id="tarih">
                     <label for="tarih">Tarih (Seferin Yapıldığı Gün)</label>
                 </div>
-                
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="hasilat" class="para" placeholder="">
                     <label for="hasilat">Günlük Kazanç (TL)</label>
                 </div>
-
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="km" class="para" placeholder="">
                     <label for="km">Güncel KM (Araç KM'si)</label>
                 </div>
-
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="mazotTL" class="para" placeholder="">
                     <label for="mazotTL">Mazot (TL)</label>
                 </div>
-
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="siviBakim" class="para" placeholder="">
                     <label for="siviBakim">Sıvı Bakım (Yağ, Antifriz vs.) TL</label>
                 </div>
-
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="tamir" class="para" placeholder="">
                     <label for="tamir">Tamir (Usta Ücreti) TL</label>
                 </div>
-
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="parca" class="para" placeholder="">
                     <label for="parca">Parça (Yedek Parça) TL</label>
                 </div>
-
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="diger" class="para" placeholder="">
                     <label for="diger">Diğer Harcamalar (Aidat vs.) TL</label>
                 </div>
-
                 <div class="input-grup full">
                     <input type="text" inputmode="numeric" id="gunlukSoforUcret" class="para" placeholder="">
                     <label for="gunlukSoforUcret">Günlük Şoför Ücreti (TL)</label>
                 </div>
-
             </div>
             <button class="btn-primary" id="kaydetBtn" onclick="kaydet()">Günü Kaydet (Buluta Gönder)</button>
             <div id="mesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
         </div>
     </div>
 
-    <!-- YÖNETİCİ EKRANI -->
     <div id="rapor" class="tab-content">
         <div class="stats-row">
             <div class="stat-box">
@@ -226,7 +206,6 @@
             </div>
         </div>
 
-        <!-- ARAÇ TAKİP AYARLARI -->
         <div class="card">
             <h2>🚗 Araç Takip Ayarları (Şoför Ekranına Yansır)</h2>
             <div class="form-grid">
@@ -243,7 +222,7 @@
                     <label for="ayarYagKm">Son Yağ Değişimi Yapılan KM</label>
                 </div>
             </div>
-            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Buraya girdiğiniz bilgiler anında kaydedilir ve şoförün ekranındaki uyarı panosuna yansır.</p>
+            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Buraya girdiğiniz bilgiler buluta kaydedilir ve şoförün ekranına anında yansır.</p>
         </div>
 
         <div class="card">
@@ -392,12 +371,14 @@
             document.getElementById('raporTabBtn').style.display = 'block'; 
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
+            aracAyarlariniBuluttanYukle(); // Yönetici girişinde ayarları çek
         } else if (girilenSifre === SOFOR_SIFRESI) {
             document.getElementById('loginEkrani').style.display = 'none';
             document.getElementById('uygulamaEkrani').style.display = 'block';
             document.getElementById('raporTabBtn').style.display = 'none'; 
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
+            aracAyarlariniBuluttanYukle(); // Şoför girişinde ayarları çek
         } else {
             hataEl.style.display = 'block';
         }
@@ -418,29 +399,55 @@
         if(tabId === 'giris') { aracUyarilariniGuncelle(); }
     }
 
-    // --- ARAÇ UYARI SİSTEMİ ---
-    function aracAyarlariniKaydet() {
+    // --- ARAÇ AYARLARINI BULUTA KAYDETME VE OKUMA ---
+    async function aracAyarlariniKaydet() {
+        if(!window.firebaseHazir) return;
+        
         const muayene = document.getElementById('ayarMuayeneTarihi').value;
         const egzoz = document.getElementById('ayarEgzozTarihi').value;
         const yagKm = formatiCoz(document.getElementById('ayarYagKm').value);
 
         const ayarlar = { muayene, egzoz, yagKm };
-        localStorage.setItem('aracAyarlari', JSON.stringify(ayarlar)); 
-        aracUyarilariniGuncelle(); 
+        
+        try {
+            // "Ayarlar" adında tek bir belgeye (dökümana) kaydediyoruz
+            await window.setDoc(window.doc(window.db, "sistem", "aracAyarlari"), ayarlar);
+            aracUyarilariniGuncelle(); // Kaydettikten sonra hemen güncelle
+        } catch (e) {
+            console.error("Ayarlar kaydedilemedi: ", e);
+        }
     }
 
-    function aracUyarilariniGuncelle() {
-        const ayarlarStr = localStorage.getItem('aracAyarlari');
-        if(!ayarlarStr) return;
-        
-        const ayarlar = JSON.parse(ayarlarStr);
-
-        // Form kutularını doldur (Yönetici görüyorsa)
-        if(document.getElementById('ayarMuayeneTarihi').value === "") {
-            document.getElementById('ayarMuayeneTarihi').value = ayarlar.muayene || "";
-            document.getElementById('ayarEgzozTarihi').value = ayarlar.egzoz || "";
-            document.getElementById('ayarYagKm').value = sayiyiFormatla(ayarlar.yagKm) || "";
+    async function aracAyarlariniBuluttanYukle() {
+        if(!window.firebaseHazir) return;
+        try {
+            const docRef = window.doc(window.db, "sistem", "aracAyarlari");
+            const docSnap = await window.getDoc(docRef);
+            
+            if (docSnap.exists()) {
+                const ayarlar = docSnap.data();
+                // Eğer yönetici ekranı açıksa kutuları doldur
+                if(document.getElementById('ayarMuayeneTarihi')) {
+                    document.getElementById('ayarMuayeneTarihi').value = ayarlar.muayene || "";
+                    document.getElementById('ayarEgzozTarihi').value = ayarlar.egzoz || "";
+                    document.getElementById('ayarYagKm').value = sayiyiFormatla(ayarlar.yagKm) || "";
+                }
+                // Uyarı panosunu güncelle
+                aracUyarilariniGuncelle(ayarlar);
+            }
+        } catch(e) {
+            console.error("Ayarlar yüklenemedi: ", e);
         }
+    }
+
+    function aracUyarilariniGuncelle(gelenAyarlar = null) {
+        // Eğer parametre gelmediyse (örn. arayüzden çağrıldıysa) buluttan çekilmiş son veriyi kullan
+        // Bunu basitleştirmek için ayarları doğrudan inputlardan okuyoruz (çünkü inputlar buluttan dolduruldu)
+        const ayarlar = {
+            muayene: document.getElementById('ayarMuayeneTarihi') ? document.getElementById('ayarMuayeneTarihi').value : (gelenAyarlar ? gelenAyarlar.muayene : null),
+            egzoz: document.getElementById('ayarEgzozTarihi') ? document.getElementById('ayarEgzozTarihi').value : (gelenAyarlar ? gelenAyarlar.egzoz : null),
+            yagKm: document.getElementById('ayarYagKm') ? formatiCoz(document.getElementById('ayarYagKm').value) : (gelenAyarlar ? gelenAyarlar.yagKm : 0)
+        };
 
         const bugun = new Date();
         bugun.setHours(0,0,0,0);
@@ -448,7 +455,7 @@
         // 1. MUAYENE KONTROLÜ
         const muayeneKutu = document.getElementById('muayeneKutu');
         const muayeneDurum = document.getElementById('muayeneDurum');
-        const muayeneTarihYazi = document.getElementById('muayeneTarihYazi'); // Yeni alt yazı alanı
+        const muayeneTarihYazi = document.getElementById('muayeneTarihYazi');
         
         if(ayarlar.muayene) {
             const muayeneTarihi = new Date(ayarlar.muayene);
@@ -456,8 +463,6 @@
             const kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
 
             muayeneKutu.className = 'uyari-kutu'; 
-            
-            // Tarihi alt yazıya ekle (GG.AA.YYYY formatında)
             muayeneTarihYazi.innerText = "Bitiş: " + muayeneTarihi.toLocaleDateString('tr-TR');
 
             if(kalanGun < 0) {
@@ -475,7 +480,7 @@
         // 2. EGZOZ KONTROLÜ
         const egzozKutu = document.getElementById('egzozKutu');
         const egzozDurum = document.getElementById('egzozDurum');
-        const egzozTarihYazi = document.getElementById('egzozTarihYazi'); // Yeni alt yazı alanı
+        const egzozTarihYazi = document.getElementById('egzozTarihYazi');
 
         if(ayarlar.egzoz) {
             const egzozTarihi = new Date(ayarlar.egzoz);
@@ -483,8 +488,6 @@
             const kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
 
             egzozKutu.className = 'uyari-kutu';
-
-            // Tarihi alt yazıya ekle
             egzozTarihYazi.innerText = "Bitiş: " + egzozTarihi.toLocaleDateString('tr-TR');
 
             if(kalanGun < 0) {
@@ -504,14 +507,12 @@
         const yagDurum = document.getElementById('yagDurum');
         
         if(ayarlar.yagKm > 0) {
-            // Son girilen KM'yi bul
             let sonKm = 0;
             if(kayitlar.length > 0 && kayitlar[0].km) {
                 sonKm = kayitlar[0].km;
             }
 
             if(sonKm > 0) {
-                // Yağ değişim ömrü 10.000 KM
                 const hedefKm = ayarlar.yagKm + 10000;
                 const kalanKm = hedefKm - sonKm; 
                 
@@ -809,9 +810,11 @@
         });
     }
     
-    // Sayfa yüklendiğinde uyarıları ve ayarları başlat
+    // Sayfa yüklendiğinde verilerin gelmesini bekle ve uyarıları başlat
     window.onload = function() {
-        aracUyarilariniGuncelle();
+        setTimeout(() => {
+            aracAyarlariniBuluttanYukle();
+        }, 1000); // Veritabanı bağlantısı kurulana kadar 1 saniye bekle
     };
 </script>
 </body>
