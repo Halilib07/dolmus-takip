@@ -539,4 +539,54 @@
         
         const netEl = document.getElementById('netKar');
         netEl.innerText = netKar.toLocaleString('tr-TR') + " TL";
-        netEl.className = netKar >= 0 ? 'text-success' : 'text-danger
+        netEl.className = netKar >= 0 ? 'text-success' : 'text-danger';
+        
+        document.getElementById('kmBasiMazot').innerText = kmBasiMazot + " TL/KM";
+
+        cizGrafik(toplamMazot, toplamSivi, toplamTamir, toplamParca, toplamDiger, genelToplamSofor, toplamMuhasebe);
+    }
+
+    async function sil(id) {
+        if(confirm("Bu kaydı buluttan kalıcı olarak silmek istediğinize emin misiniz?")) {
+            try {
+                await window.deleteDoc(window.doc(window.db, "kayitlar", id));
+                if(duzenlenenId === id) {
+                    // Eğer silinen kayıt, o an düzenlenen kayıt ise formu sıfırla
+                    duzenlenenId = null;
+                    document.getElementById('formBaslik').innerText = "Günlük Sefer ve Gider Ekle";
+                    document.getElementById('kaydetBtn').innerText = "Günü Kaydet (Buluta Gönder)";
+                    document.getElementById('kaydetBtn').style.background = "var(--success)";
+                    document.getElementById('hasilat').value = '';
+                    document.getElementById('km').value = '';
+                    document.getElementById('mazotTL').value = '';
+                    document.getElementById('siviBakim').value = '';
+                    document.getElementById('tamir').value = '';
+                    document.getElementById('parca').value = '';
+                    document.getElementById('diger').value = '';
+                    document.getElementById('gunlukSoforUcret').value = '';
+                }
+            } catch (e) {
+                alert("Silinirken hata oluştu.");
+            }
+        }
+    }
+
+    function cizGrafik(mazot, sivi, tamir, parca, diger, sofor, muhasebe) {
+        const ctx = document.getElementById('giderGrafik').getContext('2d');
+        if(grafik) grafik.destroy(); 
+
+        grafik = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Mazot', 'Sıvı Bakım', 'Tamir', 'Parça', 'Diğer', 'Şoför', 'Vergi/Sigorta/Muhasebe'],
+                datasets: [{
+                    data: [mazot, sivi, tamir, parca, diger, sofor, muhasebe],
+                    backgroundColor: ['#e74c3c', '#3498db', '#f1c40f', '#9b59b6', '#95a5a6', '#2ecc71', '#34495e']
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+</script>
+</body>
+</html>
