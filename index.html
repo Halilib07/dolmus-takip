@@ -69,7 +69,7 @@
         .stat-box p { margin: 0; font-size: 20px; font-weight: bold; color: var(--primary); }
         
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; min-width: 1200px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        table { width: 100%; min-width: 1300px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
         th { background: #ecf0f1; font-weight: bold; }
         .text-danger { color: var(--danger); }
@@ -82,11 +82,27 @@
         .chart-container { width: 100%; max-width: 400px; margin: 0 auto; }
         .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
 
+        /* Şık Yüzen Etiketler (Inputlar İçin) */
         .input-grup { position: relative; margin-top: 10px; }
         .input-grup input { width: 100%; padding: 22px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
         .input-grup input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
         .input-grup label { position: absolute; left: 15px; top: 16px; color: #7f8c8d; font-size: 14px; font-weight: normal; pointer-events: none; transition: all 0.2s ease; margin: 0; }
         .input-grup input:focus + label, .input-grup input:not(:placeholder-shown) + label { top: 5px; font-size: 11px; font-weight: bold; color: var(--primary); }
+
+        /* Yeni: Select (Açılır Menü) Tasarımı */
+        .input-grup select {
+            width: 100%; padding: 22px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; 
+            font-size: 16px; background: white; cursor: pointer; outline: none; box-sizing: border-box;
+            appearance: none; -webkit-appearance: none; -moz-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='%237f8c8d' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+            background-repeat: no-repeat;
+            background-position-x: 95%;
+            background-position-y: center;
+            transition: all 0.2s ease;
+        }
+        .input-grup select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
+        /* Select etiketinin konumu (her zaman yukarıda duracak) */
+        .input-grup .select-label { position: absolute; left: 15px; top: 5px; color: var(--primary); font-size: 11px; font-weight: bold; margin: 0; }
 
         .toplam-sabit { grid-column: span 2; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid var(--primary); margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
         .toplam-sabit span { font-weight: bold; font-size: 16px; }
@@ -96,7 +112,6 @@
         .btn-duzenle { background: var(--warning); }
         .btn-dagit { background: #8e44ad; width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
 
-        /* Uyarı Panosu */
         .uyari-panosu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 100px; }
         .uyari-kutu h4 { margin: 0 0 5px 0; font-size: 13px; opacity: 0.9; }
@@ -111,47 +126,25 @@
         /* --- MOBİL UYUMLULUK (RESPONSIVE) AYARLARI --- */
         @media (max-width: 768px) {
             body { padding: 10px; }
-            
             .header-alani { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 15px; }
             .header-alani h1 { font-size: 20px; padding: 0; }
             .cikis-btn { position: relative; right: auto; top: auto; padding: 6px 12px; font-size: 14px; }
-
             .tab-btn { padding: 12px 5px; font-size: 14px; }
-
-            /* Uyarı Panosu - Telefonda Dikey (Alt Alta) */
             .uyari-panosu { grid-template-columns: 1fr; gap: 10px; }
-            
-            /* Uyarı Kutuları Telefonda Daha Şık */
-            .uyari-kutu { 
-                min-height: auto; 
-                padding: 12px 15px; 
-                flex-direction: row; 
-                justify-content: space-between; 
-                align-items: center; 
-                text-align: left; 
-            }
+            .uyari-kutu { min-height: auto; padding: 12px 15px; flex-direction: row; justify-content: space-between; align-items: center; text-align: left; }
             .uyari-kutu h4 { margin: 0; font-size: 14px; }
             .uyari-kutu p { font-size: 18px; margin: 0; }
-            
-            /* Mobilde Tarih yazısını gizlemiyoruz, altına alıyoruz */
-            .uyari-alt-yazi { 
-                display: block; 
-                font-size: 11px; 
-                margin-top: 2px; 
-            }
-
+            .uyari-alt-yazi { display: block; font-size: 11px; margin-top: 2px; }
             .form-grid { grid-template-columns: 1fr; gap: 10px; }
             .form-grid .full { grid-column: span 1; }
-            
-            .input-grup input { padding: 18px 12px 8px 12px; font-size: 15px; }
+            .input-grup input, .input-grup select { padding: 18px 12px 8px 12px; font-size: 15px; }
             .input-grup label { left: 12px; top: 14px; font-size: 13px; }
+            .input-grup .select-label { left: 12px; top: 3px; font-size: 10px; }
             .input-grup input:focus + label, .input-grup input:not(:placeholder-shown) + label { top: 3px; font-size: 10px; }
-
             .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
             .stat-box { padding: 10px; }
             .stat-box p { font-size: 16px; }
             .stat-box h3 { font-size: 12px; }
-
             .card { padding: 15px; }
             .toplam-sabit { flex-direction: column; align-items: flex-start; gap: 5px; }
             .toplam-sabit strong { font-size: 18px; }
@@ -197,7 +190,7 @@
             <div class="uyari-kutu durum-gri" id="yagKutu">
                 <div>
                     <h4>🛢️ Yağ Değişimi</h4>
-                    <div class="uyari-alt-yazi" id="yagKmYazi"></div> <!-- YENİ: Hedef KM yazısı -->
+                    <div class="uyari-alt-yazi" id="yagKmYazi"></div> 
                 </div>
                 <p id="yagDurum">KM Girilmedi</p>
             </div>
@@ -210,6 +203,18 @@
                     <input type="date" id="tarih">
                     <label for="tarih">Tarih (Seferin Yapıldığı Gün)</label>
                 </div>
+                
+                <!-- YENİ: GÜZERGAH SEÇİMİ -->
+                <div class="input-grup">
+                    <label for="guzergah" class="select-label">Güzergah Seçimi</label>
+                    <select id="guzergah">
+                        <option value="Kumluca">Kumluca</option>
+                        <option value="Turunçova">Turunçova</option>
+                        <option value="Dağdibi">Dağdibi</option>
+                    </select>
+                </div>
+                <!-- ------------------------ -->
+
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="hasilat" class="para" placeholder="">
                     <label for="hasilat">Günlük Kazanç (TL)</label>
@@ -356,6 +361,7 @@
                     <thead>
                         <tr>
                             <th>Sefer Tarihi</th>
+                            <th>Güzergah</th> <!-- YENİ SÜTUN -->
                             <th>İlk Giriş</th>
                             <th>Son Giriş</th>
                             <th>Hasılat</th>
@@ -373,7 +379,7 @@
                         </tr>
                     </thead>
                     <tbody id="tabloListesi">
-                        <tr><td colspan="15" class="loading">Veriler buluttan yükleniyor...</td></tr>
+                        <tr><td colspan="16" class="loading">Veriler buluttan yükleniyor...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -569,7 +575,7 @@
 
         const yagKutu = document.getElementById('yagKutu');
         const yagDurum = document.getElementById('yagDurum');
-        const yagKmYazi = document.getElementById('yagKmYazi'); // Yeni hedef km alanı
+        const yagKmYazi = document.getElementById('yagKmYazi'); 
         
         if(ayarlar.yagKm > 0) {
             let enGuncelKayit = null;
@@ -586,7 +592,6 @@
                 const hedefKm = ayarlar.yagKm + ayarlar.yagOmru; 
                 const kalanKm = hedefKm - sonKm; 
                 
-                // Hedef KM'yi alt yazıya ekle
                 yagKmYazi.innerText = "Değişim: " + hedefKm.toLocaleString('tr-TR') + " KM";
 
                 yagKutu.className = 'uyari-kutu';
@@ -633,7 +638,10 @@
         btn.innerText = "Buluta Kaydediliyor...";
         btn.disabled = true;
 
+        const secilenGuzergah = document.getElementById('guzergah').value;
+
         const yeniDegerler = {
+            guzergah: secilenGuzergah,
             hasilat: document.getElementById('hasilat').value !== "" ? formatiCoz(document.getElementById('hasilat').value) : null,
             km: document.getElementById('km').value !== "" ? formatiCoz(document.getElementById('km').value) : null,
             mazotTL: document.getElementById('mazotTL').value !== "" ? formatiCoz(document.getElementById('mazotTL').value) : null,
@@ -654,7 +662,7 @@
             sabitGiderPayi: ayniTarihliKayit ? (ayniTarihliKayit.sabitGiderPayi || 0) : 0
         };
 
-        const alanlar = ['hasilat', 'km', 'mazotTL', 'siviBakim', 'tamir', 'parca', 'diger', 'gunlukSoforUcret'];
+        const alanlar = ['guzergah', 'hasilat', 'km', 'mazotTL', 'siviBakim', 'tamir', 'parca', 'diger', 'gunlukSoforUcret'];
         
         alanlar.forEach(alan => {
             if (yeniDegerler[alan] !== null) {
@@ -662,7 +670,8 @@
             } else if (ayniTarihliKayit) {
                 kayit[alan] = ayniTarihliKayit[alan] || 0;
             } else {
-                kayit[alan] = 0;
+                if(alan === 'guzergah') kayit[alan] = "Belirtilmedi";
+                else kayit[alan] = 0;
             }
         });
 
@@ -814,6 +823,7 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${(k.tarih || '').split('-').reverse().join('.')}</td>
+                <td>${k.guzergah || 'Belirtilmedi'}</td> <!-- Güzergah buraya yazdırılıyor -->
                 <td>${tarihSaatFormatla(k.zaman)}</td>
                 <td>${tarihSaatFormatla(k.kayitSaati)}</td>
                 <td>${k.hasilat.toLocaleString('tr-TR')} TL</td>
@@ -870,6 +880,12 @@
         if(!kayit) return;
 
         document.getElementById('tarih').value = kayit.tarih;
+        
+        // Güzergah menüsünü eski veriye göre ayarla
+        if(kayit.guzergah) {
+            document.getElementById('guzergah').value = kayit.guzergah;
+        }
+
         document.getElementById('hasilat').value = sayiyiFormatla(kayit.hasilat);
         document.getElementById('km').value = sayiyiFormatla(kayit.km);
         document.getElementById('mazotTL').value = sayiyiFormatla(kayit.mazotTL);
