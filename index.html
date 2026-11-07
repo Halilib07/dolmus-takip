@@ -43,6 +43,11 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
         .container { max-width: 1200px; margin: auto; }
         
+        /* Başlık ve Çıkış Butonu */
+        .header-alani { position: relative; text-align: center; margin-bottom: 20px; }
+        .header-alani h1 { color: var(--primary); margin: 0; padding: 0 60px; font-size: 24px; } /* Sağdan soldan boşluk bırak */
+        .cikis-btn { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; position: absolute; right: 0; top: 0; }
+
         #loginEkrani { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
         #loginEkrani h2 { color: var(--primary); margin-bottom: 20px; }
         #loginEkrani input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
@@ -77,13 +82,13 @@
 
         .chart-container { width: 100%; max-width: 400px; margin: 0 auto; }
         .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
-        .cikis-btn { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; float: right; margin-bottom: 10px; font-weight: bold; }
 
+        /* Şık Yüzen Etiketler */
         .input-grup { position: relative; margin-top: 10px; }
-        .input-grup input { width: 100%; padding: 20px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
+        .input-grup input { width: 100%; padding: 22px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
         .input-grup input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
-        .input-grup label { position: absolute; left: 15px; top: 15px; color: #7f8c8d; font-size: 14px; font-weight: normal; pointer-events: none; transition: all 0.2s ease; margin: 0; }
-        .input-grup input:focus + label, .input-grup input:not(:placeholder-shown) + label { top: 4px; font-size: 11px; font-weight: bold; color: var(--primary); }
+        .input-grup label { position: absolute; left: 15px; top: 16px; color: #7f8c8d; font-size: 14px; font-weight: normal; pointer-events: none; transition: all 0.2s ease; margin: 0; }
+        .input-grup input:focus + label, .input-grup input:not(:placeholder-shown) + label { top: 5px; font-size: 11px; font-weight: bold; color: var(--primary); }
 
         .toplam-sabit { grid-column: span 2; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid var(--primary); margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
         .toplam-sabit span { font-weight: bold; font-size: 16px; }
@@ -93,16 +98,57 @@
         .btn-duzenle { background: var(--warning); }
         .btn-dagit { background: #8e44ad; width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
 
+        /* Uyarı Panosu */
         .uyari-panosu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 80px; }
-        .uyari-kutu h4 { margin: 0 0 5px 0; font-size: 14px; opacity: 0.9; }
-        .uyari-kutu p { margin: 0; font-size: 20px; font-weight: bold; }
-        .uyari-alt-yazi { margin-top: 5px; font-size: 12px; font-weight: normal; opacity: 0.85; }
+        .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 90px; }
+        .uyari-kutu h4 { margin: 0 0 5px 0; font-size: 13px; opacity: 0.9; }
+        .uyari-kutu p { margin: 0; font-size: 18px; font-weight: bold; }
+        .uyari-alt-yazi { margin-top: 5px; font-size: 11px; font-weight: normal; opacity: 0.85; }
         
         .durum-yesil { background-color: var(--success); }
         .durum-sari { background-color: var(--warning); }
         .durum-kirmizi { background-color: var(--danger); }
         .durum-gri { background-color: #95a5a6; }
+
+        /* --- MOBİL UYUMLULUK (RESPONSIVE) AYARLARI --- */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            
+            /* Başlık ve Çıkış Butonu */
+            .header-alani { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 15px; }
+            .header-alani h1 { font-size: 20px; padding: 0; }
+            .cikis-btn { position: relative; right: auto; top: auto; padding: 6px 12px; font-size: 14px; }
+
+            /* Sekmeler */
+            .tab-btn { padding: 12px 5px; font-size: 14px; }
+
+            /* Uyarı Panosu - Telefonda Alt Alta */
+            .uyari-panosu { grid-template-columns: 1fr; gap: 10px; }
+            .uyari-kutu { min-height: auto; padding: 12px; flex-direction: row; justify-content: space-between; align-items: center; text-align: left; }
+            .uyari-kutu h4 { margin: 0; font-size: 14px; }
+            .uyari-kutu p { font-size: 16px; margin: 0; }
+            .uyari-alt-yazi { display: none; /* Mobilde yer kaplamasın diye gizledik veya alt satıra alabiliriz */ }
+
+            /* Form Izgarası - Telefonda Tek Sütun */
+            .form-grid { grid-template-columns: 1fr; gap: 10px; }
+            .form-grid .full { grid-column: span 1; }
+            
+            /* Giriş Kutuları */
+            .input-grup input { padding: 18px 12px 8px 12px; font-size: 15px; }
+            .input-grup label { left: 12px; top: 14px; font-size: 13px; }
+            .input-grup input:focus + label, .input-grup input:not(:placeholder-shown) + label { top: 3px; font-size: 10px; }
+
+            /* İstatistik Kutuları */
+            .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-box { padding: 10px; }
+            .stat-box p { font-size: 16px; }
+            .stat-box h3 { font-size: 12px; }
+
+            /* Tablo ve Kartlar */
+            .card { padding: 15px; }
+            .toplam-sabit { flex-direction: column; align-items: flex-start; gap: 5px; }
+            .toplam-sabit strong { font-size: 18px; }
+        }
     </style>
 </head>
 <body>
@@ -115,8 +161,10 @@
 </div>
 
 <div id="uygulamaEkrani" class="container">
-    <button class="cikis-btn" onclick="cikisYap()">Güvenli Çıkış</button>
-    <h1 style="text-align:center; color:var(--primary)">🚐 Dolmuş İşletme Yönetim Paneli</h1>
+    <div class="header-alani">
+        <h1>🚐 Dolmuş İşletme Yönetim Paneli</h1>
+        <button class="cikis-btn" onclick="cikisYap()">Güvenli Çıkış</button>
+    </div>
     
     <div class="tabs" id="sekmeler">
         <button class="tab-btn active" onclick="switchTab('giris', this)">📱 Günlük Giriş (Şoför)</button>
@@ -126,23 +174,29 @@
     <div id="giris" class="tab-content active">
         <div class="uyari-panosu" id="uyariPanosu">
             <div class="uyari-kutu durum-gri" id="muayeneKutu">
-                <h4>🚗 Araç Muayenesi</h4>
+                <div>
+                    <h4>🚗 Araç Muayenesi</h4>
+                    <div class="uyari-alt-yazi" id="muayeneTarihYazi"></div>
+                </div>
                 <p id="muayeneDurum">Tarih Girilmedi</p>
-                <div class="uyari-alt-yazi" id="muayeneTarihYazi"></div>
             </div>
             <div class="uyari-kutu durum-gri" id="egzozKutu">
-                <h4>💨 Egzoz Emisyon</h4>
+                <div>
+                    <h4>💨 Egzoz Emisyon</h4>
+                    <div class="uyari-alt-yazi" id="egzozTarihYazi"></div>
+                </div>
                 <p id="egzozDurum">Tarih Girilmedi</p>
-                <div class="uyari-alt-yazi" id="egzozTarihYazi"></div>
             </div>
             <div class="uyari-kutu durum-gri" id="yagKutu">
-                <h4>🛢️ Yağ Değişimi</h4>
+                <div>
+                    <h4>🛢️ Yağ Değişimi</h4>
+                </div>
                 <p id="yagDurum">KM Girilmedi</p>
             </div>
         </div>
 
         <div class="card">
-            <h2 id="formBaslik">Günlük Sefer ve Gider Ekle</h2>
+            <h2 id="formBaslik" style="margin-top:0; margin-bottom: 20px;">Günlük Sefer ve Gider Ekle</h2>
             <div class="form-grid">
                 <div class="input-grup">
                     <input type="date" id="tarih">
@@ -207,7 +261,7 @@
         </div>
 
         <div class="card">
-            <h2>🚗 Araç Takip Ayarları (Şoför Ekranına Yansır)</h2>
+            <h2>🚗 Araç Takip Ayarları</h2>
             <div class="form-grid">
                 <div class="input-grup">
                     <input type="date" id="ayarMuayeneTarihi" onchange="aracAyarlariniKaydet()">
@@ -403,7 +457,6 @@
         if(tabId === 'giris') { aracUyarilariniGuncelle(); }
     }
 
-    // --- ARAÇ AYARLARINI BULUTA KAYDETME VE OKUMA ---
     async function aracAyarlariniKaydet() {
         if(!window.firebaseHazir) return;
         
@@ -454,7 +507,6 @@
         const bugun = new Date();
         bugun.setHours(0,0,0,0);
 
-        // 1. MUAYENE KONTROLÜ (+1 YIL EKLEME)
         const muayeneKutu = document.getElementById('muayeneKutu');
         const muayeneDurum = document.getElementById('muayeneDurum');
         const muayeneTarihYazi = document.getElementById('muayeneTarihYazi');
@@ -481,7 +533,6 @@
             }
         }
 
-        // 2. EGZOZ KONTROLÜ (+1 YIL EKLEME)
         const egzozKutu = document.getElementById('egzozKutu');
         const egzozDurum = document.getElementById('egzozDurum');
         const egzozTarihYazi = document.getElementById('egzozTarihYazi');
@@ -508,7 +559,6 @@
             }
         }
 
-        // 3. YAĞ DEĞİŞİMİ KONTROLÜ (En Yeni Tarihli KM'ye Göre)
         const yagKutu = document.getElementById('yagKutu');
         const yagDurum = document.getElementById('yagDurum');
         
@@ -530,7 +580,7 @@
                 yagKutu.className = 'uyari-kutu';
                 if(kalanKm <= 0) {
                     yagKutu.classList.add('durum-kirmizi');
-                    yagDurum.innerText = `DEĞİŞİM ZAMANI! (${Math.abs(kalanKm).toLocaleString('tr-TR')} km geçti)`;
+                    yagDurum.innerText = `DEĞİŞİM ZAMANI!`;
                 } else if(kalanKm <= 1500) {
                     yagKutu.classList.add('durum-sari');
                     yagDurum.innerText = `${kalanKm.toLocaleString('tr-TR')} KM Kaldı!`;
@@ -540,27 +590,24 @@
                 }
             } else {
                 yagKutu.className = 'uyari-kutu durum-gri';
-                yagDurum.innerText = "Şoför Henüz KM Girmedi";
+                yagDurum.innerText = "KM Girilmedi";
             }
         }
     }
-    // ---------------------------
 
     async function kaydet() {
         if(!window.firebaseHazir) { alert("Bulut sistemi henüz yüklenmedi..."); return; }
         const secilenTarih = document.getElementById('tarih').value;
         if(!secilenTarih) { alert("Lütfen bir tarih seçin!"); return; }
 
-        // --- YENİ: SIVI BAKIM KONTROLÜ VE KM ZORUNLULUĞU ---
         const siviBakimDeger = formatiCoz(document.getElementById('siviBakim').value);
         const kmDeger = formatiCoz(document.getElementById('km').value);
 
         if (siviBakimDeger > 0 && kmDeger === 0) {
             alert("⚠️ DİKKAT: Sıvı Bakım (Yağ Değişimi vs.) tutarı girdiniz. Lütfen aracın o anki Güncel KM'sini de giriniz!");
-            document.getElementById('km').focus(); // İmleci KM kutusuna götür
-            return; // Kaydı durdur
+            document.getElementById('km').focus();
+            return; 
         }
-        // ----------------------------------------------------
 
         const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
         if (ayniTarihliKayit) {
@@ -614,29 +661,22 @@
             }
             await window.addDoc(window.collection(window.db, "kayitlar"), kayit);
             
-            // --- YENİ: SIVI BAKIM YAPILDIYSA YÖNETİCİ AYARLARINI GÜNCELLE ---
             if (siviBakimDeger > 0 && kmDeger > 0) {
-                // Yönetici ayarlarını buluttan çek
                 const ayarDocRef = window.doc(window.db, "sistem", "aracAyarlari");
                 const ayarDocSnap = await window.getDoc(ayarDocRef);
                 
                 if (ayarDocSnap.exists()) {
                     const mevcutAyarlar = ayarDocSnap.data();
-                    mevcutAyarlar.yagKm = kmDeger; // Yağ değişim KM'sini yeni girilen KM ile güncelle
+                    mevcutAyarlar.yagKm = kmDeger; 
                     
-                    // Tekrar buluta kaydet
                     await window.setDoc(ayarDocRef, mevcutAyarlar);
                     
-                    // Yönetici ekranı açıksa inputu da güncelle
                     if(document.getElementById('ayarYagKm')) {
                         document.getElementById('ayarYagKm').value = sayiyiFormatla(kmDeger);
                     }
-                    
-                    // Uyarı panosunu anında güncelle
                     aracUyarilariniGuncelle(mevcutAyarlar);
                 }
             }
-            // ------------------------------------------------------------------
 
             mesajEl.style.color = "green";
             mesajEl.innerText = ayniTarihliKayit ? "✅ Kayıt başarıyla güncellendi!" : "✅ Başarıyla buluta kaydedildi!";
