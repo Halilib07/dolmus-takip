@@ -96,6 +96,7 @@
         .btn-duzenle { background: var(--warning); }
         .btn-dagit { background: #8e44ad; width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
 
+        /* Uyarı Panosu */
         .uyari-panosu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 100px; }
         .uyari-kutu h4 { margin: 0 0 5px 0; font-size: 13px; opacity: 0.9; }
@@ -196,6 +197,7 @@
             <div class="uyari-kutu durum-gri" id="yagKutu">
                 <div>
                     <h4>🛢️ Yağ Değişimi</h4>
+                    <div class="uyari-alt-yazi" id="yagKmYazi"></div> <!-- YENİ: Hedef KM yazısı -->
                 </div>
                 <p id="yagDurum">KM Girilmedi</p>
             </div>
@@ -567,6 +569,7 @@
 
         const yagKutu = document.getElementById('yagKutu');
         const yagDurum = document.getElementById('yagDurum');
+        const yagKmYazi = document.getElementById('yagKmYazi'); // Yeni hedef km alanı
         
         if(ayarlar.yagKm > 0) {
             let enGuncelKayit = null;
@@ -583,6 +586,9 @@
                 const hedefKm = ayarlar.yagKm + ayarlar.yagOmru; 
                 const kalanKm = hedefKm - sonKm; 
                 
+                // Hedef KM'yi alt yazıya ekle
+                yagKmYazi.innerText = "Değişim: " + hedefKm.toLocaleString('tr-TR') + " KM";
+
                 yagKutu.className = 'uyari-kutu';
                 if(kalanKm <= 0) {
                     yagKutu.classList.add('durum-kirmizi');
@@ -597,6 +603,7 @@
             } else {
                 yagKutu.className = 'uyari-kutu durum-gri';
                 yagDurum.innerText = "KM Girilmedi";
+                yagKmYazi.innerText = "";
             }
         }
     }
