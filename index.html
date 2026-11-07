@@ -87,7 +87,7 @@
         
         .input-grup input {
             width: 100%;
-            padding: 20px 15px 10px 15px; /* Üstten boşluk bırakıyoruz ki yazı sığsın */
+            padding: 20px 15px 10px 15px;
             border: 1px solid #ccc;
             border-radius: 8px;
             font-size: 16px;
@@ -114,7 +114,6 @@
             margin: 0;
         }
 
-        /* Kutuya tıklanınca veya içi doluyken yazıyı yukarı kaydır */
         .input-grup input:focus + label,
         .input-grup input:not(:placeholder-shown) + label {
             top: 4px;
@@ -122,6 +121,21 @@
             font-weight: bold;
             color: var(--primary);
         }
+
+        /* Toplam Sabit Gider Alanı */
+        .toplam-sabit {
+            grid-column: span 2;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .toplam-sabit span { font-weight: bold; font-size: 16px; }
+        .toplam-sabit strong { font-size: 20px; color: var(--primary); }
     </style>
 </head>
 <body>
@@ -213,19 +227,58 @@
         </div>
 
         <div class="card">
-            <h2>Sabit Giderler & Şoför</h2>
+            <h2>Sabit Giderler & Şoför (Fişteki Kalemler)</h2>
             <div class="form-grid">
                 
-                <!-- Günlük Şoför Ücreti -->
                 <div class="input-grup">
                     <input type="number" id="soforUcret" placeholder="" onchange="guncelleRapor()">
                     <label for="soforUcret">Günlük Şoför Ücreti (TL)</label>
                 </div>
-
-                <!-- Aylık Muhasebe Gideri -->
+                
                 <div class="input-grup">
-                    <input type="number" id="muhasebeGider" placeholder="" onchange="guncelleRapor()">
-                    <label for="muhasebeGider">Aylık Muhasebe/Sigorta (Fişteki Toplam: 12.993 TL)</label>
+                    <input type="number" id="pesinVergi" placeholder="" onchange="guncelleRapor()">
+                    <label for="pesinVergi">Peşin Vergi (TL)</label>
+                </div>
+
+                <div class="input-grup">
+                    <input type="number" id="stopaj" placeholder="" onchange="guncelleRapor()">
+                    <label for="stopaj">Stopaj (TL)</label>
+                </div>
+
+                <div class="input-grup">
+                    <input type="number" id="kdv" placeholder="" onchange="guncelleRapor()">
+                    <label for="kdv">K.D.V. (TL)</label>
+                </div>
+
+                <div class="input-grup">
+                    <input type="number" id="gelirVergisi" placeholder="" onchange="guncelleRapor()">
+                    <label for="gelirVergisi">Gelir Vergisi (TL)</label>
+                </div>
+
+                <div class="input-grup">
+                    <input type="number" id="bagKur" placeholder="" onchange="guncelleRapor()">
+                    <label for="bagKur">Bağ-Kur (TL)</label>
+                </div>
+
+                <div class="input-grup">
+                    <input type="number" id="sigorta" placeholder="" onchange="guncelleRapor()">
+                    <label for="sigorta">Sigorta (TL)</label>
+                </div>
+
+                <div class="input-grup">
+                    <input type="number" id="matbaaNoter" placeholder="" onchange="guncelleRapor()">
+                    <label for="matbaaNoter">Matbaa / Noter (TL)</label>
+                </div>
+
+                <div class="input-grup">
+                    <input type="number" id="muhasebe" placeholder="" onchange="guncelleRapor()">
+                    <label for="muhasebe">Muhasebe (TL)</label>
+                </div>
+
+                <!-- Toplam Sabit Gider Özeti -->
+                <div class="toplam-sabit">
+                    <span>Toplam Aylık Sabit Gider:</span>
+                    <strong id="toplamAylikSabit">0 TL</strong>
                 </div>
 
             </div>
@@ -273,32 +326,23 @@
         const hataEl = document.getElementById('loginHata');
 
         if (girilenSifre === YONETICI_SIFRESI) {
-            // Yönetici girişi: Her şey açık
             document.getElementById('loginEkrani').style.display = 'none';
             document.getElementById('uygulamaEkrani').style.display = 'block';
-            document.getElementById('raporTabBtn').style.display = 'block'; // Rapor sekmesini göster
+            document.getElementById('raporTabBtn').style.display = 'block';
             hataEl.style.display = 'none';
-            
-            // Varsayılan olarak giriş sekmesi açılsın
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
-
         } else if (girilenSifre === SOFOR_SIFRESI) {
-            // Şoför girişi: Sadece giriş ekranı açık
             document.getElementById('loginEkrani').style.display = 'none';
             document.getElementById('uygulamaEkrani').style.display = 'block';
-            document.getElementById('raporTabBtn').style.display = 'none'; // Rapor sekmesini gizle
+            document.getElementById('raporTabBtn').style.display = 'none';
             hataEl.style.display = 'none';
-
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
-
         } else {
-            // Hatalı şifre
             hataEl.style.display = 'block';
         }
     }
 
     function cikisYap() {
-        // Sayfayı yenileyerek her şeyi sıfırla
         location.reload();
     }
 
@@ -412,13 +456,31 @@
             tbody.appendChild(tr);
         });
 
-        const gunSayisi = kayitlar.length || 1;
+        // Sabit Giderleri Topla
         const soforUcretGunluk = Number(document.getElementById('soforUcret').value) || 0;
+        
+        const pesinVergi = Number(document.getElementById('pesinVergi').value) || 0;
+        const stopaj = Number(document.getElementById('stopaj').value) || 0;
+        const kdv = Number(document.getElementById('kdv').value) || 0;
+        const gelirVergisi = Number(document.getElementById('gelirVergisi').value) || 0;
+        const bagKur = Number(document.getElementById('bagKur').value) || 0;
+        const sigorta = Number(document.getElementById('sigorta').value) || 0;
+        const matbaaNoter = Number(document.getElementById('matbaaNoter').value) || 0;
+        const muhasebe = Number(document.getElementById('muhasebe').value) || 0;
+
+        const toplamAylikSabit = pesinVergi + stopaj + kdv + gelirVergisi + bagKur + sigorta + matbaaNoter + muhasebe;
+        
+        // Toplam Sabit Gider kutusunu güncelle
+        document.getElementById('toplamAylikSabit').innerText = toplamAylikSabit.toLocaleString('tr-TR') + " TL";
+
+        const gunSayisi = kayitlar.length || 1;
+        
+        // Şoför ücreti günlük girildiği için gün sayısıyla çarpıyoruz
         const toplamSofor = soforUcretGunluk * gunSayisi;
         
-        const muhasebeAylik = Number(document.getElementById('muhasebeGider').value) || 0;
-        const muhasebeGunluk = muhasebeAylik / 30;
-        const toplamMuhasebe = muhasebeGunluk * gunSayisi;
+        // Aylık sabit gideri günlük gider gibi hesaplamak için 30'a bölüp gün sayısıyla çarpıyoruz
+        const sabitGiderGunluk = toplamAylikSabit / 30;
+        const toplamMuhasebe = sabitGiderGunluk * gunSayisi;
 
         const genelToplamGider = toplamMazot + toplamSivi + toplamTamir + toplamParca + toplamDiger + toplamSofor + toplamMuhasebe;
         const netKar = toplamHasilat - genelToplamGider;
@@ -433,6 +495,7 @@
         
         document.getElementById('kmBasiMazot').innerText = kmBasiMazot + " TL/KM";
 
+        // Grafiği Çiz
         cizGrafik(toplamMazot, toplamSivi, toplamTamir, toplamParca, toplamDiger, toplamSofor, toplamMuhasebe);
     }
 
@@ -453,7 +516,7 @@
         grafik = new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: ['Mazot', 'Sıvı Bakım', 'Tamir', 'Parça', 'Diğer', 'Şoför', 'Muhasebe/Vergi'],
+                labels: ['Mazot', 'Sıvı Bakım', 'Tamir', 'Parça', 'Diğer', 'Şoför', 'Vergi/Sigorta/Muhasebe'],
                 datasets: [{
                     data: [mazot, sivi, tamir, parca, diger, sofor, muhasebe],
                     backgroundColor: ['#e74c3c', '#3498db', '#f1c40f', '#9b59b6', '#95a5a6', '#2ecc71', '#34495e']
