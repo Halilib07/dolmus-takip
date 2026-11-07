@@ -210,7 +210,6 @@
             <h2>🚗 Araç Takip Ayarları (Şoför Ekranına Yansır)</h2>
             <div class="form-grid">
                 <div class="input-grup">
-                    <!-- Etiketler değişti: Muayene Yapıldığı Tarih -->
                     <input type="date" id="ayarMuayeneTarihi" onchange="aracAyarlariniKaydet()">
                     <label for="ayarMuayeneTarihi">Araç Muayenesinin Yapıldığı Tarih</label>
                 </div>
@@ -218,12 +217,17 @@
                     <input type="date" id="ayarEgzozTarihi" onchange="aracAyarlariniKaydet()">
                     <label for="ayarEgzozTarihi">Egzoz Emisyonun Yapıldığı Tarih</label>
                 </div>
-                <div class="input-grup full">
+                <div class="input-grup">
                     <input type="text" inputmode="numeric" id="ayarYagKm" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
                     <label for="ayarYagKm">Son Yağ Değişimi Yapılan KM</label>
                 </div>
+                <div class="input-grup">
+                    <!-- YENİ: Yağ Değişim Ömrü -->
+                    <input type="text" inputmode="numeric" id="ayarYagOmru" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
+                    <label for="ayarYagOmru">Yağ Değişim Ömrü (Örn: 10.000 KM)</label>
+                </div>
             </div>
-            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Girdiğiniz tarihlerin üzerine sistem otomatik olarak <b>+1 Yıl</b> ekler ve şoför ekranındaki bitiş tarihini hesaplar.</p>
+            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Girdiğiniz tarihlerin üzerine sistem otomatik olarak <b>+1 Yıl</b> ekler. Yağ ömrü için belirlediğiniz KM, şoförün girdiği <b>en güncel tarihli</b> KM'den düşülerek hesaplanır.</p>
         </div>
 
         <div class="card">
@@ -407,8 +411,9 @@
         const muayene = document.getElementById('ayarMuayeneTarihi').value;
         const egzoz = document.getElementById('ayarEgzozTarihi').value;
         const yagKm = formatiCoz(document.getElementById('ayarYagKm').value);
+        const yagOmru = formatiCoz(document.getElementById('ayarYagOmru').value); // Yeni
 
-        const ayarlar = { muayene, egzoz, yagKm };
+        const ayarlar = { muayene, egzoz, yagKm, yagOmru };
         
         try {
             await window.setDoc(window.doc(window.db, "sistem", "aracAyarlari"), ayarlar);
@@ -430,6 +435,7 @@
                     document.getElementById('ayarMuayeneTarihi').value = ayarlar.muayene || "";
                     document.getElementById('ayarEgzozTarihi').value = ayarlar.egzoz || "";
                     document.getElementById('ayarYagKm').value = sayiyiFormatla(ayarlar.yagKm) || "";
+                    document.getElementById('ayarYagOmru').value = sayiyiFormatla(ayarlar.yagOmru) || ""; // Yeni
                 }
                 aracUyarilariniGuncelle(ayarlar);
             }
@@ -442,7 +448,8 @@
         const ayarlar = {
             muayene: document.getElementById('ayarMuayeneTarihi') ? document.getElementById('ayarMuayeneTarihi').value : (gelenAyarlar ? gelenAyarlar.muayene : null),
             egzoz: document.getElementById('ayarEgzozTarihi') ? document.getElementById('ayarEgzozTarihi').value : (gelenAyarlar ? gelenAyarlar.egzoz : null),
-            yagKm: document.getElementById('ayarYagKm') ? formatiCoz(document.getElementById('ayarYagKm').value) : (gelenAyarlar ? gelenAyarlar.yagKm : 0)
+            yagKm: document.getElementById('ayarYagKm') ? formatiCoz(document.getElementById('ayarYagKm').value) : (gelenAyarlar ? gelenAyarlar.yagKm : 0),
+            yagOmru: document.getElementById('ayarYagOmru') ? formatiCoz(document.getElementById('ayarYagOmru').value) : (gelenAyarlar ? gelenAyarlar.yagOmru : 10000) // Varsayılan 10.000
         };
 
         const bugun = new Date();
@@ -455,7 +462,7 @@
         
         if(ayarlar.muayene) {
             const muayeneTarihi = new Date(ayarlar.muayene);
-            muayeneTarihi.setFullYear(muayeneTarihi.getFullYear() + 1); // 1 Yıl ekle
+            muayeneTarihi.setFullYear(muayeneTarihi.getFullYear() + 1); 
 
             const farkMs = muayeneTarihi - bugun;
             const kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
@@ -482,7 +489,7 @@
 
         if(ayarlar.egzoz) {
             const egzozTarihi = new Date(ayarlar.egzoz);
-            egzozTarihi.setFullYear(egzozTarihi.getFullYear() + 1); // 1 Yıl ekle
+            egzozTarihi.setFullYear(egzozTarihi.getFullYear() + 1); 
 
             const farkMs = egzozTarihi - bugun;
             const kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
@@ -502,18 +509,25 @@
             }
         }
 
-        // 3. YAĞ DEĞİŞİMİ KONTROLÜ
+        // 3. YAĞ DEĞİŞİMİ KONTROLÜ (En Yeni Tarihli KM'ye Göre)
         const yagKutu = document.getElementById('yagKutu');
         const yagDurum = document.getElementById('yagDurum');
         
         if(ayarlar.yagKm > 0) {
-            let sonKm = 0;
-            if(kayitlar.length > 0 && kayitlar[0].km) {
-                sonKm = kayitlar[0].km;
+            // Tarihi en yeni olan kaydı bul (Kayıtlar zaten Firebase'den yeniden eskiye sıralı geliyor, listenin 0. elemanı en güncel tarihtir)
+            let enGuncelKayit = null;
+            
+            // Eğer kayıtlar arasında geçerli bir KM değeri olan en son kaydı bulalım
+            for (let i = 0; i < kayitlar.length; i++) {
+                if (kayitlar[i].km && kayitlar[i].km > 0) {
+                    enGuncelKayit = kayitlar[i];
+                    break; // En yenisini bulduk, döngüden çık
+                }
             }
 
-            if(sonKm > 0) {
-                const hedefKm = ayarlar.yagKm + 10000; // 10.000 km ömür
+            if(enGuncelKayit) {
+                const sonKm = enGuncelKayit.km;
+                const hedefKm = ayarlar.yagKm + ayarlar.yagOmru; // Ayarlardan gelen değişken ömür
                 const kalanKm = hedefKm - sonKm; 
                 
                 yagKutu.className = 'uyari-kutu';
@@ -617,7 +631,7 @@
 
     window.dinleVeriler = function() {
         if(!window.firebaseHazir) { setTimeout(window.dinleVeriler, 500); return; }
-        const q = window.query(window.collection(window.db, "kayitlar"), window.orderBy("zaman", "desc"));
+        const q = window.query(window.collection(window.db, "kayitlar"), window.orderBy("tarih", "desc")); // Tarihe göre sırala
         
         window.onSnapshot(q, (snapshot) => {
             kayitlar = [];
