@@ -54,8 +54,11 @@
         #loginHata { color: var(--danger); font-weight: bold; margin-top: 10px; display: none; }
 
         #uygulamaEkrani { display: none; }
+        
+        /* 3 SEKMELİ YAPI */
         .tabs { display: flex; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .tab-btn { flex: 1; padding: 15px; border: none; background: white; cursor: pointer; font-size: 16px; font-weight: bold; color: #7f8c8d; transition: 0.3s; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: white; cursor: pointer; font-size: 16px; font-weight: bold; color: #7f8c8d; transition: 0.3s; border-right: 1px solid #eee; }
+        .tab-btn:last-child { border-right: none; }
         .tab-btn.active { background: var(--primary); color: white; }
         
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
@@ -63,6 +66,7 @@
         .form-grid .full { grid-column: span 2; }
         button.btn-primary { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
         
+        /* Rapor Sekmesi Özel Tasarım */
         .rapor-filtre-alani { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; background: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
         .rapor-filtre-alani .input-grup { margin-top: 0; flex: 1; min-width: 150px; }
         .rapor-filtre-alani button { padding: 12px 20px; background: var(--info); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; height: 46px; }
@@ -96,6 +100,7 @@
 
         .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
 
+        /* Şık Yüzen Etiketler */
         .input-grup { position: relative; margin-top: 10px; }
         .input-grup input, .input-grup select { width: 100%; padding: 22px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
         .input-grup input:focus, .input-grup select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
@@ -133,7 +138,7 @@
             .header-alani { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 15px; }
             .header-alani h1 { font-size: 20px; padding: 0; }
             .cikis-btn { position: relative; right: auto; top: auto; padding: 6px 12px; font-size: 14px; }
-            .tab-btn { padding: 12px 5px; font-size: 14px; }
+            .tab-btn { padding: 12px 5px; font-size: 13px; }
             .uyari-panosu { grid-template-columns: 1fr; gap: 10px; }
             .uyari-kutu { min-height: auto; padding: 12px 15px; flex-direction: row; justify-content: space-between; align-items: center; text-align: left; }
             .uyari-kutu h4 { margin: 0; font-size: 14px; }
@@ -174,8 +179,10 @@
     <div class="tabs" id="sekmeler">
         <button class="tab-btn active" onclick="switchTab('giris', this)">📱 Günlük Giriş (Şoför)</button>
         <button class="tab-btn" id="raporTabBtn" onclick="switchTab('rapor', this)">💻 Raporlar (Yönetici)</button>
+        <button class="tab-btn" id="ayarlarTabBtn" onclick="switchTab('ayarlar', this)" style="display:none;">⚙️ Sistem Ayarları</button>
     </div>
 
+    <!-- ŞOFÖR EKRANI -->
     <div id="giris" class="tab-content active">
         <div class="uyari-panosu" id="uyariPanosu">
             <div class="uyari-kutu durum-gri" id="muayeneKutu">
@@ -245,6 +252,7 @@
         </div>
     </div>
 
+    <!-- YÖNETİCİ / RAPOR EKRANI -->
     <div id="rapor" class="tab-content">
         <div class="rapor-filtre-alani">
             <div class="input-grup">
@@ -361,7 +369,10 @@
                 </table>
             </div>
         </div>
+    </div>
 
+    <!-- AYARLAR SEKME EKRANI -->
+    <div id="ayarlar" class="tab-content">
         <div class="card">
             <h2>⚙️ Sistem Ayarları (Araç & Sabit Giderler)</h2>
             <div class="form-grid">
@@ -381,6 +392,13 @@
                     <input type="text" inputmode="numeric" id="ayarYagOmru" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
                     <label for="ayarYagOmru">Yağ Değişim Ömrü (KM)</label>
                 </div>
+            </div>
+            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Girdiğiniz tarihlerin üzerine sistem otomatik olarak <b>+1 Yıl</b> ekler. Yağ ömrü için belirlediğiniz KM, şoförün girdiği <b>en güncel tarihli</b> KM'den düşülerek hesaplanır.</p>
+        </div>
+
+        <div class="card">
+            <h2>🧾 Muhasebe / Sabit Gider Fişi Girişi</h2>
+            <div class="form-grid">
                 <div class="input-grup">
                     <input type="date" id="sabitGiderTarih">
                     <label for="sabitGiderTarih">Fişin Ait Olduğu Tarih</label>
@@ -490,6 +508,7 @@
             document.getElementById('loginEkrani').style.display = 'none';
             document.getElementById('uygulamaEkrani').style.display = 'block';
             document.getElementById('raporTabBtn').style.display = 'block'; 
+            document.getElementById('ayarlarTabBtn').style.display = 'block'; // Ayarları göster
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
@@ -497,6 +516,7 @@
             document.getElementById('loginEkrani').style.display = 'none';
             document.getElementById('uygulamaEkrani').style.display = 'block';
             document.getElementById('raporTabBtn').style.display = 'none'; 
+            document.getElementById('ayarlarTabBtn').style.display = 'none'; // Şoförden gizle
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
@@ -515,6 +535,7 @@
         
         if(tabId === 'rapor') { filtreleRapor(); }
         if(tabId === 'giris') { aracUyarilariniGuncelle(); }
+        if(tabId === 'ayarlar') { aracAyarlariniBuluttanYukle(); }
     }
 
     async function aracAyarlariniKaydet() {
@@ -669,7 +690,6 @@
             if (ayniTarihliKayit) { await window.deleteDoc(window.doc(window.db, "kayitlar", ayniTarihliKayit.id)); }
             await window.addDoc(window.collection(window.db, "kayitlar"), kayit);
             
-            // YENİ: SIVI BAKIM YAPILDIYSA YÖNETİCİ AYARLARINI GÜNCELLE
             if (siviBakimDeger > 0 && kmDeger > 0) {
                 const ayarDocRef = window.doc(window.db, "sistem", "aracAyarlari");
                 const ayarDocSnap = await window.getDoc(ayarDocRef);
@@ -750,8 +770,9 @@
         });
         try {
             await batch.commit();
-            alert(`✅ Başarılı! Her güne ${gunlukPay.toLocaleString('tr-TR')} TL eklendi.`);
-            filtreleRapor();
+            alert(`✅ Başarılı! Her güne ${gunlukPay.toLocaleString('tr-TR')} TL eklendi.\nRaporları görmek için Raporlar sekmesine geçebilirsiniz.`);
+            // Dağıtım sonrası otomatik rapor sekmesine geç
+            switchTab('rapor', document.getElementById('raporTabBtn'));
         } catch(e) { alert("Hata!"); }
     }
 
