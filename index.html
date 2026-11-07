@@ -183,16 +183,20 @@
         </div>
 
         <div class="card">
-            <h2>Sabit Giderler & Şoför (Fişteki Kalemler)</h2>
+            <h2>Sabit Giderler (Fişteki Kalemler)</h2>
             <div class="form-grid">
+                
+                <!-- Yönetici Paneline Eklenen Tarih -->
                 <div class="input-grup">
-                    <input type="text" inputmode="numeric" id="soforUcret" class="para" placeholder="" onchange="guncelleRapor()">
-                    <label for="soforUcret">Günlük Şoför Ücreti (TL)</label>
+                    <input type="date" id="sabitGiderTarih">
+                    <label for="sabitGiderTarih">Sabit Gider Tarihi (Ay/Yıl)</label>
                 </div>
+
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="pesinVergi" class="para" placeholder="" onchange="guncelleRapor()">
                     <label for="pesinVergi">Peşin Vergi (TL)</label>
                 </div>
+                
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="stopaj" class="para" placeholder="" onchange="guncelleRapor()">
                     <label for="stopaj">Stopaj (TL)</label>
@@ -221,6 +225,13 @@
                     <input type="text" inputmode="numeric" id="muhasebe" class="para" placeholder="" onchange="guncelleRapor()">
                     <label for="muhasebe">Muhasebe (TL)</label>
                 </div>
+                
+                <!-- Yeni Eklenen Diğer Giderler -->
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="sabitDigerGider" class="para" placeholder="" onchange="guncelleRapor()">
+                    <label for="sabitDigerGider">Diğer Giderler (Trafik Cezası vs.) TL</label>
+                </div>
+
                 <div class="toplam-sabit">
                     <span>Toplam Aylık Sabit Gider:</span>
                     <strong id="toplamAylikSabit">0 TL</strong>
@@ -242,8 +253,8 @@
                     <thead>
                         <tr>
                             <th>Sefer Tarihi</th>
-                            <th>İlk Giriş</th>    <!-- Yeni Sütun -->
-                            <th>Son Giriş</th>    <!-- Yeni Sütun -->
+                            <th>İlk Giriş</th>
+                            <th>Son Giriş</th>
                             <th>Hasılat</th>
                             <th>KM</th>
                             <th>Mazot (TL)</th>
@@ -288,7 +299,6 @@
         return Number(sadeceRakam) || 0;
     }
 
-    // Tarih ve saat formatlayıcı
     function tarihSaatFormatla(timestamp) {
         if(!timestamp) return "-";
         const d = new Date(timestamp);
@@ -383,16 +393,13 @@
             gunlukSoforUcret: document.getElementById('gunlukSoforUcret').value !== "" ? formatiCoz(document.getElementById('gunlukSoforUcret').value) : null,
         };
 
-        // İlk giriş zamanı: Eğer eski kayıt varsa onun zamanını koru. Yoksa şu anki zaman.
         const ilkGirisZamani = ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now();
-        
-        // Son giriş zamanı: Her kaydetme anında şu anki zaman.
         const sonGirisZamani = Date.now();
 
         let kayit = {
             tarih: secilenTarih,
-            zaman: ilkGirisZamani, // İlk giriş tarihi (sıralama için kullanılıyor)
-            kayitSaati: sonGirisZamani // Son güncelleme/giriş tarihi
+            zaman: ilkGirisZamani,
+            kayitSaati: sonGirisZamani
         };
 
         const alanlar = ['hasilat', 'km', 'mazotTL', 'siviBakim', 'tamir', 'parca', 'diger', 'gunlukSoforUcret'];
@@ -478,8 +485,8 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${(k.tarih || '').split('-').reverse().join('.')}</td>
-                <td>${tarihSaatFormatla(k.zaman)}</td>          <!-- İlk Giriş -->
-                <td>${tarihSaatFormatla(k.kayitSaati)}</td>     <!-- Son Giriş -->
+                <td>${tarihSaatFormatla(k.zaman)}</td>
+                <td>${tarihSaatFormatla(k.kayitSaati)}</td>
                 <td>${k.hasilat.toLocaleString('tr-TR')} TL</td>
                 <td>${k.km.toLocaleString('tr-TR')}</td>
                 <td>${k.mazotTL.toLocaleString('tr-TR')} TL</td>
@@ -500,6 +507,7 @@
             tbody.appendChild(tr);
         });
 
+        // Yönetici panelindeki giderler
         const pesinVergi = formatiCoz(document.getElementById('pesinVergi').value);
         const stopaj = formatiCoz(document.getElementById('stopaj').value);
         const kdv = formatiCoz(document.getElementById('kdv').value);
@@ -508,16 +516,15 @@
         const sigorta = formatiCoz(document.getElementById('sigorta').value);
         const matbaaNoter = formatiCoz(document.getElementById('matbaaNoter').value);
         const muhasebe = formatiCoz(document.getElementById('muhasebe').value);
+        const sabitDigerGider = formatiCoz(document.getElementById('sabitDigerGider').value);
 
-        const toplamAylikSabit = pesinVergi + stopaj + kdv + gelirVergisi + bagKur + sigorta + matbaaNoter + muhasebe;
+        const toplamAylikSabit = pesinVergi + stopaj + kdv + gelirVergisi + bagKur + sigorta + matbaaNoter + muhasebe + sabitDigerGider;
         document.getElementById('toplamAylikSabit').innerText = toplamAylikSabit.toLocaleString('tr-TR') + " TL";
 
         const gunSayisi = kayitlar.length || 1;
         
-        const yoneticiSoforUcretGunluk = formatiCoz(document.getElementById('soforUcret').value);
-        const toplamYoneticiSofor = yoneticiSoforUcretGunluk * gunSayisi;
-
-        const genelToplamSofor = toplamSoforGunluk + toplamYoneticiSofor;
+        // Şoför günlük ücretleri zaten toplamSoforGunluk içinde
+        const genelToplamSofor = toplamSoforGunluk;
 
         const sabitGiderGunluk = toplamAylikSabit / 30;
         const toplamMuhasebe = sabitGiderGunluk * gunSayisi;
