@@ -32,8 +32,8 @@
         window.where = where;
         window.getDocs = getDocs;
         window.writeBatch = writeBatch;
-        window.setDoc = setDoc; // Ayarları buluta kaydetmek için
-        window.getDoc = getDoc; // Ayarları buluttan okumak için
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
         window.firebaseHazir = true;
         
         window.dinleVeriler();
@@ -210,19 +210,20 @@
             <h2>🚗 Araç Takip Ayarları (Şoför Ekranına Yansır)</h2>
             <div class="form-grid">
                 <div class="input-grup">
+                    <!-- Etiketler değişti: Muayene Yapıldığı Tarih -->
                     <input type="date" id="ayarMuayeneTarihi" onchange="aracAyarlariniKaydet()">
-                    <label for="ayarMuayeneTarihi">Araç Muayene Tarihi</label>
+                    <label for="ayarMuayeneTarihi">Araç Muayenesinin Yapıldığı Tarih</label>
                 </div>
                 <div class="input-grup">
                     <input type="date" id="ayarEgzozTarihi" onchange="aracAyarlariniKaydet()">
-                    <label for="ayarEgzozTarihi">Egzoz Emisyon Tarihi</label>
+                    <label for="ayarEgzozTarihi">Egzoz Emisyonun Yapıldığı Tarih</label>
                 </div>
                 <div class="input-grup full">
                     <input type="text" inputmode="numeric" id="ayarYagKm" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
                     <label for="ayarYagKm">Son Yağ Değişimi Yapılan KM</label>
                 </div>
             </div>
-            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Buraya girdiğiniz bilgiler buluta kaydedilir ve şoförün ekranına anında yansır.</p>
+            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Girdiğiniz tarihlerin üzerine sistem otomatik olarak <b>+1 Yıl</b> ekler ve şoför ekranındaki bitiş tarihini hesaplar.</p>
         </div>
 
         <div class="card">
@@ -371,14 +372,14 @@
             document.getElementById('raporTabBtn').style.display = 'block'; 
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
-            aracAyarlariniBuluttanYukle(); // Yönetici girişinde ayarları çek
+            aracAyarlariniBuluttanYukle(); 
         } else if (girilenSifre === SOFOR_SIFRESI) {
             document.getElementById('loginEkrani').style.display = 'none';
             document.getElementById('uygulamaEkrani').style.display = 'block';
             document.getElementById('raporTabBtn').style.display = 'none'; 
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
-            aracAyarlariniBuluttanYukle(); // Şoför girişinde ayarları çek
+            aracAyarlariniBuluttanYukle(); 
         } else {
             hataEl.style.display = 'block';
         }
@@ -410,9 +411,8 @@
         const ayarlar = { muayene, egzoz, yagKm };
         
         try {
-            // "Ayarlar" adında tek bir belgeye (dökümana) kaydediyoruz
             await window.setDoc(window.doc(window.db, "sistem", "aracAyarlari"), ayarlar);
-            aracUyarilariniGuncelle(); // Kaydettikten sonra hemen güncelle
+            aracUyarilariniGuncelle(); 
         } catch (e) {
             console.error("Ayarlar kaydedilemedi: ", e);
         }
@@ -426,13 +426,11 @@
             
             if (docSnap.exists()) {
                 const ayarlar = docSnap.data();
-                // Eğer yönetici ekranı açıksa kutuları doldur
                 if(document.getElementById('ayarMuayeneTarihi')) {
                     document.getElementById('ayarMuayeneTarihi').value = ayarlar.muayene || "";
                     document.getElementById('ayarEgzozTarihi').value = ayarlar.egzoz || "";
                     document.getElementById('ayarYagKm').value = sayiyiFormatla(ayarlar.yagKm) || "";
                 }
-                // Uyarı panosunu güncelle
                 aracUyarilariniGuncelle(ayarlar);
             }
         } catch(e) {
@@ -441,8 +439,6 @@
     }
 
     function aracUyarilariniGuncelle(gelenAyarlar = null) {
-        // Eğer parametre gelmediyse (örn. arayüzden çağrıldıysa) buluttan çekilmiş son veriyi kullan
-        // Bunu basitleştirmek için ayarları doğrudan inputlardan okuyoruz (çünkü inputlar buluttan dolduruldu)
         const ayarlar = {
             muayene: document.getElementById('ayarMuayeneTarihi') ? document.getElementById('ayarMuayeneTarihi').value : (gelenAyarlar ? gelenAyarlar.muayene : null),
             egzoz: document.getElementById('ayarEgzozTarihi') ? document.getElementById('ayarEgzozTarihi').value : (gelenAyarlar ? gelenAyarlar.egzoz : null),
@@ -452,13 +448,15 @@
         const bugun = new Date();
         bugun.setHours(0,0,0,0);
 
-        // 1. MUAYENE KONTROLÜ
+        // 1. MUAYENE KONTROLÜ (+1 YIL EKLEME)
         const muayeneKutu = document.getElementById('muayeneKutu');
         const muayeneDurum = document.getElementById('muayeneDurum');
         const muayeneTarihYazi = document.getElementById('muayeneTarihYazi');
         
         if(ayarlar.muayene) {
             const muayeneTarihi = new Date(ayarlar.muayene);
+            muayeneTarihi.setFullYear(muayeneTarihi.getFullYear() + 1); // 1 Yıl ekle
+
             const farkMs = muayeneTarihi - bugun;
             const kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
 
@@ -477,13 +475,15 @@
             }
         }
 
-        // 2. EGZOZ KONTROLÜ
+        // 2. EGZOZ KONTROLÜ (+1 YIL EKLEME)
         const egzozKutu = document.getElementById('egzozKutu');
         const egzozDurum = document.getElementById('egzozDurum');
         const egzozTarihYazi = document.getElementById('egzozTarihYazi');
 
         if(ayarlar.egzoz) {
             const egzozTarihi = new Date(ayarlar.egzoz);
+            egzozTarihi.setFullYear(egzozTarihi.getFullYear() + 1); // 1 Yıl ekle
+
             const farkMs = egzozTarihi - bugun;
             const kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
 
@@ -513,7 +513,7 @@
             }
 
             if(sonKm > 0) {
-                const hedefKm = ayarlar.yagKm + 10000;
+                const hedefKm = ayarlar.yagKm + 10000; // 10.000 km ömür
                 const kalanKm = hedefKm - sonKm; 
                 
                 yagKutu.className = 'uyari-kutu';
@@ -810,11 +810,10 @@
         });
     }
     
-    // Sayfa yüklendiğinde verilerin gelmesini bekle ve uyarıları başlat
     window.onload = function() {
         setTimeout(() => {
             aracAyarlariniBuluttanYukle();
-        }, 1000); // Veritabanı bağlantısı kurulana kadar 1 saniye bekle
+        }, 1000); 
     };
 </script>
 </body>
