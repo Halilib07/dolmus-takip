@@ -77,12 +77,7 @@
         .chart-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
         .chart-card h3 { margin-top: 0; margin-bottom: 15px; font-size: 16px; color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 10px; }
         
-        /* Grafik Kapsayıcıları (Sonsuza gitmesini engelleyen sabit yükseklik) */
-        .chart-container-wrapper {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
+        .chart-container-wrapper { position: relative; height: 300px; width: 100%; }
         
         .analiz-tablo { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
         .analiz-tablo th, .analiz-tablo td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
@@ -303,7 +298,7 @@
             </div>
         </div>
 
-        <!-- Grafik Alanı (Sabit Yükseklikler) -->
+        <!-- Grafik Alanı -->
         <div class="chart-grid">
             <div class="chart-card">
                 <h3>📈 Kazanç - Gider Trendi (Günlük)</h3>
@@ -346,14 +341,16 @@
             </div>
         </div>
 
-        <!-- Detaylı Kayıt Tablosu (YUKARI TAŞINDI) -->
+        <!-- Detaylı Kayıt Tablosu -->
         <div class="card">
             <h2>Filtrelenen Kayıtlar (Detaylı)</h2>
             <div class="tablo-kapsayici">
                 <table>
                     <thead>
                         <tr>
-                            <th>Tarih</th>
+                            <th>Sefer Tarihi</th>
+                            <th>İlk Giriş</th> <!-- GERİ EKLENDİ -->
+                            <th>Son Giriş</th> <!-- GERİ EKLENDİ -->
                             <th>Güzergah</th>
                             <th>Hasılat</th>
                             <th>KM</th>
@@ -370,13 +367,13 @@
                         </tr>
                     </thead>
                     <tbody id="tabloListesi">
-                        <tr><td colspan="14" class="loading">Veriler buluttan yükleniyor...</td></tr>
+                        <tr><td colspan="16" class="loading">Veriler buluttan yükleniyor...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Sistem Ayarları (AŞAĞI TAŞINDI) -->
+        <!-- Sistem Ayarları -->
         <div class="card">
             <h2>⚙️ Sistem Ayarları (Araç & Sabit Giderler)</h2>
             <div class="form-grid">
@@ -826,6 +823,8 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${(k.tarih || '').split('-').reverse().join('.')}</td>
+                <td>${tarihSaatFormatla(k.zaman)}</td>          <!-- İLK GİRİŞ GERİ GELDİ -->
+                <td>${tarihSaatFormatla(k.kayitSaati)}</td>     <!-- SON GİRİŞ GERİ GELDİ -->
                 <td><span style="background:#ecf0f1; padding:3px 8px; border-radius:4px; font-weight:bold;">${k.guzergah || '-'}</span></td>
                 <td>${(k.hasilat||0).toLocaleString('tr-TR')} TL</td>
                 <td>${(k.km||0).toLocaleString('tr-TR')}</td>
