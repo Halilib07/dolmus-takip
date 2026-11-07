@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCI0dEOvivjT2E0Dd1wpSfOaS6_0u4lzOI",
@@ -29,6 +29,9 @@
         window.doc = doc;
         window.query = query;
         window.orderBy = orderBy;
+        window.where = where;
+        window.getDocs = getDocs;
+        window.writeBatch = writeBatch;
         window.firebaseHazir = true;
         
         window.dinleVeriler();
@@ -86,6 +89,9 @@
 
         .islem-btn { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; color: white; }
         .btn-duzenle { background: var(--warning); }
+        
+        /* Yeni Dağıtım Butonu */
+        .btn-dagit { background: #8e44ad; width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
     </style>
 </head>
 <body>
@@ -186,10 +192,9 @@
             <h2>Sabit Giderler (Fişteki Kalemler)</h2>
             <div class="form-grid">
                 
-                <!-- Yönetici Paneline Eklenen Tarih -->
                 <div class="input-grup">
                     <input type="date" id="sabitGiderTarih">
-                    <label for="sabitGiderTarih">Sabit Gider Tarihi (Ay/Yıl)</label>
+                    <label for="sabitGiderTarih">Fişin Ait Olduğu Tarih</label>
                 </div>
 
                 <div class="input-grup">
@@ -226,7 +231,6 @@
                     <label for="muhasebe">Muhasebe (TL)</label>
                 </div>
                 
-                <!-- Yeni Eklenen Diğer Giderler -->
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="sabitDigerGider" class="para" placeholder="" onchange="guncelleRapor()">
                     <label for="sabitDigerGider">Diğer Giderler (Trafik Cezası vs.) TL</label>
@@ -236,6 +240,9 @@
                     <span>Toplam Aylık Sabit Gider:</span>
                     <strong id="toplamAylikSabit">0 TL</strong>
                 </div>
+
+                <!-- Yeni Dağıtım Butonu -->
+                <button class="btn-dagit" onclick="sabitGiderleriDagit()">Sabit Giderleri O Ayın Günlerine Dağıt</button>
             </div>
         </div>
 
@@ -263,13 +270,14 @@
                             <th>Parça</th>
                             <th>Diğer</th>
                             <th>Şoför (TL)</th>
-                            <th>Günlük Gider</th>
+                            <th>Günlük Sabit Gid.</th> <!-- Yeni Sütun -->
+                            <th>Toplam Günlük Gider</th>
                             <th>Net</th>
                             <th>İşlem</th>
                         </tr>
                     </thead>
                     <tbody id="tabloListesi">
-                        <tr><td colspan="14" class="loading">Veriler buluttan yükleniyor...</td></tr>
+                        <tr><td colspan="15" class="loading">Veriler buluttan yükleniyor...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -359,19 +367,12 @@
     }
 
     async function kaydet() {
-        if(!window.firebaseHazir) {
-            alert("Bulut sistemi henüz yüklenmedi, lütfen 1-2 saniye sonra tekrar deneyin.");
-            return;
-        }
-
+        // ... (Önceki kodlarla aynı, değişiklik yok) ...
+        if(!window.firebaseHazir) { alert("Bulut sistemi henüz yüklenmedi..."); return; }
         const secilenTarih = document.getElementById('tarih').value;
-        if(!secilenTarih) {
-            alert("Lütfen bir tarih seçin!");
-            return;
-        }
+        if(!secilenTarih) { alert("Lütfen bir tarih seçin!"); return; }
 
         const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
-
         if (ayniTarihliKayit) {
             const onay = confirm("⚠️ DİKKAT: " + secilenTarih.split('-').reverse().join('.') + " tarihinde zaten bir kayıt var!\n\nSadece DOLDURDUĞUNUZ kutular güncellenecek, BOŞ bıraktığınız kutular eski haliyle kalacaktır. Onaylıyor musunuz?");
             if (!onay) return; 
@@ -399,7 +400,9 @@
         let kayit = {
             tarih: secilenTarih,
             zaman: ilkGirisZamani,
-            kayitSaati: sonGirisZamani
+            kayitSaati: sonGirisZamani,
+            // Eğer eski kayıtta dağıtılmış gider varsa onu koru, yoksa 0 yap
+            sabitGiderPayi: ayniTarihliKayit ? (ayniTarihliKayit.sabitGiderPayi || 0) : 0
         };
 
         const alanlar = ['hasilat', 'km', 'mazotTL', 'siviBakim', 'tamir', 'parca', 'diger', 'gunlukSoforUcret'];
@@ -414,13 +417,12 @@
             }
         });
 
-        kayit.toplamGider = kayit.mazotTL + kayit.siviBakim + kayit.tamir + kayit.parca + kayit.diger + kayit.gunlukSoforUcret;
+        kayit.toplamGider = kayit.mazotTL + kayit.siviBakim + kayit.tamir + kayit.parca + kayit.diger + kayit.gunlukSoforUcret + kayit.sabitGiderPayi;
 
         try {
             if (ayniTarihliKayit) {
                 await window.deleteDoc(window.doc(window.db, "kayitlar", ayniTarihliKayit.id));
             }
-
             await window.addDoc(window.collection(window.db, "kayitlar"), kayit);
             
             mesajEl.style.color = "green";
@@ -447,11 +449,7 @@
     }
 
     window.dinleVeriler = function() {
-        if(!window.firebaseHazir) {
-            setTimeout(window.dinleVeriler, 500);
-            return;
-        }
-
+        if(!window.firebaseHazir) { setTimeout(window.dinleVeriler, 500); return; }
         const q = window.query(window.collection(window.db, "kayitlar"), window.orderBy("zaman", "desc"));
         
         window.onSnapshot(q, (snapshot) => {
@@ -459,18 +457,97 @@
             snapshot.forEach((doc) => {
                 kayitlar.push({ id: doc.id, ...doc.data() });
             });
-            
             if(document.getElementById('rapor').classList.contains('active')){
                 guncelleRapor();
             }
         });
     }
 
+    // --- SABİT GİDERLERİ DAĞITMA FONKSİYONU ---
+    async function sabitGiderleriDagit() {
+        if(!window.firebaseHazir) { alert("Sistem hazır değil."); return; }
+
+        const secilenTarihStr = document.getElementById('sabitGiderTarih').value;
+        if(!secilenTarihStr) {
+            alert("Lütfen fişin ait olduğu tarihi seçin!");
+            return;
+        }
+
+        // Yönetici panelindeki giderleri topla
+        const pesinVergi = formatiCoz(document.getElementById('pesinVergi').value);
+        const stopaj = formatiCoz(document.getElementById('stopaj').value);
+        const kdv = formatiCoz(document.getElementById('kdv').value);
+        const gelirVergisi = formatiCoz(document.getElementById('gelirVergisi').value);
+        const bagKur = formatiCoz(document.getElementById('bagKur').value);
+        const sigorta = formatiCoz(document.getElementById('sigorta').value);
+        const matbaaNoter = formatiCoz(document.getElementById('matbaaNoter').value);
+        const muhasebe = formatiCoz(document.getElementById('muhasebe').value);
+        const sabitDigerGider = formatiCoz(document.getElementById('sabitDigerGider').value);
+
+        const toplamDagitilacakTutar = pesinVergi + stopaj + kdv + gelirVergisi + bagKur + sigorta + matbaaNoter + muhasebe + sabitDigerGider;
+
+        if(toplamDagitilacakTutar <= 0) {
+            alert("Dağıtılacak bir gider tutarı girmediniz!");
+            return;
+        }
+
+        // Seçilen tarihin Yıl ve Ayını al (örn: 2026-10)
+        const secilenTarihObj = new Date(secilenTarihStr);
+        const secilenYil = secilenTarihObj.getFullYear();
+        const secilenAy = secilenTarihObj.getMonth(); // 0-11 arası
+
+        // O ay içinde şoförün veri girdiği günleri bul
+        const oAyinKayitlari = kayitlar.filter(k => {
+            if(!k.tarih) return false;
+            const kTarihObj = new Date(k.tarih);
+            return kTarihObj.getFullYear() === secilenYil && kTarihObj.getMonth() === secilenAy;
+        });
+
+        if(oAyinKayitlari.length === 0) {
+            alert("Seçilen tarihin ait olduğu ayda (örn: Ekim 2026) şoförün girdiği hiçbir veri bulunamadı! Önce şoförün o ay için veri girmesi gerekiyor.");
+            return;
+        }
+
+        const gunSayisi = oAyinKayitlari.length;
+        const gunlukPay = toplamDagitilacakTutar / gunSayisi;
+
+        const onay = confirm(`Toplam ${toplamDagitilacakTutar.toLocaleString('tr-TR')} TL gider, seçilen ay içindeki ${gunSayisi} güne bölünecek.\n\nGünlük pay: ${gunlukPay.toLocaleString('tr-TR')} TL\n\nBu işlemi onaylıyor musunuz? (Daha önce dağıtım yapıldıysa üzerine yazılır)`);
+        
+        if(!onay) return;
+
+        const batch = window.writeBatch(window.db);
+        
+        oAyinKayitlari.forEach(kayit => {
+            // Her bir günün kaydındaki "sabitGiderPayi" alanını güncelle
+            // ve toplam gideri yeniden hesapla
+            const yeniSabitPay = gunlukPay;
+            
+            // Eski toplam giderden eski sabit payı çıkar, yenisini ekle
+            const eskiSabitPay = kayit.sabitGiderPayi || 0;
+            const yeniToplamGider = (kayit.toplamGider - eskiSabitPay) + yeniSabitPay;
+
+            const kayitRef = window.doc(window.db, "kayitlar", kayit.id);
+            batch.update(kayitRef, {
+                sabitGiderPayi: yeniSabitPay,
+                toplamGider: yeniToplamGider
+            });
+        });
+
+        try {
+            await batch.commit();
+            alert(`✅ Başarılı! ${toplamDagitilacakTutar.toLocaleString('tr-TR')} TL gider, ${gunSayisi} güne bölünerek her güne ${gunlukPay.toLocaleString('tr-TR')} TL olarak eklendi.`);
+            guncelleRapor();
+        } catch(e) {
+            console.error(e);
+            alert("Dağıtım sırasında hata oluştu!");
+        }
+    }
+
     function guncelleRapor() {
         const tbody = document.getElementById('tabloListesi');
         tbody.innerHTML = '';
         
-        let toplamHasilat = 0, toplamMazot = 0, toplamSivi = 0, toplamTamir = 0, toplamParca = 0, toplamDiger = 0, toplamKM = 0, toplamSoforGunluk = 0;
+        let toplamHasilat = 0, toplamMazot = 0, toplamSivi = 0, toplamTamir = 0, toplamParca = 0, toplamDiger = 0, toplamKM = 0, toplamSoforGunluk = 0, toplamSabitGiderPayi = 0;
 
         kayitlar.forEach(k => {
             toplamHasilat += k.hasilat || 0;
@@ -481,6 +558,7 @@
             toplamDiger += k.diger || 0;
             toplamKM += k.km || 0;
             toplamSoforGunluk += k.gunlukSoforUcret || 0;
+            toplamSabitGiderPayi += k.sabitGiderPayi || 0;
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -495,6 +573,7 @@
                 <td>${k.parca.toLocaleString('tr-TR')} TL</td>
                 <td>${k.diger.toLocaleString('tr-TR')} TL</td>
                 <td>${(k.gunlukSoforUcret || 0).toLocaleString('tr-TR')} TL</td>
+                <td style="color: #8e44ad; font-weight:bold;">${(k.sabitGiderPayi || 0).toLocaleString('tr-TR')} TL</td>
                 <td class="text-danger">${k.toplamGider.toLocaleString('tr-TR')} TL</td>
                 <td class="${k.hasilat - k.toplamGider >= 0 ? 'text-success' : 'text-danger'}">
                     ${(k.hasilat - k.toplamGider).toLocaleString('tr-TR')} TL
@@ -507,7 +586,7 @@
             tbody.appendChild(tr);
         });
 
-        // Yönetici panelindeki giderler
+        // Yönetici panelindeki toplam (bilgi amaçlı, artık ana toplama direkt etki etmiyor, günlere dağıtıldı)
         const pesinVergi = formatiCoz(document.getElementById('pesinVergi').value);
         const stopaj = formatiCoz(document.getElementById('stopaj').value);
         const kdv = formatiCoz(document.getElementById('kdv').value);
@@ -517,19 +596,11 @@
         const matbaaNoter = formatiCoz(document.getElementById('matbaaNoter').value);
         const muhasebe = formatiCoz(document.getElementById('muhasebe').value);
         const sabitDigerGider = formatiCoz(document.getElementById('sabitDigerGider').value);
-
         const toplamAylikSabit = pesinVergi + stopaj + kdv + gelirVergisi + bagKur + sigorta + matbaaNoter + muhasebe + sabitDigerGider;
         document.getElementById('toplamAylikSabit').innerText = toplamAylikSabit.toLocaleString('tr-TR') + " TL";
 
-        const gunSayisi = kayitlar.length || 1;
-        
-        // Şoför günlük ücretleri zaten toplamSoforGunluk içinde
-        const genelToplamSofor = toplamSoforGunluk;
-
-        const sabitGiderGunluk = toplamAylikSabit / 30;
-        const toplamMuhasebe = sabitGiderGunluk * gunSayisi;
-
-        const genelToplamGider = toplamMazot + toplamSivi + toplamTamir + toplamParca + toplamDiger + genelToplamSofor + toplamMuhasebe;
+        // Toplam Kazanç, Gider ve Net hesaplamaları (Artık dağıtılmış sabit giderler toplam gidere dahil)
+        const genelToplamGider = toplamMazot + toplamSivi + toplamTamir + toplamParca + toplamDiger + toplamSoforGunluk + toplamSabitGiderPayi;
         const netKar = toplamHasilat - genelToplamGider;
         const kmBasiMazot = toplamKM > 0 ? (toplamMazot / toplamKM).toFixed(2) : 0;
 
@@ -542,7 +613,8 @@
         
         document.getElementById('kmBasiMazot').innerText = kmBasiMazot + " TL/KM";
 
-        cizGrafik(toplamMazot, toplamSivi, toplamTamir, toplamParca, toplamDiger, genelToplamSofor, toplamMuhasebe);
+        // Grafik verileri
+        cizGrafik(toplamMazot, toplamSivi, toplamTamir, toplamParca, toplamDiger, toplamSoforGunluk, toplamSabitGiderPayi);
     }
 
     function duzenle(id) {
