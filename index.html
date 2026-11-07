@@ -78,6 +78,50 @@
         .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
 
         .cikis-btn { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; float: right; margin-bottom: 10px; font-weight: bold; }
+
+        /* Yeni Şık Kutu Tasarımı (Yüzen Etiket) */
+        .input-grup {
+            position: relative;
+            margin-top: 10px;
+        }
+        
+        .input-grup input {
+            width: 100%;
+            padding: 20px 15px 10px 15px; /* Üstten boşluk bırakıyoruz ki yazı sığsın */
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .input-grup input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1);
+        }
+
+        .input-grup label {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            color: #7f8c8d;
+            font-size: 14px;
+            font-weight: normal;
+            pointer-events: none;
+            transition: all 0.2s ease;
+            margin: 0;
+        }
+
+        /* Kutuya tıklanınca veya içi doluyken yazıyı yukarı kaydır */
+        .input-grup input:focus + label,
+        .input-grup input:not(:placeholder-shown) + label {
+            top: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -171,17 +215,19 @@
         <div class="card">
             <h2>Sabit Giderler & Şoför</h2>
             <div class="form-grid">
-                <div>
-                    <label>Günlük Şoför Ücreti (TL)</label>
-                    <!-- value="" yapılarak içi boşaltıldı -->
-                    <input type="number" id="soforUcret" value="" placeholder="Örn: 1200" onchange="guncelleRapor()">
+                
+                <!-- Günlük Şoför Ücreti -->
+                <div class="input-grup">
+                    <input type="number" id="soforUcret" placeholder="" onchange="guncelleRapor()">
+                    <label for="soforUcret">Günlük Şoför Ücreti (TL)</label>
                 </div>
-                <div>
-                    <label>Aylık Muhasebe/Sigorta Gideri (TL)</label>
-                    <!-- value="" yapılarak içi boşaltıldı -->
-                    <input type="number" id="muhasebeGider" value="" placeholder="Örn: 13000" onchange="guncelleRapor()">
-                    <small style="color:gray">(Fişteki toplam: 12.993 TL)</small>
+
+                <!-- Aylık Muhasebe Gideri -->
+                <div class="input-grup">
+                    <input type="number" id="muhasebeGider" placeholder="" onchange="guncelleRapor()">
+                    <label for="muhasebeGider">Aylık Muhasebe/Sigorta (Fişteki Toplam: 12.993 TL)</label>
                 </div>
+
             </div>
         </div>
 
