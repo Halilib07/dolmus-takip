@@ -43,9 +43,8 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
         .container { max-width: 1200px; margin: auto; }
         
-        /* Başlık ve Çıkış Butonu */
         .header-alani { position: relative; text-align: center; margin-bottom: 20px; }
-        .header-alani h1 { color: var(--primary); margin: 0; padding: 0 60px; font-size: 24px; } /* Sağdan soldan boşluk bırak */
+        .header-alani h1 { color: var(--primary); margin: 0; padding: 0 60px; font-size: 24px; } 
         .cikis-btn { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; position: absolute; right: 0; top: 0; }
 
         #loginEkrani { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
@@ -83,7 +82,6 @@
         .chart-container { width: 100%; max-width: 400px; margin: 0 auto; }
         .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
 
-        /* Şık Yüzen Etiketler */
         .input-grup { position: relative; margin-top: 10px; }
         .input-grup input { width: 100%; padding: 22px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
         .input-grup input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
@@ -98,12 +96,11 @@
         .btn-duzenle { background: var(--warning); }
         .btn-dagit { background: #8e44ad; width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
 
-        /* Uyarı Panosu */
         .uyari-panosu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 90px; }
+        .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 100px; }
         .uyari-kutu h4 { margin: 0 0 5px 0; font-size: 13px; opacity: 0.9; }
         .uyari-kutu p { margin: 0; font-size: 18px; font-weight: bold; }
-        .uyari-alt-yazi { margin-top: 5px; font-size: 11px; font-weight: normal; opacity: 0.85; }
+        .uyari-alt-yazi { margin-top: 8px; font-size: 12px; font-weight: normal; opacity: 0.9; }
         
         .durum-yesil { background-color: var(--success); }
         .durum-sari { background-color: var(--warning); }
@@ -114,37 +111,46 @@
         @media (max-width: 768px) {
             body { padding: 10px; }
             
-            /* Başlık ve Çıkış Butonu */
             .header-alani { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 15px; }
             .header-alani h1 { font-size: 20px; padding: 0; }
             .cikis-btn { position: relative; right: auto; top: auto; padding: 6px 12px; font-size: 14px; }
 
-            /* Sekmeler */
             .tab-btn { padding: 12px 5px; font-size: 14px; }
 
-            /* Uyarı Panosu - Telefonda Alt Alta */
+            /* Uyarı Panosu - Telefonda Dikey (Alt Alta) */
             .uyari-panosu { grid-template-columns: 1fr; gap: 10px; }
-            .uyari-kutu { min-height: auto; padding: 12px; flex-direction: row; justify-content: space-between; align-items: center; text-align: left; }
+            
+            /* Uyarı Kutuları Telefonda Daha Şık */
+            .uyari-kutu { 
+                min-height: auto; 
+                padding: 12px 15px; 
+                flex-direction: row; 
+                justify-content: space-between; 
+                align-items: center; 
+                text-align: left; 
+            }
             .uyari-kutu h4 { margin: 0; font-size: 14px; }
-            .uyari-kutu p { font-size: 16px; margin: 0; }
-            .uyari-alt-yazi { display: none; /* Mobilde yer kaplamasın diye gizledik veya alt satıra alabiliriz */ }
+            .uyari-kutu p { font-size: 18px; margin: 0; }
+            
+            /* Mobilde Tarih yazısını gizlemiyoruz, altına alıyoruz */
+            .uyari-alt-yazi { 
+                display: block; 
+                font-size: 11px; 
+                margin-top: 2px; 
+            }
 
-            /* Form Izgarası - Telefonda Tek Sütun */
             .form-grid { grid-template-columns: 1fr; gap: 10px; }
             .form-grid .full { grid-column: span 1; }
             
-            /* Giriş Kutuları */
             .input-grup input { padding: 18px 12px 8px 12px; font-size: 15px; }
             .input-grup label { left: 12px; top: 14px; font-size: 13px; }
             .input-grup input:focus + label, .input-grup input:not(:placeholder-shown) + label { top: 3px; font-size: 10px; }
 
-            /* İstatistik Kutuları */
             .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
             .stat-box { padding: 10px; }
             .stat-box p { font-size: 16px; }
             .stat-box h3 { font-size: 12px; }
 
-            /* Tablo ve Kartlar */
             .card { padding: 15px; }
             .toplam-sabit { flex-direction: column; align-items: flex-start; gap: 5px; }
             .toplam-sabit strong { font-size: 18px; }
