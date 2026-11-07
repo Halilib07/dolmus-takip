@@ -266,7 +266,7 @@
 <script>
     let kayitlar = [];
     let grafik = null;
-    let duzenlenenId = null; // Düzenleme modunda olup olmadığımızı tutar
+    let duzenlenenId = null; 
 
     document.getElementById('tarih').valueAsDate = new Date();
 
@@ -275,9 +275,9 @@
 
     // --- FORMATLAMA FONKSİYONLARI ---
     function sayiyiFormatla(deger) {
-        if (!deger) return "";
+        if (!deger) return "0"; // Eğer değer yoksa 0 yaz
         let sadeceRakam = deger.toString().replace(/\D/g, '');
-        if (sadeceRakam === "") return "";
+        if (sadeceRakam === "") return "0"; // Sadece rakam yoksa 0 yaz
         return Number(sadeceRakam).toLocaleString('tr-TR');
     }
 
@@ -291,6 +291,11 @@
         input.addEventListener('input', function(e) {
             let imlecPozisyonu = this.selectionStart;
             let eskiDeger = this.value;
+            // Eğer kullanıcı tüm kutuyu silerse, boş bırakmasına izin ver (0 yazdırma)
+            if(this.value === "") {
+                this.value = "";
+                return;
+            }
             this.value = sayiyiFormatla(this.value);
             let yeniDeger = this.value;
             let fark = yeniDeger.length - eskiDeger.length;
@@ -298,8 +303,12 @@
                 this.setSelectionRange(imlecPozisyonu + fark, imlecPozisyonu + fark);
             }
         });
+        
+        // Kutudan çıkıldığında eğer boşsa 0 yaz
         input.addEventListener('blur', function() {
-            if (this.value === "0") this.value = "";
+            if (this.value === "") {
+                this.value = "0";
+            }
         });
     });
 
@@ -338,12 +347,11 @@
         if(tabId === 'rapor') { guncelleRapor(); }
     }
 
-    // Düzenleme Fonksiyonu
     function duzenle(id) {
         const kayit = kayitlar.find(k => k.id === id);
         if(!kayit) return;
 
-        // Formu doldur
+        // Formu doldururken sayıları formatla, boş/0 olanları "0" olarak göster
         document.getElementById('tarih').value = kayit.tarih;
         document.getElementById('hasilat').value = sayiyiFormatla(kayit.hasilat);
         document.getElementById('km').value = sayiyiFormatla(kayit.km);
@@ -352,15 +360,13 @@
         document.getElementById('tamir').value = sayiyiFormatla(kayit.tamir);
         document.getElementById('parca').value = sayiyiFormatla(kayit.parca);
         document.getElementById('diger').value = sayiyiFormatla(kayit.diger);
-        document.getElementById('gunlukSoforUcret').value = sayiyiFormatla(kayit.gunlukSoforUcret || 0);
+        document.getElementById('gunlukSoforUcret').value = sayiyiFormatla(kayit.gunlukSoforUcret);
 
-        // Modu değiştir
         duzenlenenId = id;
         document.getElementById('formBaslik').innerText = "Günü Düzenle (ID: " + id.substring(0,5) + "...)";
         document.getElementById('kaydetBtn').innerText = "Değişiklikleri Güncelle";
         document.getElementById('kaydetBtn').style.background = "var(--warning)";
 
-        // Giriş sekmesine dön
         switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
     }
 
@@ -381,9 +387,8 @@
             const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
             if (ayniTarihliKayit) {
                 const onay = confirm("⚠️ DİKKAT: " + secilenTarih + " tarihinde zaten bir kayıt var!\n\nEski kaydın üzerine yazmak (güncellemek) istiyor musunuz?");
-                if (!onay) return; // Kullanıcı hayır derse işlemi iptal et
+                if (!onay) return;
                 
-                // Kullanıcı evet dediyse, eski kaydı sil
                 try {
                     await window.deleteDoc(window.doc(window.db, "kayitlar", ayniTarihliKayit.id));
                 } catch(e) {
@@ -414,7 +419,6 @@
         kayit.toplamGider = kayit.mazotTL + kayit.siviBakim + kayit.tamir + kayit.parca + kayit.diger + kayit.gunlukSoforUcret;
 
         try {
-            // Düzenleme modundaysak önce eski kaydı sil
             if (duzenlenenId !== null) {
                 await window.deleteDoc(window.doc(window.db, "kayitlar", duzenlenenId));
             }
@@ -551,7 +555,6 @@
             try {
                 await window.deleteDoc(window.doc(window.db, "kayitlar", id));
                 if(duzenlenenId === id) {
-                    // Eğer silinen kayıt, o an düzenlenen kayıt ise formu sıfırla
                     duzenlenenId = null;
                     document.getElementById('formBaslik').innerText = "Günlük Sefer ve Gider Ekle";
                     document.getElementById('kaydetBtn').innerText = "Günü Kaydet (Buluta Gönder)";
