@@ -20,11 +20,9 @@
             appId: "1:122539009239:web:20fff0be54bdab3ad3bc92"
         };
 
-        // Firebase'i Başlat
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // HTML elementlerini global yapalım ki Firebase içinden erişebilelim
         window.db = db;
         window.collection = collection;
         window.addDoc = addDoc;
@@ -35,7 +33,6 @@
         window.orderBy = orderBy;
         window.firebaseHazir = true;
         
-        // Sayfa yüklendiğinde verileri dinle
         window.dinleVeriler();
     </script>
     <style>
@@ -43,6 +40,15 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
         .container { max-width: 1000px; margin: auto; }
         
+        /* Giriş Ekranı Stilleri */
+        #loginEkrani { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
+        #loginEkrani h2 { color: var(--primary); margin-bottom: 20px; }
+        #loginEkrani input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+        #loginEkrani button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        #loginHata { color: var(--danger); font-weight: bold; margin-top: 10px; display: none; }
+
+        /* Uygulama İçi Stiller */
+        #uygulamaEkrani { display: none; }
         .tabs { display: flex; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .tab-btn { flex: 1; padding: 15px; border: none; background: white; cursor: pointer; font-size: 16px; font-weight: bold; color: #7f8c8d; transition: 0.3s; }
         .tab-btn.active { background: var(--primary); color: white; }
@@ -51,7 +57,7 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .form-grid .full { grid-column: span 2; }
         label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+        input[type="number"], input[type="date"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
         button.btn-primary { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
         
         .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
@@ -70,18 +76,31 @@
 
         .chart-container { width: 100%; max-width: 400px; margin: 0 auto; }
         .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
+
+        .cikis-btn { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; float: right; margin-bottom: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<!-- GİRİŞ EKRANI -->
+<div id="loginEkrani">
+    <h2>🚐 Sisteme Giriş</h2>
+    <input type="password" id="sifre" placeholder="Lütfen şifrenizi girin">
+    <button onclick="girisYap()">Giriş Yap</button>
+    <div id="loginHata">Hatalı şifre girdiniz!</div>
+</div>
+
+<!-- UYGULAMA EKRANI -->
+<div id="uygulamaEkrani" class="container">
+    <button class="cikis-btn" onclick="cikisYap()">Güvenli Çıkış</button>
     <h1 style="text-align:center; color:var(--primary)">🚐 Dolmuş İşletme Yönetim Paneli</h1>
     
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('giris')">📱 Günlük Giriş (Şoför)</button>
-        <button class="tab-btn" onclick="switchTab('rapor')">💻 Raporlar (Yönetici)</button>
+    <div class="tabs" id="sekmeler">
+        <button class="tab-btn active" onclick="switchTab('giris', this)">📱 Günlük Giriş (Şoför)</button>
+        <button class="tab-btn" id="raporTabBtn" onclick="switchTab('rapor', this)">💻 Raporlar (Yönetici)</button>
     </div>
 
+    <!-- GÜNLÜK GİRİŞ SEKMESİ -->
     <div id="giris" class="tab-content active">
         <div class="card">
             <h2>Günlük Sefer ve Gider Ekle</h2>
@@ -128,6 +147,7 @@
         </div>
     </div>
 
+    <!-- RAPORLAR SEKMESİ -->
     <div id="rapor" class="tab-content">
         <div class="stats-row">
             <div class="stat-box">
@@ -196,11 +216,50 @@
 
     document.getElementById('tarih').valueAsDate = new Date();
 
-    function switchTab(tabId) {
+    // ŞİFRELER BURADA BELİRLENİR (Bunları kendinize göre değiştirebilirsiniz)
+    const YONETICI_SIFRESI = "admin123"; // Yönetici Şifresi
+    const SOFOR_SIFRESI = "sofor123";    // Şoför Şifresi
+
+    function girisYap() {
+        const girilenSifre = document.getElementById('sifre').value;
+        const hataEl = document.getElementById('loginHata');
+
+        if (girilenSifre === YONETICI_SIFRESI) {
+            // Yönetici girişi: Her şey açık
+            document.getElementById('loginEkrani').style.display = 'none';
+            document.getElementById('uygulamaEkrani').style.display = 'block';
+            document.getElementById('raporTabBtn').style.display = 'block'; // Rapor sekmesini göster
+            hataEl.style.display = 'none';
+            
+            // Varsayılan olarak giriş sekmesi açılsın
+            switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
+
+        } else if (girilenSifre === SOFOR_SIFRESI) {
+            // Şoför girişi: Sadece giriş ekranı açık
+            document.getElementById('loginEkrani').style.display = 'none';
+            document.getElementById('uygulamaEkrani').style.display = 'block';
+            document.getElementById('raporTabBtn').style.display = 'none'; // Rapor sekmesini gizle
+            hataEl.style.display = 'none';
+
+            switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
+
+        } else {
+            // Hatalı şifre
+            hataEl.style.display = 'block';
+        }
+    }
+
+    function cikisYap() {
+        // Sayfayı yenileyerek her şeyi sıfırla
+        location.reload();
+    }
+
+    function switchTab(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+        
         document.getElementById(tabId).classList.add('active');
-        event.target.classList.add('active');
+        if(btnElement) btnElement.classList.add('active');
         
         if(tabId === 'rapor') { guncelleRapor(); }
     }
@@ -237,7 +296,6 @@
             mesajEl.style.color = "green";
             mesajEl.innerText = "✅ Başarıyla buluta kaydedildi!";
             
-            // Formu Temizle
             document.getElementById('hasilat').value = '';
             document.getElementById('km').value = '';
             document.getElementById('mazotLitre').value = '';
@@ -258,7 +316,6 @@
         }
     }
 
-    // Buluttan veri dinleme fonksiyonu
     window.dinleVeriler = function() {
         if(!window.firebaseHazir) {
             setTimeout(window.dinleVeriler, 500);
@@ -273,7 +330,6 @@
                 kayitlar.push({ id: doc.id, ...doc.data() });
             });
             
-            // Eğer rapor sekmesi açıksa hemen güncelle
             if(document.getElementById('rapor').classList.contains('active')){
                 guncelleRapor();
             }
