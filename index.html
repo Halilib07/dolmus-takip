@@ -37,16 +37,18 @@
         window.dinleVeriler();
     </script>
     <style>
-        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; }
+        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; --info: #3498db; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
         .container { max-width: 1200px; margin: auto; }
         
+        /* Giriş Ekranı */
         #loginEkrani { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; }
         #loginEkrani h2 { color: var(--primary); margin-bottom: 20px; }
         #loginEkrani input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
         #loginEkrani button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
         #loginHata { color: var(--danger); font-weight: bold; margin-top: 10px; display: none; }
 
+        /* Ana Ekran */
         #uygulamaEkrani { display: none; }
         .tabs { display: flex; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .tab-btn { flex: 1; padding: 15px; border: none; background: white; cursor: pointer; font-size: 16px; font-weight: bold; color: #7f8c8d; transition: 0.3s; }
@@ -57,11 +59,13 @@
         .form-grid .full { grid-column: span 2; }
         button.btn-primary { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
         
+        /* İstatistik Kutuları */
         .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .stat-box h3 { margin: 0 0 5px; font-size: 14px; color: #7f8c8d; }
         .stat-box p { margin: 0; font-size: 20px; font-weight: bold; color: var(--primary); }
         
+        /* Tablo */
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; min-width: 1200px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
@@ -77,6 +81,7 @@
         .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
         .cikis-btn { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; float: right; margin-bottom: 10px; font-weight: bold; }
 
+        /* Şık Yüzen Etiketler */
         .input-grup { position: relative; margin-top: 10px; }
         .input-grup input { width: 100%; padding: 20px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
         .input-grup input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
@@ -89,9 +94,18 @@
 
         .islem-btn { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; color: white; }
         .btn-duzenle { background: var(--warning); }
-        
-        /* Yeni Dağıtım Butonu */
         .btn-dagit { background: #8e44ad; width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
+
+        /* --- ARAÇ UYARI PANOSU (DASHBOARD) --- */
+        .uyari-panosu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; }
+        .uyari-kutu h4 { margin: 0 0 5px 0; font-size: 14px; opacity: 0.9; }
+        .uyari-kutu p { margin: 0; font-size: 20px; font-weight: bold; }
+        
+        .durum-yesil { background-color: var(--success); }
+        .durum-sari { background-color: var(--warning); }
+        .durum-kirmizi { background-color: var(--danger); }
+        .durum-gri { background-color: #95a5a6; }
     </style>
 </head>
 <body>
@@ -112,7 +126,25 @@
         <button class="tab-btn" id="raporTabBtn" onclick="switchTab('rapor', this)">💻 Raporlar (Yönetici)</button>
     </div>
 
+    <!-- ŞOFÖR EKRANI -->
     <div id="giris" class="tab-content active">
+        
+        <!-- YENİ: ARAÇ UYARI PANOSU -->
+        <div class="uyari-panosu" id="uyariPanosu">
+            <div class="uyari-kutu durum-gri" id="muayeneKutu">
+                <h4>🚗 Araç Muayenesi</h4>
+                <p id="muayeneDurum">Tarih Girilmedi</p>
+            </div>
+            <div class="uyari-kutu durum-gri" id="egzozKutu">
+                <h4>💨 Egzoz Emisyon</h4>
+                <p id="egzozDurum">Tarih Girilmedi</p>
+            </div>
+            <div class="uyari-kutu durum-gri" id="yagKutu">
+                <h4>🛢️ Yağ Değişimi</h4>
+                <p id="yagDurum">KM Girilmedi</p>
+            </div>
+        </div>
+
         <div class="card">
             <h2 id="formBaslik">Günlük Sefer ve Gider Ekle</h2>
             <div class="form-grid">
@@ -129,7 +161,7 @@
 
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="km" class="para" placeholder="">
-                    <label for="km">Güncel KM</label>
+                    <label for="km">Güncel KM (Araç KM'si)</label>
                 </div>
 
                 <div class="input-grup">
@@ -168,6 +200,7 @@
         </div>
     </div>
 
+    <!-- YÖNETİCİ EKRANI -->
     <div id="rapor" class="tab-content">
         <div class="stats-row">
             <div class="stat-box">
@@ -188,20 +221,37 @@
             </div>
         </div>
 
+        <!-- YENİ: ARAÇ TAKİP AYARLARI -->
+        <div class="card">
+            <h2>🚗 Araç Takip Ayarları (Şoför Ekranına Yansır)</h2>
+            <div class="form-grid">
+                <div class="input-grup">
+                    <input type="date" id="ayarMuayeneTarihi" onchange="aracAyarlariniKaydet()">
+                    <label for="ayarMuayeneTarihi">Araç Muayene Tarihi</label>
+                </div>
+                <div class="input-grup">
+                    <input type="date" id="ayarEgzozTarihi" onchange="aracAyarlariniKaydet()">
+                    <label for="ayarEgzozTarihi">Egzoz Emisyon Tarihi</label>
+                </div>
+                <div class="input-grup full">
+                    <input type="text" inputmode="numeric" id="ayarYagKm" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
+                    <label for="ayarYagKm">Son Yağ Değişimi Yapılan KM</label>
+                </div>
+            </div>
+            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Buraya girdiğiniz bilgiler anında kaydedilir ve şoförün ekranındaki uyarı panosuna yansır.</p>
+        </div>
+
         <div class="card">
             <h2>Sabit Giderler (Fişteki Kalemler)</h2>
             <div class="form-grid">
-                
                 <div class="input-grup">
                     <input type="date" id="sabitGiderTarih">
                     <label for="sabitGiderTarih">Fişin Ait Olduğu Tarih</label>
                 </div>
-
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="pesinVergi" class="para" placeholder="" onchange="guncelleRapor()">
                     <label for="pesinVergi">Peşin Vergi (TL)</label>
                 </div>
-                
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="stopaj" class="para" placeholder="" onchange="guncelleRapor()">
                     <label for="stopaj">Stopaj (TL)</label>
@@ -230,18 +280,14 @@
                     <input type="text" inputmode="numeric" id="muhasebe" class="para" placeholder="" onchange="guncelleRapor()">
                     <label for="muhasebe">Muhasebe (TL)</label>
                 </div>
-                
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="sabitDigerGider" class="para" placeholder="" onchange="guncelleRapor()">
                     <label for="sabitDigerGider">Diğer Giderler (Trafik Cezası vs.) TL</label>
                 </div>
-
                 <div class="toplam-sabit">
                     <span>Toplam Aylık Sabit Gider:</span>
                     <strong id="toplamAylikSabit">0 TL</strong>
                 </div>
-
-                <!-- Yeni Dağıtım Butonu -->
                 <button class="btn-dagit" onclick="sabitGiderleriDagit()">Sabit Giderleri O Ayın Günlerine Dağıt</button>
             </div>
         </div>
@@ -270,8 +316,8 @@
                             <th>Parça</th>
                             <th>Diğer</th>
                             <th>Şoför (TL)</th>
-                            <th>Muh. Gider(Gün)</th> <!-- Yeni Sütun -->
-                            <th>Top. Gider(Gün)</th>
+                            <th>Günlük Sabit Gid.</th>
+                            <th>Toplam Günlük Gider</th>
                             <th>Net</th>
                             <th>İşlem</th>
                         </tr>
@@ -364,10 +410,113 @@
         if(btnElement) btnElement.classList.add('active');
         
         if(tabId === 'rapor') { guncelleRapor(); }
+        if(tabId === 'giris') { aracUyarilariniGuncelle(); }
     }
 
+    // --- ARAÇ UYARI SİSTEMİ ---
+    function aracAyarlariniKaydet() {
+        const muayene = document.getElementById('ayarMuayeneTarihi').value;
+        const egzoz = document.getElementById('ayarEgzozTarihi').value;
+        const yagKm = formatiCoz(document.getElementById('ayarYagKm').value);
+
+        const ayarlar = { muayene, egzoz, yagKm };
+        localStorage.setItem('aracAyarlari', JSON.stringify(ayarlar)); // Tarayıcı hafızasına kaydet
+        aracUyarilariniGuncelle(); // Hemen güncelle
+    }
+
+    function aracUyarilariniGuncelle() {
+        // Ayarları hafızadan oku
+        const ayarlarStr = localStorage.getItem('aracAyarlari');
+        if(!ayarlarStr) return;
+        
+        const ayarlar = JSON.parse(ayarlarStr);
+
+        // Form kutularını doldur (Yönetici görüyorsa)
+        if(document.getElementById('ayarMuayeneTarihi').value === "") {
+            document.getElementById('ayarMuayeneTarihi').value = ayarlar.muayene || "";
+            document.getElementById('ayarEgzozTarihi').value = ayarlar.egzoz || "";
+            document.getElementById('ayarYagKm').value = sayiyiFormatla(ayarlar.yagKm) || "";
+        }
+
+        const bugun = new Date();
+        bugun.setHours(0,0,0,0);
+
+        // 1. MUAYENE KONTROLÜ
+        const muayeneKutu = document.getElementById('muayeneKutu');
+        const muayeneDurum = document.getElementById('muayeneDurum');
+        if(ayarlar.muayene) {
+            const muayeneTarihi = new Date(ayarlar.muayene);
+            const farkMs = muayeneTarihi - bugun;
+            const kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
+
+            muayeneKutu.className = 'uyari-kutu'; // Sıfırla
+            if(kalanGun < 0) {
+                muayeneKutu.classList.add('durum-kirmizi');
+                muayeneDurum.innerText = `SÜRESİ GEÇTİ! (${Math.abs(kalanGun)} gün)`;
+            } else if(kalanGun <= 30) {
+                muayeneKutu.classList.add('durum-sari');
+                muayeneDurum.innerText = `${kalanGun} Gün Kaldı!`;
+            } else {
+                muayeneKutu.classList.add('durum-yesil');
+                muayeneDurum.innerText = `${kalanGun} Gün Kaldı`;
+            }
+        }
+
+        // 2. EGZOZ KONTROLÜ
+        const egzozKutu = document.getElementById('egzozKutu');
+        const egzozDurum = document.getElementById('egzozDurum');
+        if(ayarlar.egzoz) {
+            const egzozTarihi = new Date(ayarlar.egzoz);
+            const farkMs = egzozTarihi - bugun;
+            const kalanGun = Math.ceil(farkMs / (1000 * 60 * 60 * 24));
+
+            egzozKutu.className = 'uyari-kutu';
+            if(kalanGun < 0) {
+                egzozKutu.classList.add('durum-kirmizi');
+                egzozDurum.innerText = `SÜRESİ GEÇTİ! (${Math.abs(kalanGun)} gün)`;
+            } else if(kalanGun <= 30) {
+                egzozKutu.classList.add('durum-sari');
+                egzozDurum.innerText = `${kalanGun} Gün Kaldı!`;
+            } else {
+                egzozKutu.classList.add('durum-yesil');
+                egzozDurum.innerText = `${kalanGun} Gün Kaldı`;
+            }
+        }
+
+        // 3. YAĞ DEĞİŞİMİ KONTROLÜ (Son bilinen KM'ye göre)
+        const yagKutu = document.getElementById('yagKutu');
+        const yagDurum = document.getElementById('yagDurum');
+        
+        if(ayarlar.yagKm > 0) {
+            // Son girilen KM'yi bul (kayitlar en son girene göre desc sıralı, ilk eleman en güncel)
+            let sonKm = 0;
+            if(kayitlar.length > 0 && kayitlar[0].km) {
+                sonKm = kayitlar[0].km;
+            }
+
+            if(sonKm > 0) {
+                const kalanKm = (ayarlar.yagKm + 10000) - sonKm; // 10.000 km ömür biçtik (isteğe göre değiştirilebilir)
+                
+                yagKutu.className = 'uyari-kutu';
+                if(kalanKm <= 0) {
+                    yagKutu.classList.add('durum-kirmizi');
+                    yagDurum.innerText = `DEĞİŞİM ZAMANI! (${Math.abs(kalanKm)} km geçti)`;
+                } else if(kalanKm <= 1500) {
+                    yagKutu.classList.add('durum-sari');
+                    yagDurum.innerText = `${kalanKm} KM Kaldı!`;
+                } else {
+                    yagKutu.classList.add('durum-yesil');
+                    yagDurum.innerText = `${kalanKm} KM Kaldı`;
+                }
+            } else {
+                yagKutu.className = 'uyari-kutu durum-gri';
+                yagDurum.innerText = "Şoför Henüz KM Girmedi";
+            }
+        }
+    }
+    // ---------------------------
+
     async function kaydet() {
-        // ... (Önceki kodlarla aynı, değişiklik yok) ...
         if(!window.firebaseHazir) { alert("Bulut sistemi henüz yüklenmedi..."); return; }
         const secilenTarih = document.getElementById('tarih').value;
         if(!secilenTarih) { alert("Lütfen bir tarih seçin!"); return; }
@@ -401,7 +550,6 @@
             tarih: secilenTarih,
             zaman: ilkGirisZamani,
             kayitSaati: sonGirisZamani,
-            // Eğer eski kayıtta dağıtılmış gider varsa onu koru, yoksa 0 yap
             sabitGiderPayi: ayniTarihliKayit ? (ayniTarihliKayit.sabitGiderPayi || 0) : 0
         };
 
@@ -460,20 +608,18 @@
             if(document.getElementById('rapor').classList.contains('active')){
                 guncelleRapor();
             }
+            if(document.getElementById('giris').classList.contains('active')){
+                aracUyarilariniGuncelle(); // KM'ye göre yağ uyarısını güncellemek için
+            }
         });
     }
 
-    // --- SABİT GİDERLERİ DAĞITMA FONKSİYONU ---
     async function sabitGiderleriDagit() {
         if(!window.firebaseHazir) { alert("Sistem hazır değil."); return; }
 
         const secilenTarihStr = document.getElementById('sabitGiderTarih').value;
-        if(!secilenTarihStr) {
-            alert("Lütfen fişin ait olduğu tarihi seçin!");
-            return;
-        }
+        if(!secilenTarihStr) { alert("Lütfen fişin ait olduğu tarihi seçin!"); return; }
 
-        // Yönetici panelindeki giderleri topla
         const pesinVergi = formatiCoz(document.getElementById('pesinVergi').value);
         const stopaj = formatiCoz(document.getElementById('stopaj').value);
         const kdv = formatiCoz(document.getElementById('kdv').value);
@@ -486,43 +632,30 @@
 
         const toplamDagitilacakTutar = pesinVergi + stopaj + kdv + gelirVergisi + bagKur + sigorta + matbaaNoter + muhasebe + sabitDigerGider;
 
-        if(toplamDagitilacakTutar <= 0) {
-            alert("Dağıtılacak bir gider tutarı girmediniz!");
-            return;
-        }
+        if(toplamDagitilacakTutar <= 0) { alert("Dağıtılacak bir gider tutarı girmediniz!"); return; }
 
-        // Seçilen tarihin Yıl ve Ayını al (örn: 2026-10)
         const secilenTarihObj = new Date(secilenTarihStr);
         const secilenYil = secilenTarihObj.getFullYear();
-        const secilenAy = secilenTarihObj.getMonth(); // 0-11 arası
+        const secilenAy = secilenTarihObj.getMonth(); 
 
-        // O ay içinde şoförün veri girdiği günleri bul
         const oAyinKayitlari = kayitlar.filter(k => {
             if(!k.tarih) return false;
             const kTarihObj = new Date(k.tarih);
             return kTarihObj.getFullYear() === secilenYil && kTarihObj.getMonth() === secilenAy;
         });
 
-        if(oAyinKayitlari.length === 0) {
-            alert("Seçilen tarihin ait olduğu ayda (örn: Ekim 2026) şoförün girdiği hiçbir veri bulunamadı! Önce şoförün o ay için veri girmesi gerekiyor.");
-            return;
-        }
+        if(oAyinKayitlari.length === 0) { alert("Seçilen tarihin ait olduğu ayda şoförün girdiği hiçbir veri bulunamadı!"); return; }
 
         const gunSayisi = oAyinKayitlari.length;
         const gunlukPay = toplamDagitilacakTutar / gunSayisi;
 
-        const onay = confirm(`Toplam ${toplamDagitilacakTutar.toLocaleString('tr-TR')} TL gider, seçilen ay içindeki ${gunSayisi} güne bölünecek.\n\nGünlük pay: ${gunlukPay.toLocaleString('tr-TR')} TL\n\nBu işlemi onaylıyor musunuz? (Daha önce dağıtım yapıldıysa üzerine yazılır)`);
-        
+        const onay = confirm(`Toplam ${toplamDagitilacakTutar.toLocaleString('tr-TR')} TL gider, seçilen ay içindeki ${gunSayisi} güne bölünecek.\n\nGünlük pay: ${gunlukPay.toLocaleString('tr-TR')} TL\n\nBu işlemi onaylıyor musunuz?`);
         if(!onay) return;
 
         const batch = window.writeBatch(window.db);
         
         oAyinKayitlari.forEach(kayit => {
-            // Her bir günün kaydındaki "sabitGiderPayi" alanını güncelle
-            // ve toplam gideri yeniden hesapla
             const yeniSabitPay = gunlukPay;
-            
-            // Eski toplam giderden eski sabit payı çıkar, yenisini ekle
             const eskiSabitPay = kayit.sabitGiderPayi || 0;
             const yeniToplamGider = (kayit.toplamGider - eskiSabitPay) + yeniSabitPay;
 
@@ -586,7 +719,6 @@
             tbody.appendChild(tr);
         });
 
-        // Yönetici panelindeki toplam (bilgi amaçlı, artık ana toplama direkt etki etmiyor, günlere dağıtıldı)
         const pesinVergi = formatiCoz(document.getElementById('pesinVergi').value);
         const stopaj = formatiCoz(document.getElementById('stopaj').value);
         const kdv = formatiCoz(document.getElementById('kdv').value);
@@ -599,7 +731,6 @@
         const toplamAylikSabit = pesinVergi + stopaj + kdv + gelirVergisi + bagKur + sigorta + matbaaNoter + muhasebe + sabitDigerGider;
         document.getElementById('toplamAylikSabit').innerText = toplamAylikSabit.toLocaleString('tr-TR') + " TL";
 
-        // Toplam Kazanç, Gider ve Net hesaplamaları (Artık dağıtılmış sabit giderler toplam gidere dahil)
         const genelToplamGider = toplamMazot + toplamSivi + toplamTamir + toplamParca + toplamDiger + toplamSoforGunluk + toplamSabitGiderPayi;
         const netKar = toplamHasilat - genelToplamGider;
         const kmBasiMazot = toplamKM > 0 ? (toplamMazot / toplamKM).toFixed(2) : 0;
@@ -613,7 +744,6 @@
         
         document.getElementById('kmBasiMazot').innerText = kmBasiMazot + " TL/KM";
 
-        // Grafik verileri
         cizGrafik(toplamMazot, toplamSivi, toplamTamir, toplamParca, toplamDiger, toplamSoforGunluk, toplamSabitGiderPayi);
     }
 
@@ -660,6 +790,11 @@
             options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
         });
     }
+    
+    // Sayfa yüklendiğinde uyarıları ve ayarları başlat
+    window.onload = function() {
+        aracUyarilariniGuncelle();
+    };
 </script>
 </body>
 </html>
