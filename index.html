@@ -63,7 +63,6 @@
         .form-grid .full { grid-column: span 2; }
         button.btn-primary { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
         
-        /* Rapor Sekmesi Özel Tasarım */
         .rapor-filtre-alani { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; background: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
         .rapor-filtre-alani .input-grup { margin-top: 0; flex: 1; min-width: 150px; }
         .rapor-filtre-alani button { padding: 12px 20px; background: var(--info); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; height: 46px; }
@@ -88,7 +87,7 @@
         .text-muted { color: #7f8c8d; font-size: 12px; }
 
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; min-width: 1300px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        table { width: 100%; min-width: 1400px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
         th { background: #ecf0f1; font-weight: bold; }
         
@@ -97,7 +96,6 @@
 
         .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
 
-        /* Şık Yüzen Etiketler */
         .input-grup { position: relative; margin-top: 10px; }
         .input-grup input, .input-grup select { width: 100%; padding: 22px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
         .input-grup input:focus, .input-grup select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
@@ -126,7 +124,6 @@
         .durum-kirmizi { background-color: var(--danger); }
         .durum-gri { background-color: #95a5a6; }
 
-        /* --- MOBİL UYUMLULUK --- */
         @media (max-width: 900px) {
             .chart-grid { grid-template-columns: 1fr; }
             .chart-container-wrapper { height: 250px; }
@@ -179,7 +176,6 @@
         <button class="tab-btn" id="raporTabBtn" onclick="switchTab('rapor', this)">💻 Raporlar (Yönetici)</button>
     </div>
 
-    <!-- ŞOFÖR EKRANI -->
     <div id="giris" class="tab-content active">
         <div class="uyari-panosu" id="uyariPanosu">
             <div class="uyari-kutu durum-gri" id="muayeneKutu">
@@ -249,10 +245,7 @@
         </div>
     </div>
 
-    <!-- YÖNETİCİ / RAPOR EKRANI -->
     <div id="rapor" class="tab-content">
-        
-        <!-- Filtreleme Alanı -->
         <div class="rapor-filtre-alani">
             <div class="input-grup">
                 <input type="date" id="filtreBaslangic">
@@ -274,7 +267,6 @@
             <button onclick="filtreleRapor()">Filtrele / Raporla</button>
         </div>
 
-        <!-- İstatistik Kartları -->
         <div class="stats-row">
             <div class="stat-box">
                 <h3>Toplam Kazanç</h3>
@@ -298,7 +290,6 @@
             </div>
         </div>
 
-        <!-- Grafik Alanı -->
         <div class="chart-grid">
             <div class="chart-card">
                 <h3>📈 Kazanç - Gider Trendi (Günlük)</h3>
@@ -334,14 +325,12 @@
                             </tr>
                         </thead>
                         <tbody id="guzergahAnalizTablo">
-                            <!-- JS ile doldurulacak -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- Detaylı Kayıt Tablosu -->
         <div class="card">
             <h2>Filtrelenen Kayıtlar (Detaylı)</h2>
             <div class="tablo-kapsayici">
@@ -349,8 +338,8 @@
                     <thead>
                         <tr>
                             <th>Sefer Tarihi</th>
-                            <th>İlk Giriş</th> <!-- GERİ EKLENDİ -->
-                            <th>Son Giriş</th> <!-- GERİ EKLENDİ -->
+                            <th>İlk Giriş</th>
+                            <th>Son Giriş</th>
                             <th>Güzergah</th>
                             <th>Hasılat</th>
                             <th>KM</th>
@@ -373,7 +362,6 @@
             </div>
         </div>
 
-        <!-- Sistem Ayarları -->
         <div class="card">
             <h2>⚙️ Sistem Ayarları (Araç & Sabit Giderler)</h2>
             <div class="form-grid">
@@ -681,6 +669,7 @@
             if (ayniTarihliKayit) { await window.deleteDoc(window.doc(window.db, "kayitlar", ayniTarihliKayit.id)); }
             await window.addDoc(window.collection(window.db, "kayitlar"), kayit);
             
+            // YENİ: SIVI BAKIM YAPILDIYSA YÖNETİCİ AYARLARINI GÜNCELLE
             if (siviBakimDeger > 0 && kmDeger > 0) {
                 const ayarDocRef = window.doc(window.db, "sistem", "aracAyarlari");
                 const ayarDocSnap = await window.getDoc(ayarDocRef);
@@ -823,8 +812,8 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${(k.tarih || '').split('-').reverse().join('.')}</td>
-                <td>${tarihSaatFormatla(k.zaman)}</td>          <!-- İLK GİRİŞ GERİ GELDİ -->
-                <td>${tarihSaatFormatla(k.kayitSaati)}</td>     <!-- SON GİRİŞ GERİ GELDİ -->
+                <td>${tarihSaatFormatla(k.zaman)}</td>
+                <td>${tarihSaatFormatla(k.kayitSaati)}</td>
                 <td><span style="background:#ecf0f1; padding:3px 8px; border-radius:4px; font-weight:bold;">${k.guzergah || '-'}</span></td>
                 <td>${(k.hasilat||0).toLocaleString('tr-TR')} TL</td>
                 <td>${(k.km||0).toLocaleString('tr-TR')}</td>
