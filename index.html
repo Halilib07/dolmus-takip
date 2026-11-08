@@ -6,7 +6,7 @@
     <title>Dolmuş İşletme Yönetim Paneli</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- YENİ: Flatpickr Kütüphanesi (Mobil uyumlu, günleri kilitleyebilen takvim) -->
+    <!-- Flatpickr Kütüphanesi -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
@@ -96,7 +96,7 @@
         .text-muted { color: #7f8c8d; font-size: 12px; }
 
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .detay-tablo { width: 100%; min-width: 1400px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        .detay-tablo { width: 100%; min-width: 1500px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
         .detay-tablo th, .detay-tablo td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
         .detay-tablo th { background: #ecf0f1; font-weight: bold; }
         
@@ -115,6 +115,44 @@
         .input-grup select { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg fill='%237f8c8d' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>"); background-repeat: no-repeat; background-position-x: 95%; background-position-y: center; cursor: pointer;}
         .input-grup .select-label { position: absolute; left: 15px; top: 5px; color: var(--primary); font-size: 11px; font-weight: bold; margin: 0; }
 
+        /* YENİ: Fiş Yükleme Alanı Tasarımı */
+        .fis-alani { 
+            display: none; 
+            grid-column: span 2; 
+            background: #fff8e1; 
+            border: 2px dashed var(--warning); 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-top: 10px;
+        }
+        .fis-alani.aktif { display: block; }
+        .fis-alani h4 { margin: 0 0 10px 0; color: var(--warning); font-size: 15px; }
+        .fis-icerik { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+        .fis-foto-alani { flex: 1; min-width: 200px; }
+        .fis-foto-alani input[type="file"] { display: none; }
+        .fis-foto-btn { 
+            display: inline-block; 
+            background: var(--warning); 
+            color: white; 
+            padding: 10px 15px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .fis-foto-btn:hover { background: #d68910; }
+        .fis-onizleme { 
+            margin-top: 10px; 
+            max-width: 100%; 
+            max-height: 200px; 
+            border-radius: 5px; 
+            display: none; 
+            border: 1px solid #ccc;
+        }
+        .fis-tarih-alani { flex: 1; min-width: 200px; }
+
         .hedef-ay-kutu { padding: 22px 15px 10px 15px; border: 1px solid var(--purple); border-radius: 8px; font-size: 16px; background: #f4ecf7; color: var(--purple); font-weight: bold; box-sizing: border-box; height: 100%; display: flex; align-items: center; }
 
         .toplam-sabit { grid-column: span 2; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid var(--primary); margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
@@ -123,6 +161,7 @@
 
         .islem-btn { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; color: white; }
         .btn-duzenle { background: var(--warning); }
+        .btn-fis-gor { background: var(--info); }
         
         .btn-dagit { background: var(--purple); width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
         .btn-sil-fis { background: var(--danger); width: 100%; padding: 10px; margin-top: 5px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; grid-column: span 2; display: none;}
@@ -163,7 +202,6 @@
             border-bottom: 2px solid #bdc3c7;
         }
 
-        /* Flatpickr için özel düzeltmeler (Mobilde daha iyi görünmesi için) */
         .flatpickr-input[readonly] { background: white !important; cursor: pointer; }
 
         @media (max-width: 1024px) {
@@ -183,7 +221,7 @@
             .uyari-kutu p { font-size: 18px; margin: 0; }
             .uyari-alt-yazi { display: block; font-size: 11px; margin-top: 2px; }
             .form-grid { grid-template-columns: 1fr; gap: 10px; }
-            .form-grid .full { grid-column: span 1; }
+            .form-grid .full, .fis-alani { grid-column: span 1; }
             .input-grup input, .input-grup select { padding: 18px 12px 8px 12px; font-size: 15px; }
             .input-grup label { left: 12px; top: 14px; font-size: 13px; }
             .input-grup .select-label { left: 12px; top: 3px; font-size: 10px; }
@@ -249,7 +287,6 @@
             <h2 id="formBaslik" style="margin-top:0; margin-bottom: 20px;">Günlük Sefer ve Gider Ekle</h2>
             <div class="form-grid">
                 <div class="input-grup">
-                    <!-- DİKKAT: type="text" yapıldı, flatpickr ile kontrol edilecek -->
                     <input type="text" id="tarih" placeholder=" ">
                     <label for="tarih">Tarih (Seferin Yapıldığı Gün)</label>
                 </div>
@@ -271,7 +308,7 @@
                     <label for="km">Güncel KM (Araç KM'si)</label>
                 </div>
                 <div class="input-grup">
-                    <input type="text" inputmode="numeric" id="mazotTL" class="para" placeholder="">
+                    <input type="text" inputmode="numeric" id="mazotTL" class="para" placeholder="" oninput="mazotFisKontrol()">
                     <label for="mazotTL">Mazot (TL)</label>
                 </div>
                 <div class="input-grup">
@@ -295,6 +332,24 @@
                     <label for="gunlukSoforUcret">Günlük Şoför Ücreti (TL)</label>
                 </div>
             </div>
+
+            <!-- YENİ: Mazot Fişi Yükleme Alanı -->
+            <div class="fis-alani" id="mazotFisAlani">
+                <h4>🧾 Mazot Fişi Bilgileri (Zorunlu)</h4>
+                <div class="fis-icerik">
+                    <div class="fis-foto-alani">
+                        <input type="file" id="mazotFisFoto" accept="image/*" onchange="fisOnizle(this)">
+                        <label for="mazotFisFoto" class="fis-foto-btn" id="fisFotoBtn">📷 Fiş Fotoğrafı Çek / Seç</label>
+                        <img id="fisOnizlemeImg" class="fis-onizleme" alt="Fiş Önizleme">
+                    </div>
+                    <div class="fis-tarih-alani input-grup" style="margin-top: 0;">
+                        <input type="date" id="mazotFisTarihi">
+                        <label for="mazotFisTarihi">Fiş Üzerindeki Tarih</label>
+                        <p style="font-size: 11px; color: var(--danger); margin-top: 5px;">* Fiş tarihi, sefer tarihi ile aynı olmalıdır.</p>
+                    </div>
+                </div>
+            </div>
+
             <button class="btn-primary" id="kaydetBtn" onclick="kaydet()">Günü Kaydet (Buluta Gönder)</button>
             <div id="mesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
         </div>
@@ -460,6 +515,7 @@
                             <th>Hasılat</th>
                             <th>KM</th>
                             <th>Mazot</th>
+                            <th>Fiş</th> <!-- YENİ -->
                             <th>Sıvı Bakım</th>
                             <th>Tamir</th>
                             <th>Parça</th>
@@ -473,7 +529,7 @@
                         </tr>
                     </thead>
                     <tbody id="tabloListesi">
-                        <tr><td colspan="17" class="loading">Veriler buluttan yükleniyor...</td></tr>
+                        <tr><td colspan="18" class="loading">Veriler buluttan yükleniyor...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -656,8 +712,8 @@
     let chartAylik = null;
     let chartGunlukSutun = null;
 
-    // YENİ: Flatpickr örneğini tutacağımız değişken
     let fpInstance = null;
+    let mevcutFisFotoBase64 = null; // Yüklenen fotoğrafı tutar
 
     function formatTarih(dateObj) {
         let d = new Date(dateObj),
@@ -671,17 +727,15 @@
         return [year, month, day].join('-');
     }
 
-    // YENİ: Flatpickr Başlatma ve Tarih Sınırlandırma
     function tarihSeciciyiBaslat() {
         const bugun = new Date();
         bugun.setHours(0, 0, 0, 0);
 
         const enEski = new Date(bugun);
-        enEski.setDate(enEski.getDate() - 2); // Bugün + dün + evvelsi gün
+        enEski.setDate(enEski.getDate() - 2);
 
         const inputEl = document.getElementById('tarih');
         
-        // Eğer önceden oluşturulmuşsa temizle
         if (fpInstance) {
             fpInstance.destroy();
         }
@@ -689,15 +743,12 @@
         fpInstance = flatpickr(inputEl, {
             locale: "tr",
             dateFormat: "Y-m-d",
-            altInput: true, // Ekranda kullanıcı dostu format göster (örn: 09.11.2026)
+            altInput: true,
             altFormat: "d.m.Y",
             defaultDate: bugun,
-            minDate: isYonetici ? null : enEski, // Yönetici değilse bugünden 2 gün öncesine kadar izin ver
-            maxDate: isYonetici ? null : bugun,  // Yönetici değilse bugünden ileriye izin verme
-            disableMobile: true, // Telefonların kendi takvimini engelle, kendi takvimimizi göster
-            onChange: function(selectedDates, dateStr, instance) {
-                // Tarih değiştiğinde bir şey yapmak isterseniz buraya eklenebilir
-            }
+            minDate: isYonetici ? null : enEski,
+            maxDate: isYonetici ? null : bugun,
+            disableMobile: true,
         });
     }
 
@@ -740,6 +791,41 @@
         });
     });
 
+    // YENİ: Mazot girilince fiş alanını aç
+    function mazotFisKontrol() {
+        const mazotDeger = formatiCoz(document.getElementById('mazotTL').value);
+        const fisAlani = document.getElementById('mazotFisAlani');
+        if (mazotDeger > 0) {
+            fisAlani.classList.add('aktif');
+        } else {
+            fisAlani.classList.remove('aktif');
+            // Temizle
+            document.getElementById('mazotFisFoto').value = '';
+            document.getElementById('fisOnizlemeImg').style.display = 'none';
+            document.getElementById('mazotFisTarihi').value = '';
+            mevcutFisFotoBase64 = null;
+        }
+    }
+
+    // YENİ: Fiş fotoğrafı önizleme
+    function fisOnizle(input) {
+        const file = input.files[0];
+        const img = document.getElementById('fisOnizlemeImg');
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                img.style.display = 'block';
+                mevcutFisFotoBase64 = e.target.result; // Base64 olarak sakla
+            }
+            reader.readAsDataURL(file);
+        } else {
+            img.style.display = 'none';
+            mevcutFisFotoBase64 = null;
+        }
+    }
+
     function girisYap() {
         const girilenSifre = document.getElementById('sifre').value;
         const hataEl = document.getElementById('loginHata');
@@ -754,7 +840,7 @@
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
             yilSecenekleriniDoldur(); 
-            tarihSeciciyiBaslat(); // Yönetici girişinde takvimi kısıtlamasız başlat
+            tarihSeciciyiBaslat(); 
         } else if (girilenSifre === SOFOR_SIFRESI) {
             isYonetici = false;
             document.getElementById('loginEkrani').style.display = 'none';
@@ -764,7 +850,7 @@
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
-            tarihSeciciyiBaslat(); // Şoför girişinde takvimi 3 gün ile sınırla
+            tarihSeciciyiBaslat(); 
         } else {
             hataEl.style.display = 'block';
         }
@@ -970,8 +1056,6 @@
         const secilenTarih = document.getElementById('tarih').value;
         if(!secilenTarih) { alert("Lütfen bir tarih seçin!"); return; }
 
-        // Flatpickr minDate/maxDate kısıtlaması olduğu için buradaki manuel tarih doğrulamasına gerek kalmadı,
-        // Ancak yine de güvenlik amaçlı (örneğin konsoldan manipüle edilirse) şoför için kontrol edelim.
         if (!isYonetici) {
             const bugunD = new Date();
             bugunD.setHours(0, 0, 0, 0);
@@ -996,6 +1080,28 @@
         const tamirDeger = formatiCoz(document.getElementById('tamir').value);
         const parcaDeger = formatiCoz(document.getElementById('parca').value);
         const digerDeger = formatiCoz(document.getElementById('diger').value);
+
+        const mazotFisTarihi = document.getElementById('mazotFisTarihi').value;
+        const mazotFisFoto = mevcutFisFotoBase64;
+
+        // YENİ: Mazot Fiş Kontrolleri
+        if (mazotDeger > 0) {
+            if (!mazotFisFoto) {
+                alert("⚠️ Mazot gideri girdiniz. Lütfen Mazot Fişi Fotoğrafını yükleyin!");
+                document.getElementById('mazotFisFoto').focus();
+                return;
+            }
+            if (!mazotFisTarihi) {
+                alert("⚠️ Lütfen Fiş Üzerindeki Tarihi girin!");
+                document.getElementById('mazotFisTarihi').focus();
+                return;
+            }
+            if (mazotFisTarihi !== secilenTarih) {
+                alert(`⚠️ HATA: Girdiğiniz fiş tarihi (${mazotFisTarihi.split('-').reverse().join('.')}) ile sefer tarihi (${secilenTarih.split('-').reverse().join('.')}) uyuşmuyor!\n\nFiş tarihi, sefer tarihi ile aynı olmalıdır.`);
+                document.getElementById('mazotFisTarihi').focus();
+                return;
+            }
+        }
 
         const herhangiBirVeriVar =
             hasilatDeger > 0 || kmDeger > 0 || mazotDeger > 0 ||
@@ -1095,7 +1201,9 @@
             kayitSaati: Date.now(),
             muhasebeKalemleri: ayniTarihliKayit ? (ayniTarihliKayit.muhasebeKalemleri || {}) : {},
             sabitGiderPayi: ayniTarihliKayit ? (ayniTarihliKayit.sabitGiderPayi || 0) : 0,
-            ukomeGeliri: ayniTarihliKayit ? (ayniTarihliKayit.ukomeGeliri || 0) : 0
+            ukomeGeliri: ayniTarihliKayit ? (ayniTarihliKayit.ukomeGeliri || 0) : 0,
+            mazotFisFoto: mazotDeger > 0 ? mazotFisFoto : null, // YENİ
+            mazotFisTarihi: mazotDeger > 0 ? mazotFisTarihi : null // YENİ
         };
 
         const alanlar = ['guzergah', 'hasilat', 'km', 'mazotTL', 'siviBakim', 'tamir', 'parca', 'diger', 'gunlukSoforUcret'];
@@ -1205,8 +1313,12 @@
             document.getElementById('tamir').value = ''; document.getElementById('parca').value = '';
             document.getElementById('diger').value = ''; document.getElementById('gunlukSoforUcret').value = '';
             document.getElementById('guzergah').value = '';
+            document.getElementById('mazotFisFoto').value = '';
+            document.getElementById('fisOnizlemeImg').style.display = 'none';
+            document.getElementById('mazotFisTarihi').value = '';
+            document.getElementById('mazotFisAlani').classList.remove('aktif');
+            mevcutFisFotoBase64 = null;
 
-            // Tarihi bugüne sıfırla
             if (fpInstance) {
                 fpInstance.setDate(new Date());
             }
@@ -2157,6 +2269,12 @@
         liste.forEach(k => {
             const tr = document.createElement('tr');
             const net = ((k.hasilat||0) + (k.ukomeGeliri||0)) - (k.toplamGider||0);
+            // YENİ: Fiş butonu
+            let fisBtn = '-';
+            if (k.mazotFisFoto) {
+                fisBtn = `<button onclick="fisGoster('${k.id}')" class="islem-btn btn-fis-gor">🧾 Fiş</button>`;
+            }
+            
             tr.innerHTML = `
                 <td>${(k.tarih || '').split('-').reverse().join('.')}</td>
                 <td>${tarihSaatFormatla(k.zaman)}</td>
@@ -2165,6 +2283,7 @@
                 <td>${Math.round(k.hasilat||0).toLocaleString('tr-TR')} TL</td>
                 <td>${Math.round(k.km||0).toLocaleString('tr-TR')}</td>
                 <td>${Math.round(k.mazotTL||0).toLocaleString('tr-TR')}</td>
+                <td>${fisBtn}</td>
                 <td>${Math.round(k.siviBakim||0).toLocaleString('tr-TR')}</td>
                 <td>${Math.round(k.tamir||0).toLocaleString('tr-TR')}</td>
                 <td>${Math.round(k.parca||0).toLocaleString('tr-TR')}</td>
@@ -2183,6 +2302,15 @@
             `;
             tbody.appendChild(tr);
         });
+    }
+
+    // YENİ: Fiş fotoğrafını tam ekran gösterme
+    function fisGoster(id) {
+        const kayit = kayitlar.find(k => k.id === id);
+        if (kayit && kayit.mazotFisFoto) {
+            const w = window.open("");
+            w.document.write(`<title>Mazot Fişi - ${kayit.tarih}</title><body style="margin:0; display:flex; justify-content:center; align-items:center; height:100vh; background:#333;"><img src="${kayit.mazotFisFoto}" style="max-width:100%; max-height:100%; object-fit:contain;"></body>`);
+        }
     }
 
     function cizTrendGrafigi(liste) {
@@ -2400,14 +2528,12 @@
         const eskiTarih = kayit.tarih;
 
         if (isYonetici) {
-            // Yönetici her tarihi düzenleyebilir
             if (fpInstance) {
                 fpInstance.set('minDate', null);
                 fpInstance.set('maxDate', null);
                 fpInstance.setDate(eskiTarih, false);
             }
         } else {
-            // Şoför: önce sınırları tazele
             const bugun = new Date();
             bugun.setHours(0, 0, 0, 0);
             const enEski = new Date(bugun);
@@ -2415,7 +2541,6 @@
 
             const eskiTarihObj = new Date(eskiTarih);
             if (eskiTarihObj < enEski || eskiTarihObj > bugun) {
-                // 3 günden eski kayıt: input kilitlenir
                 if (fpInstance) {
                     fpInstance.set('minDate', eskiTarih);
                     fpInstance.set('maxDate', eskiTarih);
@@ -2442,6 +2567,22 @@
         document.getElementById('parca').value = sayiyiFormatla(kayit.parca);
         document.getElementById('diger').value = sayiyiFormatla(kayit.diger);
         document.getElementById('gunlukSoforUcret').value = sayiyiFormatla(kayit.gunlukSoforUcret || 0);
+
+        // YENİ: Fiş bilgilerini doldur
+        if (kayit.mazotTL > 0) {
+            document.getElementById('mazotFisAlani').classList.add('aktif');
+            document.getElementById('mazotFisTarihi').value = kayit.mazotFisTarihi || '';
+            if (kayit.mazotFisFoto) {
+                document.getElementById('fisOnizlemeImg').src = kayit.mazotFisFoto;
+                document.getElementById('fisOnizlemeImg').style.display = 'block';
+                mevcutFisFotoBase64 = kayit.mazotFisFoto;
+            } else {
+                document.getElementById('fisOnizlemeImg').style.display = 'none';
+                mevcutFisFotoBase64 = null;
+            }
+        } else {
+            document.getElementById('mazotFisAlani').classList.remove('aktif');
+        }
 
         switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
     }
