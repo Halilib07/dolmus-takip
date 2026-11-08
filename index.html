@@ -301,6 +301,7 @@
                 <div class="input-grup">
                     <label for="guzergah" class="select-label">Güzergah Seçimi</label>
                     <select id="guzergah">
+                        <option value="" selected disabled>Güzergah Seçiniz</option>
                         <option value="Kumluca">Kumluca</option>
                         <option value="Turunçova">Turunçova</option>
                         <option value="Dağdibi">Dağdibi</option>
@@ -883,8 +884,36 @@
         const secilenTarih = document.getElementById('tarih').value;
         if(!secilenTarih) { alert("Lütfen bir tarih seçin!"); return; }
 
-        const siviBakimDeger = formatiCoz(document.getElementById('siviBakim').value);
+        // ZORUNLU ALAN KONTROLLERİ
+        const secilenGuzergah = document.getElementById('guzergah').value;
+        if (!secilenGuzergah) {
+            alert("⚠️ Lütfen Güzergah seçiniz!");
+            document.getElementById('guzergah').focus();
+            return;
+        }
+
+        const hasilatDeger = formatiCoz(document.getElementById('hasilat').value);
+        if (!hasilatDeger || hasilatDeger <= 0) {
+            alert("⚠️ Günlük Kazanç (Hasılat) boş veya 0 olamaz!");
+            document.getElementById('hasilat').focus();
+            return;
+        }
+
         const kmDeger = formatiCoz(document.getElementById('km').value);
+        if (!kmDeger || kmDeger <= 0) {
+            alert("⚠️ Güncel KM boş veya 0 olamaz!");
+            document.getElementById('km').focus();
+            return;
+        }
+
+        const soforUcretDeger = formatiCoz(document.getElementById('gunlukSoforUcret').value);
+        if (!soforUcretDeger || soforUcretDeger <= 0) {
+            alert("⚠️ Günlük Şoför Ücreti boş veya 0 olamaz!");
+            document.getElementById('gunlukSoforUcret').focus();
+            return;
+        }
+
+        const siviBakimDeger = formatiCoz(document.getElementById('siviBakim').value);
 
         if (siviBakimDeger > 0 && kmDeger === 0) {
             alert("⚠️ DİKKAT: Sıvı Bakım tutarı girdiniz. Lütfen Güncel KM'yi de giriniz!");
@@ -901,8 +930,6 @@
         const mesajEl = document.getElementById('mesaj');
         btn.innerText = "Buluta Kaydediliyor...";
         btn.disabled = true;
-
-        const secilenGuzergah = document.getElementById('guzergah').value;
 
         const yeniDegerler = {
             guzergah: secilenGuzergah,
@@ -955,6 +982,7 @@
             document.getElementById('mazotTL').value = ''; document.getElementById('siviBakim').value = '';
             document.getElementById('tamir').value = ''; document.getElementById('parca').value = '';
             document.getElementById('diger').value = ''; document.getElementById('gunlukSoforUcret').value = '';
+            document.getElementById('guzergah').value = ''; // Güzergah'ı da sıfırla
             
             setTimeout(() => { mesajEl.innerText = ""; }, 3000);
         } catch (e) {
