@@ -743,8 +743,10 @@
         let seceneklerTumsuz = '';
 
         siraliYillar.forEach(y => {
-            secenekler += `<option value="${y}">${y}</option>`;
-            seceneklerTumsuz += `<option value="${y}">${y}</option>`;
+            // Seçili yılı şu anki yıl yapalım
+            let seciliMi = (y === simdikiYil) ? "selected" : "";
+            secenekler += `<option value="${y}" ${seciliMi}>${y}</option>`;
+            seceneklerTumsuz += `<option value="${y}" ${seciliMi}>${y}</option>`;
         });
 
         document.getElementById('filtreYil').innerHTML = secenekler;
