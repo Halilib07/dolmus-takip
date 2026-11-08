@@ -140,8 +140,8 @@
            ========================================= */
         #pdfRaporAlani {
             display: none;
-            width: 277mm;          /* 297 - 20mm margin */
-            margin: 0 auto;
+            width: 280mm;          /* 297 - 17mm (kenar boşluğu) */
+            margin: 0;
             padding: 0;
             background: #fff;
             color: #263445;
@@ -151,9 +151,9 @@
         }
 
         .pdf-page {
-            width: 277mm;
-            min-height: 190mm;     /* 210 - 20mm margin */
-            padding: 6mm;
+            width: 280mm;
+            min-height: 193mm;     /* 210 - 17mm */
+            padding: 8mm;
             box-sizing: border-box;
             background: #fff;
             position: relative;
@@ -1460,7 +1460,7 @@
     }
 
     // =============================================
-    // PDF OLUŞTURMA VE İNDİRME (YATAY A4)
+    // PDF OLUŞTURMA VE İNDİRME (YATAY A4 - TAM SAYFA)
     // =============================================
     async function pdfOlusturVeIndir(element, baslangicStr, bitisStr) {
         if (!element) {
@@ -1494,7 +1494,7 @@
             void element.offsetHeight;
 
             const ayarlar = {
-                margin: [8, 8, 8, 8],
+                margin: 0,                              // ← SIFIR: margin'i CSS veriyor
                 filename: `Dolmus_Raporu_${baslangicStr}_${bitisStr}.pdf`,
                 image: { type: "jpeg", quality: 0.98 },
                 html2canvas: {
@@ -1505,12 +1505,19 @@
                     scrollX: 0,
                     scrollY: 0,
                     windowWidth: 1200,
-                    windowHeight: 800
+                    windowHeight: 800,
+                    onclone: (clonedDoc) => {
+                        const el = clonedDoc.getElementById('pdfRaporAlani');
+                        if (el) {
+                            el.style.width = '280mm';
+                            el.style.margin = '0';
+                        }
+                    }
                 },
                 jsPDF: {
                     unit: "mm",
                     format: "a4",
-                    orientation: "landscape"    // ← YATAY
+                    orientation: "landscape"            // ← YATAY
                 },
                 pagebreak: { mode: ["css"] }
             };
