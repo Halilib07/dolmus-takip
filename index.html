@@ -344,7 +344,6 @@
             </div>
         </div>
 
-        <!-- YENİ: SEÇİLEN TARİH ARALIĞI GÜNLÜK SÜTUN GRAFİĞİ -->
         <div class="chart-grid">
             <div class="chart-card chart-full-width">
                 <h3>📅 Seçilen Aralık: Günlük Kâr/Zarar (Sütun Grafik)</h3>
@@ -489,14 +488,30 @@
     let chartGider = null;
     let chartHaftalik = null;
     let chartAylik = null;
-    let chartGunlukSutun = null; // YENİ
+    let chartGunlukSutun = null;
 
-    document.getElementById('tarih').valueAsDate = new Date();
+    // DÜZELTME: Tarih formatlama yardımcı fonksiyonu (YYYY-MM-DD)
+    function formatTarih(dateObj) {
+        let d = new Date(dateObj),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return [year, month, day].join('-');
+    }
+
+    document.getElementById('tarih').value = formatTarih(new Date());
     
     const bugun = new Date();
+    // DÜZELTME: Ayın 1'ini almak için Date objesini sıfırlıyoruz
     const ayBasi = new Date(bugun.getFullYear(), bugun.getMonth(), 1);
-    document.getElementById('filtreBaslangic').valueAsDate = ayBasi;
-    document.getElementById('filtreBitis').valueAsDate = bugun;
+    
+    // DÜZELTME: Değerleri güvenli formata çevirerek atıyoruz
+    document.getElementById('filtreBaslangic').value = formatTarih(ayBasi);
+    document.getElementById('filtreBitis').value = formatTarih(bugun);
 
     const YONETICI_SIFRESI = "Hb.123-"; 
     const SOFOR_SIFRESI = "";    
@@ -881,7 +896,7 @@
         cizTrendGrafigi(filtrelenmisKayitlar);
         cizGiderGrafigi(tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tSabit);
         cizHaftalikGrafigi(filtrelenmisKayitlar);
-        cizGunlukSutunGrafigi(filtrelenmisKayitlar); // YENİ
+        cizGunlukSutunGrafigi(filtrelenmisKayitlar);
         cizAylikGrafigi();
         guzergahAnaliziYap(filtrelenmisKayitlar);
         tabloyuDoldur(filtrelenmisKayitlar);
@@ -994,26 +1009,21 @@
         });
     }
 
-    // YENİ: SEÇİLEN TARİH ARALIĞI GÜNLÜK SÜTUN GRAFİĞİ
     function cizGunlukSutunGrafigi(liste) {
         const ctx = document.getElementById('gunlukSutunGrafik').getContext('2d');
         if(chartGunlukSutun) chartGunlukSutun.destroy();
 
-        // Tarihleri eskiden yeniye sırala
         const siraliListe = [...liste].sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
 
         const etiketler = [];
         const netKarData = [];
 
         siraliListe.forEach((k, index) => {
-            // Etiket olarak 1. Gün, 2. Gün... veya direkt Tarih (GG.AA) kullanabiliriz. 
-            // Tarih daha anlaşılır olur.
             const d = new Date(k.tarih);
             etiketler.push(d.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }));
             netKarData.push((k.hasilat || 0) - (k.toplamGider || 0));
         });
 
-        // Renkler (Eksi ise Kırmızı, Artı ise Mavi)
         const arkaPlanRenkleri = netKarData.map(deger => deger < 0 ? '#e74c3c' : '#3498db');
 
         chartGunlukSutun = new Chart(ctx, {
@@ -1031,19 +1041,7 @@
                 responsive: true, 
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }, // Renkler kendini açıklıyor, efsaneye gerek yok
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) { label += ': '; }
-                                if (context.parsed.y !== null) {
-                                    label += context.parsed.y.toLocaleString('tr-TR') + ' TL';
-                                }
-                                return label;
-                            }
-                        }
-                    }
+                    legend: { display: false }
                 }
             }
         });
