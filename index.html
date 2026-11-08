@@ -669,17 +669,36 @@
     }
 
     // YENİ FONKSİYON: Seçilen tarihe göre formu doldur veya temizle
+    // Seçilen tarihe göre formu doldur veya temizle
     function formuTariheGoreDoldur(secilenTarih) {
         if (!secilenTarih) return;
-
+    
+        // Şoför girişinde sadece bugünün tarihi için otomatik doldurma yapılsın
+        if (!isYonetici) {
+            const bugunStr = formatTarih(new Date());
+            if (secilenTarih !== bugunStr) {
+                // Şoför bugün dışında bir tarih seçtiyse formu temizle, otomatik doldurma yapma
+                document.getElementById('guzergah').value = "";
+                document.getElementById('hasilat').value = "";
+                document.getElementById('km').value = "";
+                document.getElementById('mazotTL').value = "";
+                document.getElementById('siviBakim').value = "";
+                document.getElementById('tamir').value = "";
+                document.getElementById('parca').value = "";
+                document.getElementById('diger').value = "";
+                document.getElementById('gunlukSoforUcret').value = "";
+                return;
+            }
+        }
+    
         // Seçilen tarihe ait kaydı bul
         const mevcutKayit = kayitlar.find(k => k.tarih === secilenTarih);
-
+    
         if (mevcutKayit) {
             // Kayıt varsa form alanlarını doldur
             if (mevcutKayit.guzergah) document.getElementById('guzergah').value = mevcutKayit.guzergah;
             else document.getElementById('guzergah').value = "";
-
+    
             document.getElementById('hasilat').value = mevcutKayit.hasilat ? sayiyiFormatla(mevcutKayit.hasilat) : "";
             document.getElementById('km').value = mevcutKayit.km ? sayiyiFormatla(mevcutKayit.km) : "";
             document.getElementById('mazotTL').value = mevcutKayit.mazotTL ? sayiyiFormatla(mevcutKayit.mazotTL) : "";
@@ -688,15 +707,14 @@
             document.getElementById('parca').value = mevcutKayit.parca ? sayiyiFormatla(mevcutKayit.parca) : "";
             document.getElementById('diger').value = mevcutKayit.diger ? sayiyiFormatla(mevcutKayit.diger) : "";
             document.getElementById('gunlukSoforUcret').value = mevcutKayit.gunlukSoforUcret ? sayiyiFormatla(mevcutKayit.gunlukSoforUcret) : "";
-
-            // Kullanıcıya bilgi ver
+    
             const mesajEl = document.getElementById('mesaj');
             mesajEl.style.color = "var(--info)";
             mesajEl.innerText = "ℹ️ Bu tarihe ait önceden kaydedilmiş bir kayıt bulundu ve forma yüklendi. Düzenleyip tekrar kaydedebilirsiniz.";
-            setTimeout(() => { mesajEl.innerText = ""; }, 5000);
+            setTimeout(() => { mesajEl.innerText = ""; }, 8000);
             
         } else {
-            // Kayıt yoksa formu temizle (yeni giriş için)
+            // Kayıt yoksa formu temizle
             document.getElementById('guzergah').value = "";
             document.getElementById('hasilat').value = "";
             document.getElementById('km').value = "";
@@ -706,11 +724,14 @@
             document.getElementById('parca').value = "";
             document.getElementById('diger').value = "";
             document.getElementById('gunlukSoforUcret').value = "";
-            
-            const mesajEl = document.getElementById('mesaj');
-            mesajEl.style.color = "var(--info)";
-            mesajEl.innerText = "ℹ️ Bu tarihe ait henüz bir kayıt yok. Yeni giriş yapabilirsiniz.";
-            setTimeout(() => { mesajEl.innerText = ""; }, 3000);
+    
+            // Sadece yönetici için "kayıt yok" mesajı göster (şoförde bugün dışı için zaten temizlendi)
+            if (isYonetici) {
+                const mesajEl = document.getElementById('mesaj');
+                mesajEl.style.color = "var(--info)";
+                mesajEl.innerText = "ℹ️ Bu tarihe ait henüz bir kayıt yok. Yeni giriş yapabilirsiniz.";
+                setTimeout(() => { mesajEl.innerText = ""; }, 8000);
+            }
         }
     }
 
