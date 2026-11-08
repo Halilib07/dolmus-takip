@@ -2018,11 +2018,11 @@
         const gunSayisi = filtrelenmisKayitlar.length;
         const ortKar = gunSayisi > 0 ? netKar / gunSayisi : 0;
 
-        document.getElementById('rKazanc').innerText = toplamGelir.toLocaleString('tr-TR') + " TL";
-        document.getElementById('rGider').innerText = tGider.toLocaleString('tr-TR') + " TL";
-        document.getElementById('rKar').innerText = netKar.toLocaleString('tr-TR') + " TL";
+        document.getElementById('rKazanc').innerText = Math.round(toplamGelir).toLocaleString('tr-TR') + " TL";
+        document.getElementById('rGider').innerText = Math.round(tGider).toLocaleString('tr-TR') + " TL";
+        document.getElementById('rKar').innerText = Math.round(netKar).toLocaleString('tr-TR') + " TL";
         document.getElementById('rKar').className = netKar >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById('rOrtKar').innerText = ortKar.toLocaleString('tr-TR', {maximumFractionDigits: 2}) + " TL";
+        document.getElementById('rOrtKar').innerText = Math.round(ortKar).toLocaleString('tr-TR') + " TL";
         document.getElementById('rSeferSayisi').innerText = gunSayisi + " Gün";
 
         maliTabloDoldur(toplamGelir, tKazanc, tUkome, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
@@ -2050,7 +2050,7 @@
             
             tr.innerHTML = `
                 <td>${baslik}</td>
-                <td>${tutar.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} TL</td>
+                <td>${Math.round(tutar).toLocaleString('tr-TR')} TL</td>
                 <td>${isGrup ? '-' : oran(tutar)}</td>
             `;
             tbody.appendChild(tr);
@@ -2094,19 +2094,19 @@
                 <td>${tarihSaatFormatla(k.zaman)}</td>
                 <td>${tarihSaatFormatla(k.kayitSaati)}</td>
                 <td><span style="background:#ecf0f1; padding:3px 8px; border-radius:4px; font-weight:bold;">${k.guzergah || '-'}</span></td>
-                <td>${(k.hasilat||0).toLocaleString('tr-TR')} TL</td>
-                <td>${(k.km||0).toLocaleString('tr-TR')}</td>
-                <td>${(k.mazotTL||0).toLocaleString('tr-TR')}</td>
-                <td>${(k.siviBakim||0).toLocaleString('tr-TR')}</td>
-                <td>${(k.tamir||0).toLocaleString('tr-TR')}</td>
-                <td>${(k.parca||0).toLocaleString('tr-TR')}</td>
-                <td>${(k.diger||0).toLocaleString('tr-TR')}</td>
-                <td>${(k.gunlukSoforUcret||0).toLocaleString('tr-TR')}</td>
-                <td style="color:var(--purple); font-weight:bold;">${(k.sabitGiderPayi||0).toLocaleString('tr-TR')}</td>
-                <td style="color:var(--success); font-weight:bold;">${(k.ukomeGeliri||0).toLocaleString('tr-TR')}</td>
-                <td class="text-danger">${(k.toplamGider||0).toLocaleString('tr-TR')} TL</td>
+                <td>${Math.round(k.hasilat||0).toLocaleString('tr-TR')} TL</td>
+                <td>${Math.round(k.km||0).toLocaleString('tr-TR')}</td>
+                <td>${Math.round(k.mazotTL||0).toLocaleString('tr-TR')}</td>
+                <td>${Math.round(k.siviBakim||0).toLocaleString('tr-TR')}</td>
+                <td>${Math.round(k.tamir||0).toLocaleString('tr-TR')}</td>
+                <td>${Math.round(k.parca||0).toLocaleString('tr-TR')}</td>
+                <td>${Math.round(k.diger||0).toLocaleString('tr-TR')}</td>
+                <td>${Math.round(k.gunlukSoforUcret||0).toLocaleString('tr-TR')}</td>
+                <td style="color:var(--purple); font-weight:bold;">${Math.round(k.sabitGiderPayi||0).toLocaleString('tr-TR')}</td>
+                <td style="color:var(--success); font-weight:bold;">${Math.round(k.ukomeGeliri||0).toLocaleString('tr-TR')}</td>
+                <td class="text-danger">${Math.round(k.toplamGider||0).toLocaleString('tr-TR')} TL</td>
                 <td class="${net >= 0 ? 'text-success' : 'text-danger'}" style="font-weight:bold;">
-                    ${net.toLocaleString('tr-TR')} TL
+                    ${Math.round(net).toLocaleString('tr-TR')} TL
                 </td>
                 <td>
                     <button onclick="duzenle('${k.id}')" class="islem-btn btn-duzenle">Düzenle</button>
@@ -2318,8 +2318,8 @@
             tr.innerHTML = `
                 <td style="font-weight:bold;">${g}</td>
                 <td>${veri.sefer}</td>
-                <td class="${veri.toplamKar >= 0 ? 'text-success' : 'text-danger'}" style="font-weight:bold;">${veri.toplamKar.toLocaleString('tr-TR')} TL</td>
-                <td>${ortKar.toLocaleString('tr-TR')} TL</td>
+                <td class="${veri.toplamKar >= 0 ? 'text-success' : 'text-danger'}" style="font-weight:bold;">${Math.round(veri.toplamKar).toLocaleString('tr-TR')} TL</td>
+                <td>${Math.round(ortKar).toLocaleString('tr-TR')} TL</td>
             `;
             tbody.appendChild(tr);
         });
