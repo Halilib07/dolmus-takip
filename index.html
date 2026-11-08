@@ -127,7 +127,6 @@
         .durum-kirmizi { background-color: var(--danger); }
         .durum-gri { background-color: #95a5a6; }
 
-        /* YENİ: TAM GENİŞLİK GRAFİK */
         .chart-full-width { grid-column: span 2; }
 
         @media (max-width: 1024px) {
@@ -304,7 +303,6 @@
             </div>
         </div>
 
-        <!-- Grafikler -->
         <div class="chart-grid">
             <div class="chart-card">
                 <h3>📈 Kazanç - Gider Trendi (Günlük)</h3>
@@ -346,7 +344,16 @@
             </div>
         </div>
 
-        <!-- YENİ: AYLIK GETİRİ EĞRİSİ (TAM GENİŞLİK) -->
+        <!-- YENİ: SEÇİLEN TARİH ARALIĞI GÜNLÜK SÜTUN GRAFİĞİ -->
+        <div class="chart-grid">
+            <div class="chart-card chart-full-width">
+                <h3>📅 Seçilen Aralık: Günlük Kâr/Zarar (Sütun Grafik)</h3>
+                <div class="chart-container-wrapper">
+                    <canvas id="gunlukSutunGrafik"></canvas>
+                </div>
+            </div>
+        </div>
+
         <div class="chart-grid">
             <div class="chart-card chart-full-width">
                 <h3>📅 Aylık Getiri Eğrisi (Net Kâr/Zarar)</h3>
@@ -481,7 +488,8 @@
     let chartTrend = null;
     let chartGider = null;
     let chartHaftalik = null;
-    let chartAylik = null; // YENİ
+    let chartAylik = null;
+    let chartGunlukSutun = null; // YENİ
 
     document.getElementById('tarih').valueAsDate = new Date();
     
@@ -873,7 +881,8 @@
         cizTrendGrafigi(filtrelenmisKayitlar);
         cizGiderGrafigi(tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tSabit);
         cizHaftalikGrafigi(filtrelenmisKayitlar);
-        cizAylikGrafigi(); // YENİ: Tüm veriler üzerinden aylık hesaplama
+        cizGunlukSutunGrafigi(filtrelenmisKayitlar); // YENİ
+        cizAylikGrafigi();
         guzergahAnaliziYap(filtrelenmisKayitlar);
         tabloyuDoldur(filtrelenmisKayitlar);
     }
@@ -985,68 +994,44 @@
         });
     }
 
-    // YENİ: AYLIK GETİRİ EĞRİSİ ÇİZİMİ
-    function cizAylikGrafigi() {
-        const ctx = document.getElementById('aylikGrafik').getContext('2d');
-        if(chartAylik) chartAylik.destroy();
+    // YENİ: SEÇİLEN TARİH ARALIĞI GÜNLÜK SÜTUN GRAFİĞİ
+    function cizGunlukSutunGrafigi(liste) {
+        const ctx = document.getElementById('gunlukSutunGrafik').getContext('2d');
+        if(chartGunlukSutun) chartGunlukSutun.destroy();
 
-        // Tüm kayıtları (filtresiz) kullanarak tüm ayları kapsayalım
-        const aylikVeri = {};
+        // Tarihleri eskiden yeniye sırala
+        const siraliListe = [...liste].sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
 
-        kayitlar.forEach(k => {
-            if(!k.tarih) return;
-            const d = new Date(k.tarih);
-            const yil = d.getFullYear();
-            const ay = d.getMonth(); // 0-11
-            const anahtar = `${yil}-${ay.toString().padStart(2, '0')}`; // Örn: 2026-10
-            
-            if(!aylikVeri[anahtar]) {
-                aylikVeri[anahtar] = { kazanc: 0, gider: 0 };
-            }
-            aylikVeri[anahtar].kazanc += k.hasilat || 0;
-            aylikVeri[anahtar].gider += k.toplamGider || 0;
-        });
-
-        // Anahtarları (Yıl-Ay) kronolojik olarak sırala
-        const siraliAylar = Object.keys(aylikVeri).sort();
-        
-        const aylarEtiket = []; // Örn: Ekim 2026
+        const etiketler = [];
         const netKarData = [];
 
-        const ayIsimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-
-        siraliAylar.forEach(anahtar => {
-            const [yilStr, ayStr] = anahtar.split('-');
-            const ayIdx = parseInt(ayStr);
-            aylarEtiket.push(`${ayIsimleri[ayIdx]} ${yilStr}`);
-            netKarData.push(aylikVeri[anahtar].kazanc - aylikVeri[anahtar].gider);
+        siraliListe.forEach((k, index) => {
+            // Etiket olarak 1. Gün, 2. Gün... veya direkt Tarih (GG.AA) kullanabiliriz. 
+            // Tarih daha anlaşılır olur.
+            const d = new Date(k.tarih);
+            etiketler.push(d.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }));
+            netKarData.push((k.hasilat || 0) - (k.toplamGider || 0));
         });
 
-        // Net Kâr renkleri (Zarar varsa kırmızı, kâr varsa yeşil)
-        const cizgiRenkleri = netKarData.map(deger => deger >= 0 ? '#27ae60' : '#e74c3c');
-        const dolguRenkleri = netKarData.map(deger => deger >= 0 ? 'rgba(39, 174, 96, 0.1)' : 'rgba(231, 76, 60, 0.1)');
+        // Renkler (Eksi ise Kırmızı, Artı ise Mavi)
+        const arkaPlanRenkleri = netKarData.map(deger => deger < 0 ? '#e74c3c' : '#3498db');
 
-        chartAylik = new Chart(ctx, {
-            type: 'line',
+        chartGunlukSutun = new Chart(ctx, {
+            type: 'bar',
             data: {
-                labels: aylarEtiket,
+                labels: etiketler,
                 datasets: [{
-                    label: 'Aylık Net Kâr (TL)',
+                    label: 'Günlük Net Kâr (TL)',
                     data: netKarData,
-                    borderColor: cizgiRenkleri, // Her nokta için dinamik renk
-                    backgroundColor: dolguRenkleri,
-                    borderWidth: 3,
-                    pointBackgroundColor: cizgiRenkleri,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
-                    tension: 0.3,
-                    fill: true
+                    backgroundColor: arkaPlanRenkleri,
+                    borderRadius: 5
                 }]
             },
             options: { 
                 responsive: true, 
                 maintainAspectRatio: false,
                 plugins: {
+                    legend: { display: false }, // Renkler kendini açıklıyor, efsaneye gerek yok
                     tooltip: {
                         callbacks: {
                             label: function(context) {
@@ -1061,6 +1046,58 @@
                     }
                 }
             }
+        });
+    }
+
+    function cizAylikGrafigi() {
+        const ctx = document.getElementById('aylikGrafik').getContext('2d');
+        if(chartAylik) chartAylik.destroy();
+
+        const aylikVeri = {};
+        kayitlar.forEach(k => {
+            if(!k.tarih) return;
+            const d = new Date(k.tarih);
+            const yil = d.getFullYear();
+            const ay = d.getMonth();
+            const anahtar = `${yil}-${ay.toString().padStart(2, '0')}`;
+            if(!aylikVeri[anahtar]) aylikVeri[anahtar] = { kazanc: 0, gider: 0 };
+            aylikVeri[anahtar].kazanc += k.hasilat || 0;
+            aylikVeri[anahtar].gider += k.toplamGider || 0;
+        });
+
+        const siraliAylar = Object.keys(aylikVeri).sort();
+        const aylarEtiket = [];
+        const netKarData = [];
+        const ayIsimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+        siraliAylar.forEach(anahtar => {
+            const [yilStr, ayStr] = anahtar.split('-');
+            const ayIdx = parseInt(ayStr);
+            aylarEtiket.push(`${ayIsimleri[ayIdx]} ${yilStr}`);
+            netKarData.push(aylikVeri[anahtar].kazanc - aylikVeri[anahtar].gider);
+        });
+
+        const cizgiRenkleri = netKarData.map(deger => deger >= 0 ? '#27ae60' : '#e74c3c');
+        const dolguRenkleri = netKarData.map(deger => deger >= 0 ? 'rgba(39, 174, 96, 0.1)' : 'rgba(231, 76, 60, 0.1)');
+
+        chartAylik = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: aylarEtiket,
+                datasets: [{
+                    label: 'Aylık Net Kâr (TL)',
+                    data: netKarData,
+                    borderColor: cizgiRenkleri, 
+                    backgroundColor: dolguRenkleri,
+                    borderWidth: 3,
+                    pointBackgroundColor: cizgiRenkleri,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
         });
     }
 
