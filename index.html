@@ -6,7 +6,7 @@
     <title>Dolmuş İşletme Yönetim Paneli</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- YENİ: Flatpickr Kütüphanesi (Mobil uyumlu, günleri kilitleyebilen takvim) -->
+    <!-- Flatpickr Kütüphanesi -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
@@ -163,7 +163,6 @@
             border-bottom: 2px solid #bdc3c7;
         }
 
-        /* Flatpickr için özel düzeltmeler (Mobilde daha iyi görünmesi için) */
         .flatpickr-input[readonly] { background: white !important; cursor: pointer; }
 
         @media (max-width: 1024px) {
@@ -249,7 +248,6 @@
             <h2 id="formBaslik" style="margin-top:0; margin-bottom: 20px;">Günlük Sefer ve Gider Ekle</h2>
             <div class="form-grid">
                 <div class="input-grup">
-                    <!-- DİKKAT: type="text" yapıldı, flatpickr ile kontrol edilecek -->
                     <input type="text" id="tarih" placeholder=" ">
                     <label for="tarih">Tarih (Seferin Yapıldığı Gün)</label>
                 </div>
@@ -656,7 +654,6 @@
     let chartAylik = null;
     let chartGunlukSutun = null;
 
-    // YENİ: Flatpickr örneğini tutacağımız değişken
     let fpInstance = null;
 
     function formatTarih(dateObj) {
@@ -671,7 +668,53 @@
         return [year, month, day].join('-');
     }
 
-    // YENİ: Flatpickr Başlatma ve Tarih Sınırlandırma
+    // YENİ FONKSİYON: Seçilen tarihe göre formu doldur veya temizle
+    function formuTariheGoreDoldur(secilenTarih) {
+        if (!secilenTarih) return;
+
+        // Seçilen tarihe ait kaydı bul
+        const mevcutKayit = kayitlar.find(k => k.tarih === secilenTarih);
+
+        if (mevcutKayit) {
+            // Kayıt varsa form alanlarını doldur
+            if (mevcutKayit.guzergah) document.getElementById('guzergah').value = mevcutKayit.guzergah;
+            else document.getElementById('guzergah').value = "";
+
+            document.getElementById('hasilat').value = mevcutKayit.hasilat ? sayiyiFormatla(mevcutKayit.hasilat) : "";
+            document.getElementById('km').value = mevcutKayit.km ? sayiyiFormatla(mevcutKayit.km) : "";
+            document.getElementById('mazotTL').value = mevcutKayit.mazotTL ? sayiyiFormatla(mevcutKayit.mazotTL) : "";
+            document.getElementById('siviBakim').value = mevcutKayit.siviBakim ? sayiyiFormatla(mevcutKayit.siviBakim) : "";
+            document.getElementById('tamir').value = mevcutKayit.tamir ? sayiyiFormatla(mevcutKayit.tamir) : "";
+            document.getElementById('parca').value = mevcutKayit.parca ? sayiyiFormatla(mevcutKayit.parca) : "";
+            document.getElementById('diger').value = mevcutKayit.diger ? sayiyiFormatla(mevcutKayit.diger) : "";
+            document.getElementById('gunlukSoforUcret').value = mevcutKayit.gunlukSoforUcret ? sayiyiFormatla(mevcutKayit.gunlukSoforUcret) : "";
+
+            // Kullanıcıya bilgi ver
+            const mesajEl = document.getElementById('mesaj');
+            mesajEl.style.color = "var(--info)";
+            mesajEl.innerText = "ℹ️ Bu tarihe ait önceden kaydedilmiş bir kayıt bulundu ve forma yüklendi. Düzenleyip tekrar kaydedebilirsiniz.";
+            setTimeout(() => { mesajEl.innerText = ""; }, 5000);
+            
+        } else {
+            // Kayıt yoksa formu temizle (yeni giriş için)
+            document.getElementById('guzergah').value = "";
+            document.getElementById('hasilat').value = "";
+            document.getElementById('km').value = "";
+            document.getElementById('mazotTL').value = "";
+            document.getElementById('siviBakim').value = "";
+            document.getElementById('tamir').value = "";
+            document.getElementById('parca').value = "";
+            document.getElementById('diger').value = "";
+            document.getElementById('gunlukSoforUcret').value = "";
+            
+            const mesajEl = document.getElementById('mesaj');
+            mesajEl.style.color = "var(--info)";
+            mesajEl.innerText = "ℹ️ Bu tarihe ait henüz bir kayıt yok. Yeni giriş yapabilirsiniz.";
+            setTimeout(() => { mesajEl.innerText = ""; }, 3000);
+        }
+    }
+
+    // Flatpickr Başlatma ve Tarih Sınırlandırma
     function tarihSeciciyiBaslat() {
         const bugun = new Date();
         bugun.setHours(23, 59, 59, 999);
@@ -689,14 +732,17 @@
         fpInstance = flatpickr(inputEl, {
             locale: "tr",
             dateFormat: "Y-m-d",
-            altInput: true, // Ekranda kullanıcı dostu format göster (örn: 09.11.2026)
+            altInput: true,
             altFormat: "d.m.Y",
             defaultDate: bugun,
-            minDate: isYonetici ? null : enEski, // Yönetici değilse bugünden 2 gün öncesine kadar izin ver
-            maxDate: isYonetici ? null : bugun,  // Yönetici değilse bugünden ileriye izin verme
-            disableMobile: true, // Telefonların kendi takvimini engelle, kendi takvimimizi göster
+            minDate: isYonetici ? null : enEski,
+            maxDate: isYonetici ? null : bugun,
+            disableMobile: true,
+            onReady: function(selectedDates, dateStr, instance) {
+                formuTariheGoreDoldur(dateStr);
+            },
             onChange: function(selectedDates, dateStr, instance) {
-                // Tarih değiştiğinde bir şey yapmak isterseniz buraya eklenebilir
+                formuTariheGoreDoldur(dateStr);
             }
         });
     }
@@ -754,7 +800,7 @@
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
             yilSecenekleriniDoldur(); 
-            tarihSeciciyiBaslat(); // Yönetici girişinde takvimi kısıtlamasız başlat
+            tarihSeciciyiBaslat(); 
         } else if (girilenSifre === SOFOR_SIFRESI) {
             isYonetici = false;
             document.getElementById('loginEkrani').style.display = 'none';
@@ -764,7 +810,7 @@
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
-            tarihSeciciyiBaslat(); // Şoför girişinde takvimi 3 gün ile sınırla
+            tarihSeciciyiBaslat(); 
         } else {
             hataEl.style.display = 'block';
         }
@@ -970,23 +1016,16 @@
         const secilenTarih = document.getElementById('tarih').value;
         if(!secilenTarih) { alert("Lütfen bir tarih seçin!"); return; }
 
-        // Flatpickr minDate/maxDate kısıtlaması olduğu için buradaki manuel tarih doğrulamasına gerek kalmadı,
-        // Ancak yine de güvenlik amaçlı (örneğin konsoldan manipüle edilirse) şoför için kontrol edelim.
-        // YENİ KOD (Düzeltilmiş Kısım)
         if (!isYonetici) {
-            // Bugünün tarihini al ve saatini sıfırla (gün başı)
             const bugunD = new Date();
             bugunD.setHours(0, 0, 0, 0);
         
-            // İzin verilen en eski tarihi hesapla (bugünden 2 gün öncesi)
             const enEskiIzinli = new Date(bugunD);
             enEskiIzinli.setDate(enEskiIzinli.getDate() - 2);
         
-            // Seçilen tarihi al ve saatini sıfırla (gün başı)
             const secilenTarihObj = new Date(secilenTarih);
             secilenTarihObj.setHours(0, 0, 0, 0);
         
-            // Gün bazında karşılaştırma yap
             if (secilenTarihObj > bugunD || secilenTarihObj < enEskiIzinli) {
                 alert("⚠️ Şoför olarak sadece bugün ve geriye dönük 2 gün için veri girebilirsiniz.");
                 return;
@@ -1214,9 +1253,9 @@
             document.getElementById('diger').value = ''; document.getElementById('gunlukSoforUcret').value = '';
             document.getElementById('guzergah').value = '';
 
-            // Tarihi bugüne sıfırla
+            // Tarihi bugüne sıfırla (ve formu yeniden doldur ki bugünün verisi varsa görünsün)
             if (fpInstance) {
-                fpInstance.setDate(new Date());
+                fpInstance.setDate(new Date()); // Bu, onChange'i tetikleyecek ve formu güncelleyecektir.
             }
             
             setTimeout(() => { mesajEl.innerText = ""; }, 3000);
@@ -1234,7 +1273,12 @@
             snapshot.forEach((doc) => { kayitlar.push({ id: doc.id, ...doc.data() }); });
             
             if(document.getElementById('rapor').classList.contains('active')){ filtreleRapor(); }
-            if(document.getElementById('giris').classList.contains('active')){ aracUyarilariniGuncelle(); }
+            if(document.getElementById('giris').classList.contains('active')){ 
+                aracUyarilariniGuncelle(); 
+                // Formu mevcut tarihe göre doldur (veriler yeni yüklendiği için)
+                const aktifTarih = document.getElementById('tarih').value;
+                if (aktifTarih) formuTariheGoreDoldur(aktifTarih);
+            }
 
             const fisSnapshot = await window.getDocs(window.collection(window.db, "muhasebeFisleri"));
             const fisler = {};
@@ -2450,6 +2494,11 @@
         document.getElementById('parca').value = sayiyiFormatla(kayit.parca);
         document.getElementById('diger').value = sayiyiFormatla(kayit.diger);
         document.getElementById('gunlukSoforUcret').value = sayiyiFormatla(kayit.gunlukSoforUcret || 0);
+
+        // Düzenleme yaparken tarih değişimini tetikle, böylece onReady/onChange ile form dolacak
+        if (fpInstance) {
+            fpInstance.setDate(eskiTarih, true);
+        }
 
         switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
     }
