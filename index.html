@@ -136,17 +136,17 @@
         .btn-pdf:hover { background-color: #e67e22; }
         
         /* =========================================
-           PDF RAPOR TASARIMI (MOBİL UYUMLU HALE GETİRİLDİ)
+           PDF RAPOR TASARIMI 
            ========================================= */
         #pdfRaporAlani { 
             display: none; 
-            width: 100%; /* Mobilde taşmaması için 100% yapıldı */
-            max-width: 750px; 
+            width: 100%; 
+            max-width: 800px; 
             margin: 0 auto;
             background: white; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             color: #2c3e50;
-            padding: 30px; /* Boşluklar daraltıldı */
+            padding: 30px;
             box-sizing: border-box;
         }
 
@@ -170,16 +170,24 @@
         .pdf-list li:last-child { border-bottom: none; }
         .pdf-list li strong { color: #2c3e50; font-weight: 600; }
 
-        .pdf-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        .pdf-table th, .pdf-table td { padding: 8px; text-align: left; font-size: 12px; }
+        /* PDF Tablo Sığdırma Düzeltmesi */
+        .pdf-table { width: 100%; border-collapse: collapse; margin-top: 5px; table-layout: fixed; }
+        .pdf-table th, .pdf-table td { padding: 8px; text-align: left; font-size: 11px; word-wrap: break-word; }
         .pdf-table thead { background-color: #2c3e50; color: white; }
         .pdf-table th { font-weight: 600; text-transform: uppercase; font-size: 10px; }
         .pdf-table tbody tr { border-bottom: 1px solid #ecf0f1; }
         .pdf-table tbody tr:nth-child(even) { background-color: #f9f9f9; }
+        
+        /* Sütun Genişliklerini Sabitleme */
+        .pdf-table th:nth-child(1) { width: 30%; }
+        .pdf-table th:nth-child(2) { width: 15%; text-align: center; }
+        .pdf-table th:nth-child(3) { width: 30%; text-align: right; }
+        .pdf-table th:nth-child(4) { width: 25%; text-align: right; }
+        .pdf-table td:nth-child(2) { text-align: center; }
+        .pdf-table td:nth-child(3), .pdf-table td:nth-child(4) { text-align: right; }
 
         .pdf-footer { text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 10px; color: #95a5a6; }
 
-        /* Mobil */
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
             .chart-grid { grid-template-columns: 1fr; } 
@@ -210,12 +218,11 @@
             .toplam-sabit { flex-direction: column; align-items: flex-start; gap: 5px; }
             .toplam-sabit strong { font-size: 18px; }
             .rapor-filtre-alani { flex-direction: column; align-items: stretch; }
-            /* Mobilde PDF tasarımını daralt */
             #pdfRaporAlani { padding: 15px; }
             .pdf-stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
             .pdf-2col { grid-template-columns: 1fr; gap: 10px; }
             .pdf-header h1 { font-size: 18px; }
-            .pdf-table th, .pdf-table td { padding: 5px; font-size: 10px; }
+            .pdf-table th, .pdf-table td { padding: 5px; font-size: 9px; }
         }
     </style>
 </head>
@@ -409,6 +416,16 @@
             </div>
         </div>
 
+        <!-- YENİ: GÜNLÜK NET KÂR ÇİZGİ GRAFİĞİ -->
+        <div class="chart-grid">
+            <div class="chart-card chart-full-width">
+                <h3>📈 Seçilen Aralık: Günlük Net Kâr Çizgi Grafiği (Trend)</h3>
+                <div class="chart-container-wrapper">
+                    <canvas id="gunlukCizgiGrafik"></canvas>
+                </div>
+            </div>
+        </div>
+
         <div class="chart-grid">
             <div class="chart-card chart-full-width">
                 <h3>📅 Seçilen Aralık: Günlük Kâr/Zarar (Sütun Grafik)</h3>
@@ -546,7 +563,7 @@
 </div>
 
 <!-- ========================================= -->
-<!-- PDF RAPOR ŞABLONU (TAMAMIYLA GİZLİDİR) -->
+<!-- PDF RAPOR ŞABLONU -->
 <!-- ========================================= -->
 <div id="pdfRaporAlani">
     <div class="pdf-header">
@@ -606,7 +623,7 @@
                     <th>Güzergah</th>
                     <th>Sefer</th>
                     <th>Toplam Kâr</th>
-                    <th>Ortalama Kâr</th>
+                    <th>Ort. Kâr</th>
                 </tr>
             </thead>
             <tbody id="pdfGuzergahTablo">
@@ -628,6 +645,7 @@
     let chartHaftalik = null;
     let chartAylik = null;
     let chartGunlukSutun = null;
+    let chartGunlukCizgi = null; // YENİ
 
     function formatTarih(dateObj) {
         let d = new Date(dateObj),
@@ -1032,6 +1050,7 @@
         cizTrendGrafigi(filtrelenmisKayitlar);
         cizGiderGrafigi(tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tSabit);
         cizHaftalikGrafigi(filtrelenmisKayitlar);
+        cizGunlukCizgiGrafigi(filtrelenmisKayitlar); // YENİ EKLENDİ
         cizGunlukSutunGrafigi(filtrelenmisKayitlar);
         cizAylikGrafigi();
         guzergahAnaliziYap(filtrelenmisKayitlar);
@@ -1142,6 +1161,49 @@
                 }]
             },
             options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    // YENİ: GÜNLÜK NET KÂR ÇİZGİ GRAFİĞİ
+    function cizGunlukCizgiGrafigi(liste) {
+        const ctx = document.getElementById('gunlukCizgiGrafik').getContext('2d');
+        if(chartGunlukCizgi) chartGunlukCizgi.destroy();
+
+        const siraliListe = [...liste].sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
+
+        const etiketler = [];
+        const netKarData = [];
+
+        siraliListe.forEach(k => {
+            const d = new Date(k.tarih);
+            etiketler.push(d.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }));
+            netKarData.push((k.hasilat || 0) - (k.toplamGider || 0));
+        });
+
+        // Çizgi rengi genel trende göre belirlenebilir, şimdilik sabit yeşil yapalım
+        chartGunlukCizgi = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: etiketler,
+                datasets: [{
+                    label: 'Günlük Net Kâr (TL)',
+                    data: netKarData,
+                    borderColor: '#2ecc71',
+                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#2ecc71',
+                    pointRadius: 4,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
         });
     }
 
@@ -1377,13 +1439,12 @@
         // Tarayıcıda anlık görünür yap (html2pdf render edebilsin diye)
         element.style.display = 'block'; 
 
-        // PDF AYARLARI (Daha iyi sığması için güncellendi)
         const opt = {
-            margin:       [0.2, 0.2, 0.2, 0.2], // Kenar boşluklarını daralttık
+            margin:       [0.2, 0.2, 0.2, 0.2], // Kenar boşlukları
             filename:     `Dolmus_Raporu_${baslangicStr}_${bitisStr}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2, useCORS: true, scrollY: 0 }, 
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' } // A4 formatına zorladık
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' } // A4 formatı
         };
 
         // PDF oluştur ve indir
