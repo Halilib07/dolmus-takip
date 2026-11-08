@@ -714,11 +714,33 @@
         const secilenTarih = document.getElementById('tarih').value;
         if(!secilenTarih) { alert("Lütfen bir tarih seçin!"); return; }
 
+        const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
+
         const siviBakimDeger = formatiCoz(document.getElementById('siviBakim').value);
         const kmDeger = formatiCoz(document.getElementById('km').value);
         const hasilatDeger = formatiCoz(document.getElementById('hasilat').value);
         const soforDeger = formatiCoz(document.getElementById('gunlukSoforUcret').value);
         const secilenGuzergah = document.getElementById('guzergah').value;
+        const mazotDeger = formatiCoz(document.getElementById('mazotTL').value);
+        const tamirDeger = formatiCoz(document.getElementById('tamir').value);
+        const parcaDeger = formatiCoz(document.getElementById('parca').value);
+        const digerDeger = formatiCoz(document.getElementById('diger').value);
+
+        // 0) En az bir gerçek veri girilmiş olmalı (sadece tarih veya sadece güzergah yetmez)
+        const herhangiBirVeriVar =
+            hasilatDeger > 0 ||
+            kmDeger > 0 ||
+            mazotDeger > 0 ||
+            siviBakimDeger > 0 ||
+            tamirDeger > 0 ||
+            parcaDeger > 0 ||
+            digerDeger > 0 ||
+            soforDeger > 0;
+
+        if (!herhangiBirVeriVar && !ayniTarihliKayit) {
+            alert("⚠️ Hiçbir veri girmediniz. Kaydetmek için en az bir kazanç veya gider tutarı giriniz.");
+            return;
+        }
 
         // 1) Sıvı bakım girildiyse KM zorunlu
         if (siviBakimDeger > 0 && kmDeger === 0) {
@@ -741,8 +763,6 @@
                 document.getElementById('gunlukSoforUcret').focus(); return;
             }
         }
-
-        const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
 
         if (ayniTarihliKayit) {
             const onay = confirm("⚠️ DİKKAT: " + secilenTarih.split('-').reverse().join('.') + " tarihinde zaten bir kayıt var!\n\nSadece DOLDURDUĞUNUZ kutular güncellenecek, BOŞ bıraktığınız kutular eski haliyle kalacaktır. Onaylıyor musunuz?");
