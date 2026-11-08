@@ -133,12 +133,19 @@
         .chart-full-width { grid-column: span 2; }
 
         /* MUHASEBE RAPOR TABLOSU STİLLERİ */
-        .mali-tablo { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        .mali-tablo th { background: var(--primary); color: white; padding: 12px; text-align: left; }
-        .mali-tablo td { padding: 10px 12px; border-bottom: 1px solid #eee; }
-        .mali-tablo .grup-baslik { font-weight: bold; background: #f8f9fa; color: var(--primary); }
-        .mali-tablo .toplam-row { font-weight: bold; background: #ecf0f1; border-top: 2px solid var(--primary); }
-        .mali-tablo .kar-row { font-weight: bold; background: #e8f8f5; color: var(--success); font-size: 16px; border-top: 2px solid var(--success); }
+        .mali-tablo { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; table-layout: fixed; }
+        .mali-tablo th { background: var(--primary); color: white; padding: 12px; text-align: left; border: 1px solid #2c3e50; }
+        .mali-tablo th:first-child { width: 50%; }
+        .mali-tablo th:nth-child(2) { width: 30%; text-align: right; }
+        .mali-tablo th:nth-child(3) { width: 20%; text-align: right; }
+        
+        .mali-tablo td { padding: 10px 12px; border-bottom: 1px solid #eee; white-space: normal; word-wrap: break-word; }
+        .mali-tablo td:nth-child(2) { text-align: right; }
+        .mali-tablo td:nth-child(3) { text-align: right; }
+        
+        .mali-tablo .grup-baslik td { font-weight: bold; background: #f8f9fa; color: var(--primary); text-transform: uppercase; font-size: 13px; padding-top: 15px; padding-bottom: 5px; border-bottom: 2px solid var(--primary); }
+        .mali-tablo .toplam-row td { font-weight: bold; background: #ecf0f1; border-top: 2px solid var(--primary); font-size: 15px; color: var(--primary); }
+        .mali-tablo .kar-row td { font-weight: bold; background: #e8f8f5; color: var(--success); font-size: 16px; border-top: 2px solid var(--success); }
 
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
