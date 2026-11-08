@@ -295,18 +295,18 @@
                 <label for="filtreAy" class="select-label">Ay Seçimi</label>
                 <select id="filtreAy" onchange="yilAyDegisti()">
                     <option value="">Tümü</option>
-                    <option value="0">Ocak</option>
-                    <option value="1">Şubat</option>
-                    <option value="2">Mart</option>
-                    <option value="3">Nisan</option>
-                    <option value="4">Mayıs</option>
-                    <option value="5">Haziran</option>
-                    <option value="6">Temmuz</option>
-                    <option value="7">Ağustos</option>
-                    <option value="8">Eylül</option>
-                    <option value="9">Ekim</option>
-                    <option value="10">Kasım</option>
-                    <option value="11">Aralık</option>
+                    <option value="1">Ocak</option>
+                    <option value="2">Şubat</option>
+                    <option value="3">Mart</option>
+                    <option value="4">Nisan</option>
+                    <option value="5">Mayıs</option>
+                    <option value="6">Haziran</option>
+                    <option value="7">Temmuz</option>
+                    <option value="8">Ağustos</option>
+                    <option value="9">Eylül</option>
+                    <option value="10">Ekim</option>
+                    <option value="11">Kasım</option>
+                    <option value="12">Aralık</option>
                 </select>
             </div>
             <div class="input-grup">
@@ -505,18 +505,18 @@
                 <div class="input-grup">
                     <label for="ukomeAy" class="select-label">Ay Seçin</label>
                     <select id="ukomeAy">
-                        <option value="0">Ocak</option>
-                        <option value="1">Şubat</option>
-                        <option value="2">Mart</option>
-                        <option value="3">Nisan</option>
-                        <option value="4">Mayıs</option>
-                        <option value="5">Haziran</option>
-                        <option value="6">Temmuz</option>
-                        <option value="7">Ağustos</option>
-                        <option value="8">Eylül</option>
-                        <option value="9">Ekim</option>
-                        <option value="10">Kasım</option>
-                        <option value="11">Aralık</option>
+                        <option value="1">Ocak</option>
+                        <option value="2">Şubat</option>
+                        <option value="3">Mart</option>
+                        <option value="4">Nisan</option>
+                        <option value="5">Mayıs</option>
+                        <option value="6">Haziran</option>
+                        <option value="7">Temmuz</option>
+                        <option value="8">Ağustos</option>
+                        <option value="9">Eylül</option>
+                        <option value="10">Ekim</option>
+                        <option value="11">Kasım</option>
+                        <option value="12">Aralık</option>
                     </select>
                 </div>
                 <div class="input-grup full">
@@ -730,22 +730,15 @@
         const simdikiYil = new Date().getFullYear();
         let yillar = new Set();
 
-        // 1. Bulunduğumuz yıldan 5 yıl geriye ve 5 yıl ileriye otomatik ekle
         for (let y = simdikiYil - 5; y <= simdikiYil + 5; y++) {
             yillar.add(y);
         }
 
-        // 2. Veritabanında kayıtlı (kayitlar) yılları da bul ve listeye ekle
         kayitlar.forEach(k => {
-            if (k.tarih) {
-                const kayitYili = new Date(k.tarih).getFullYear();
-                yillar.add(kayitYili);
-            }
+            if (k.tarih) yillar.add(new Date(k.tarih).getFullYear());
         });
 
-        // Yılları küçükten büyüğe doğru sırala
         const siraliYillar = Array.from(yillar).sort((a, b) => a - b);
-
         let secenekler = '<option value="">Tümü</option>';
         let seceneklerTumsuz = '';
 
@@ -769,7 +762,7 @@
 
         if (secilenYil) {
             if (secilenAy !== "") {
-                const ayInt = parseInt(secilenAy);
+                const ayInt = parseInt(secilenAy) - 1; // 1-12 -> 0-11 JS çevrimi
                 const ilkGun = new Date(secilenYil, ayInt, 1);
                 const sonGun = new Date(secilenYil, ayInt + 1, 0);
                 baslangicInput.value = formatTarih(ilkGun);
@@ -781,7 +774,7 @@
                 bitisInput.value = formatTarih(sonGun);
             }
         } else if (secilenAy !== "") {
-            const ayInt = parseInt(secilenAy);
+            const ayInt = parseInt(secilenAy) - 1;
             const simdikiYil = new Date().getFullYear();
             const ilkGun = new Date(simdikiYil, ayInt, 1);
             const sonGun = new Date(simdikiYil, ayInt + 1, 0);
@@ -1039,18 +1032,18 @@
             else { kayit[alan] = (alan === 'guzergah') ? "Belirtilmedi" : 0; }
         });
 
+        // YENİ AY SİSTEMİ (1-12)
         const [yilStr, ayStr] = secilenTarih.split('-');
-        const ayId = `${yilStr}_${parseInt(ayStr) - 1}`;
+        const ayId = `${yilStr}_${parseInt(ayStr)}`;
         
         try {
-            // Fiş ve UKOME dağıtımı kontrolü (Eğer daha önce dağıtılmamışsa otomatik hesapla)
             const fisDoc = await window.getDoc(window.doc(window.db, "muhasebeFisleri", ayId));
             if (fisDoc.exists()) {
                 const fis = fisDoc.data();
                 const oAyinKayitlari = kayitlar.filter(k => {
                     if(!k.tarih) return false;
                     const kTarihObj = new Date(k.tarih);
-                    return kTarihObj.getFullYear() === parseInt(yilStr) && kTarihObj.getMonth() === (parseInt(ayStr) - 1) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : '');
+                    return kTarihObj.getFullYear() === parseInt(yilStr) && (kTarihObj.getMonth() + 1) === parseInt(ayStr) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : '');
                 });
                 const gunSayisi = oAyinKayitlari.length + 1;
 
@@ -1070,14 +1063,13 @@
                 }
             }
 
-            // UKOME Kontrolü
             const ukomeDoc = await window.getDoc(window.doc(window.db, "ukomeDestekleri", ayId));
             if (ukomeDoc.exists()) {
                 const ukome = ukomeDoc.data();
                 const oAyinKayitlari = kayitlar.filter(k => {
                     if(!k.tarih) return false;
                     const kTarihObj = new Date(k.tarih);
-                    return kTarihObj.getFullYear() === parseInt(yilStr) && kTarihObj.getMonth() === (parseInt(ayStr) - 1) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : '');
+                    return kTarihObj.getFullYear() === parseInt(yilStr) && (kTarihObj.getMonth() + 1) === parseInt(ayStr) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : '');
                 });
                 const gunSayisi = oAyinKayitlari.length + 1;
                 
@@ -1086,23 +1078,22 @@
                 }
             }
 
-            // Geçici Vergi Kontrolü
-            const ayInt = parseInt(ayStr) - 1;
-            const donem = ayInt < 3 ? 1 : (ayInt < 6 ? 2 : (ayInt < 9 ? 3 : 4));
+            const ayInt = parseInt(ayStr);
+            const donem = ayInt <= 3 ? 1 : (ayInt <= 6 ? 2 : (ayInt <= 9 ? 3 : 4));
             const gvDocId = `${yilStr}_D${donem}`;
             const gvDoc = await window.getDoc(window.doc(window.db, "geciciVergiler", gvDocId));
             if (gvDoc.exists()) {
                 const gv = gvDoc.data();
                 let donemAylar = [];
-                if (donem === 1) donemAylar = [0, 1, 2];
-                else if (donem === 2) donemAylar = [3, 4, 5];
-                else if (donem === 3) donemAylar = [6, 7, 8];
-                else if (donem === 4) donemAylar = [9, 10, 11];
+                if (donem === 1) donemAylar = [1, 2, 3];
+                else if (donem === 2) donemAylar = [4, 5, 6];
+                else if (donem === 3) donemAylar = [7, 8, 9];
+                else if (donem === 4) donemAylar = [10, 11, 12];
 
                 const oDonemKayitlari = kayitlar.filter(k => {
                     if(!k.tarih) return false;
                     const kTarihObj = new Date(k.tarih);
-                    return kTarihObj.getFullYear() === parseInt(yilStr) && donemAylar.includes(kTarihObj.getMonth()) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : '');
+                    return kTarihObj.getFullYear() === parseInt(yilStr) && donemAylar.includes(kTarihObj.getMonth() + 1) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : '');
                 });
                 const donemGunSayisi = oDonemKayitlari.length + 1;
 
@@ -1175,6 +1166,7 @@
             let dagitimGerekiyor = false;
             const batch = window.writeBatch(window.db);
 
+            // Fişler
             for (const fisId in fisler) {
                 const fis = fisler[fisId];
                 const [yil, ay] = fisId.split('_').map(Number);
@@ -1182,7 +1174,7 @@
                 const oAyinKayitlari = kayitlar.filter(k => {
                     if(!k.tarih) return false;
                     const kTarihObj = new Date(k.tarih);
-                    return kTarihObj.getFullYear() === yil && kTarihObj.getMonth() === ay;
+                    return kTarihObj.getFullYear() === yil && (kTarihObj.getMonth() + 1) === ay;
                 });
 
                 if (oAyinKayitlari.length > 0) {
@@ -1213,6 +1205,7 @@
                 }
             }
 
+            // UKOME
             for (const ukomeId in ukomeler) {
                 const ukome = ukomeler[ukomeId];
                 const [yil, ay] = ukomeId.split('_').map(Number);
@@ -1220,7 +1213,7 @@
                 const oAyinKayitlari = kayitlar.filter(k => {
                     if(!k.tarih) return false;
                     const kTarihObj = new Date(k.tarih);
-                    return kTarihObj.getFullYear() === yil && kTarihObj.getMonth() === ay;
+                    return kTarihObj.getFullYear() === yil && (kTarihObj.getMonth() + 1) === ay;
                 });
 
                 if (oAyinKayitlari.length > 0) {
@@ -1236,18 +1229,19 @@
                 }
             }
 
+            // Geçici Vergi
             for (const gvId in geciciVergiler) {
                 const gv = geciciVergiler[gvId];
                 let aylar = [];
-                if (gv.donem === 1) aylar = [0, 1, 2];
-                else if (gv.donem === 2) aylar = [3, 4, 5];
-                else if (gv.donem === 3) aylar = [6, 7, 8];
-                else if (gv.donem === 4) aylar = [9, 10, 11];
+                if (gv.donem === 1) aylar = [1, 2, 3];
+                else if (gv.donem === 2) aylar = [4, 5, 6];
+                else if (gv.donem === 3) aylar = [7, 8, 9];
+                else if (gv.donem === 4) aylar = [10, 11, 12];
 
                 const donemKayitlari = kayitlar.filter(k => {
                     if(!k.tarih) return false;
                     const kTarihObj = new Date(k.tarih);
-                    return kTarihObj.getFullYear() === gv.yil && aylar.includes(kTarihObj.getMonth());
+                    return kTarihObj.getFullYear() === gv.yil && aylar.includes(kTarihObj.getMonth() + 1);
                 });
 
                 if (donemKayitlari.length > 0) {
@@ -1313,7 +1307,7 @@
         const oAyinKayitlari = kayitlar.filter(k => {
             if(!k.tarih) return false;
             const kTarihObj = new Date(k.tarih);
-            return kTarihObj.getFullYear() === parseInt(yil) && kTarihObj.getMonth() === parseInt(ay);
+            return kTarihObj.getFullYear() === parseInt(yil) && (kTarihObj.getMonth() + 1) === parseInt(ay);
         });
 
         if(oAyinKayitlari.length === 0) {
@@ -1323,7 +1317,7 @@
 
         const gunSayisi = oAyinKayitlari.length;
         const gunlukDestek = tutar / gunSayisi;
-        const ayIsimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+        const ayIsimleri = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 
         const mesaj = `Toplam ${tutar.toLocaleString('tr-TR')} TL UKOME Desteği, ${ayIsimleri[ay]} ${yil} ayındaki ${gunSayisi} güne bölünecek.\nGünlük Gelir: ${gunlukDestek.toLocaleString('tr-TR')} TL\n\nOnaylıyor musunuz?`;
         if(!confirm(mesaj)) return;
@@ -1390,15 +1384,15 @@
         const docId = `${yil}_D${donem}`;
 
         let aylar = [];
-        if (donem == "1") aylar = [0, 1, 2];
-        else if (donem == "2") aylar = [3, 4, 5];
-        else if (donem == "3") aylar = [6, 7, 8];
-        else if (donem == "4") aylar = [9, 10, 11];
+        if (donem == "1") aylar = [1, 2, 3];
+        else if (donem == "2") aylar = [4, 5, 6];
+        else if (donem == "3") aylar = [7, 8, 9];
+        else if (donem == "4") aylar = [10, 11, 12];
 
         const donemKayitlari = kayitlar.filter(k => {
             if(!k.tarih) return false;
             const kTarihObj = new Date(k.tarih);
-            return kTarihObj.getFullYear() === parseInt(yil) && aylar.includes(kTarihObj.getMonth());
+            return kTarihObj.getFullYear() === parseInt(yil) && aylar.includes(kTarihObj.getMonth() + 1);
         });
 
         if(donemKayitlari.length === 0) {
@@ -1483,11 +1477,11 @@
         fisTarihi.setMonth(fisTarihi.getMonth() - 1);
         
         const hedefYil = fisTarihi.getFullYear();
-        const hedefAy = fisTarihi.getMonth();
+        const hedefAy = fisTarihi.getMonth() + 1; // 1-12 formatı
         
         secilenHedefAy = `${hedefYil}_${hedefAy}`;
         
-        const ayIsimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+        const ayIsimleri = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
         
         document.getElementById('hedefAyGosterge').innerText = `${ayIsimleri[hedefAy]} ${hedefYil}`;
 
@@ -1594,12 +1588,12 @@
         if(toplamDagitilacakTutar <= 0) { alert("Dağıtılacak tutar girmediniz!"); return; }
 
         const [secilenYil, secilenAy] = secilenHedefAy.split('_').map(Number);
-        const ayIsimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+        const ayIsimleri = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 
         const oAyinKayitlari = kayitlar.filter(k => {
             if(!k.tarih) return false;
             const kTarihObj = new Date(k.tarih);
-            return kTarihObj.getFullYear() === secilenYil && kTarihObj.getMonth() === secilenAy;
+            return kTarihObj.getFullYear() === secilenYil && (kTarihObj.getMonth() + 1) === secilenAy;
         });
 
         if(oAyinKayitlari.length === 0) { 
@@ -1650,7 +1644,6 @@
                     }
                 });
 
-                // Geçici vergi varsa onu da koru
                 let mevcutGeciciVergi = (kayit.muhasebeKalemleri && kayit.muhasebeKalemleri.geciciVergi) ? kayit.muhasebeKalemleri.geciciVergi : 0;
                 if (mevcutGeciciVergi > 0) {
                     kalemler.geciciVergi = mevcutGeciciVergi;
@@ -1696,14 +1689,13 @@
             const oAyinKayitlari = kayitlar.filter(k => {
                 if(!k.tarih) return false;
                 const kTarihObj = new Date(k.tarih);
-                return kTarihObj.getFullYear() === secilenYil && kTarihObj.getMonth() === secilenAy;
+                return kTarihObj.getFullYear() === secilenYil && (kTarihObj.getMonth() + 1) === secilenAy;
             });
 
             const batch = window.writeBatch(window.db);
             oAyinKayitlari.forEach(kayit => {
                 const eskiSabitPay = kayit.sabitGiderPayi || 0;
                 
-                // Geçici vergi hariç diğer tüm muhasebe kalemlerini temizle
                 let yeniKalemler = {};
                 let yeniSabitPay = 0;
                 if (kayit.muhasebeKalemleri && kayit.muhasebeKalemleri.geciciVergi) {
