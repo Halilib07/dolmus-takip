@@ -711,7 +711,7 @@
             const mesajEl = document.getElementById('mesaj');
             mesajEl.style.color = "var(--info)";
             mesajEl.innerText = "ℹ️ Bu tarihe ait önceden kaydedilmiş bir kayıt bulundu ve forma yüklendi. Düzenleyip tekrar kaydedebilirsiniz.";
-            setTimeout(() => { mesajEl.innerText = ""; }, 8000);
+            setTimeout(() => { mesajEl.innerText = ""; }, 12000);
             
         } else {
             // Kayıt yoksa formu temizle
@@ -730,7 +730,7 @@
                 const mesajEl = document.getElementById('mesaj');
                 mesajEl.style.color = "var(--info)";
                 mesajEl.innerText = "ℹ️ Bu tarihe ait henüz bir kayıt yok. Yeni giriş yapabilirsiniz.";
-                setTimeout(() => { mesajEl.innerText = ""; }, 8000);
+                setTimeout(() => { mesajEl.innerText = ""; }, 12000);
             }
         }
     }
