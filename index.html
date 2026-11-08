@@ -716,20 +716,33 @@
 
         const siviBakimDeger = formatiCoz(document.getElementById('siviBakim').value);
         const kmDeger = formatiCoz(document.getElementById('km').value);
+        const hasilatDeger = formatiCoz(document.getElementById('hasilat').value);
+        const soforDeger = formatiCoz(document.getElementById('gunlukSoforUcret').value);
+        const secilenGuzergah = document.getElementById('guzergah').value;
 
+        // 1) Sıvı bakım girildiyse KM zorunlu
         if (siviBakimDeger > 0 && kmDeger === 0) {
             alert("⚠️ DİKKAT: Sıvı Bakım tutarı girdiniz. Lütfen Güncel KM'yi de giriniz!");
             document.getElementById('km').focus(); return; 
         }
 
-        const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
-
-        const secilenGuzergah = document.getElementById('guzergah').value;
-        if (!secilenGuzergah && !ayniTarihliKayit) {
-            alert("⚠️ Lütfen güzergah seçin!");
-            document.getElementById('guzergah').focus();
-            return;
+        // 2) Günlük kazanç girildiyse Güzergah + KM + Şoför ücreti zorunlu
+        if (hasilatDeger > 0) {
+            if (!secilenGuzergah) {
+                alert("⚠️ Günlük Kazanç girdiniz. Lütfen Güzergah seçin!");
+                document.getElementById('guzergah').focus(); return;
+            }
+            if (kmDeger === 0) {
+                alert("⚠️ Günlük Kazanç girdiniz. Lütfen Güncel KM'yi giriniz!");
+                document.getElementById('km').focus(); return;
+            }
+            if (soforDeger === 0) {
+                alert("⚠️ Günlük Kazanç girdiniz. Lütfen Günlük Şoför Ücreti'ni giriniz!");
+                document.getElementById('gunlukSoforUcret').focus(); return;
+            }
         }
+
+        const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
 
         if (ayniTarihliKayit) {
             const onay = confirm("⚠️ DİKKAT: " + secilenTarih.split('-').reverse().join('.') + " tarihinde zaten bir kayıt var!\n\nSadece DOLDURDUĞUNUZ kutular güncellenecek, BOŞ bıraktığınız kutular eski haliyle kalacaktır. Onaylıyor musunuz?");
