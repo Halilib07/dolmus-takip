@@ -90,9 +90,10 @@
         .text-muted { color: #7f8c8d; font-size: 12px; }
 
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; min-width: 1400px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
-        th { background: #ecf0f1; font-weight: bold; }
+        /* SADECE ALT DETAY TABLOSU İÇİN GEÇERLİ OLAN KURAL */
+        .detay-tablo { width: 100%; min-width: 1400px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        .detay-tablo th, .detay-tablo td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
+        .detay-tablo th { background: #ecf0f1; font-weight: bold; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -132,20 +133,70 @@
 
         .chart-full-width { grid-column: span 2; }
 
-        /* MUHASEBE RAPOR TABLOSU STİLLERİ */
-        .mali-tablo { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; table-layout: fixed; }
-        .mali-tablo th { background: var(--primary); color: white; padding: 12px; text-align: left; border: 1px solid #2c3e50; }
-        .mali-tablo th:first-child { width: 50%; }
-        .mali-tablo th:nth-child(2) { width: 30%; text-align: right; }
-        .mali-tablo th:nth-child(3) { width: 20%; text-align: right; }
+        /* ==================================================== */
+        /* MUHASEBE RAPOR TABLOSU İÇİN ÖZEL İZOLE EDİLMİŞ STİLLER */
+        /* ==================================================== */
+        .mali-tablo-wrapper {
+            width: 100%;
+            overflow-x: hidden; /* Yatay kaydırmayı kapat */
+        }
         
-        .mali-tablo td { padding: 10px 12px; border-bottom: 1px solid #eee; white-space: normal; word-wrap: break-word; }
+        .mali-tablo { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 10px; 
+            font-size: 14px; 
+            table-layout: fixed; /* Sütun genişliklerini sabitler */
+        }
+        
+        /* Sütun Genişlikleri */
+        .mali-tablo th:nth-child(1) { width: 60%; text-align: left; }
+        .mali-tablo th:nth-child(2) { width: 25%; text-align: right; }
+        .mali-tablo th:nth-child(3) { width: 15%; text-align: right; }
+        
+        .mali-tablo th { 
+            background: var(--primary); 
+            color: white; 
+            padding: 12px; 
+        }
+        
+        .mali-tablo td { 
+            padding: 10px 12px; 
+            border-bottom: 1px solid #eee; 
+            white-space: normal; /* Metinlerin alt satıra inmesine izin ver */
+            word-wrap: break-word;
+        }
+        
+        /* Hücre Hizalamaları */
+        .mali-tablo td:nth-child(1) { text-align: left; }
         .mali-tablo td:nth-child(2) { text-align: right; }
-        .mali-tablo td:nth-child(3) { text-align: right; }
-        
-        .mali-tablo .grup-baslik td { font-weight: bold; background: #f8f9fa; color: var(--primary); text-transform: uppercase; font-size: 13px; padding-top: 15px; padding-bottom: 5px; border-bottom: 2px solid var(--primary); }
-        .mali-tablo .toplam-row td { font-weight: bold; background: #ecf0f1; border-top: 2px solid var(--primary); font-size: 15px; color: var(--primary); }
-        .mali-tablo .kar-row td { font-weight: bold; background: #e8f8f5; color: var(--success); font-size: 16px; border-top: 2px solid var(--success); }
+        .mali-tablo td:nth-child(3) { text-align: right; font-weight: bold; color: var(--primary); }
+
+        /* Satır Renklendirmeleri */
+        .mali-tablo .grup-baslik td { 
+            font-weight: bold; 
+            background: #f8f9fa; 
+            color: var(--primary); 
+            text-transform: uppercase; 
+            font-size: 12px; 
+            padding-top: 15px; 
+            padding-bottom: 5px; 
+            border-bottom: 2px solid var(--primary); 
+        }
+        .mali-tablo .toplam-row td { 
+            font-weight: bold; 
+            background: #ecf0f1; 
+            border-top: 2px solid var(--primary); 
+            font-size: 15px; 
+            color: var(--primary); 
+        }
+        .mali-tablo .kar-row td { 
+            font-weight: bold; 
+            background: #e8f8f5; 
+            color: var(--success); 
+            font-size: 16px; 
+            border-top: 2px solid var(--success); 
+        }
 
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
@@ -178,6 +229,11 @@
             .toplam-sabit { flex-direction: column; align-items: flex-start; gap: 5px; }
             .toplam-sabit strong { font-size: 18px; }
             .rapor-filtre-alani { flex-direction: column; align-items: stretch; }
+            
+            /* Mobil için Mali Tablo sütun genişlikleri */
+            .mali-tablo th:nth-child(1) { width: 50%; }
+            .mali-tablo th:nth-child(2) { width: 30%; }
+            .mali-tablo th:nth-child(3) { width: 20%; }
         }
     </style>
 </head>
@@ -324,16 +380,16 @@
             </div>
         </div>
 
-        <!-- YENİ EKLENEN: MALİYET VE KAR/ZARAR TABLOSU -->
+        <!-- MALİYET VE KAR/ZARAR TABLOSU -->
         <div class="card">
             <h2>📊 Maliyet Kalemleri ve Kar/Zarar Tablosu</h2>
-            <div class="analiz-tablo-wrapper">
+            <div class="mali-tablo-wrapper">
                 <table class="mali-tablo" id="maliTablo">
                     <thead>
                         <tr>
                             <th>KALEMLER</th>
-                            <th style="text-align:right;">TUTAR (TL)</th>
-                            <th style="text-align:right;">ORAN (%)</th>
+                            <th>TUTAR (TL)</th>
+                            <th>ORAN (%)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -405,7 +461,8 @@
         <div class="card">
             <h2>Filtrelenen Kayıtlar (Detaylı)</h2>
             <div class="tablo-kapsayici">
-                <table>
+                <!-- GENEL TABLE ETİKETİ KALDIRILDI, DETAY-TABLO SINIFI EKLENDİ -->
+                <table class="detay-tablo">
                     <thead>
                         <tr>
                             <th>Sefer Tarihi</th>
@@ -869,7 +926,6 @@
             tarih: secilenTarih,
             zaman: ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now(),
             kayitSaati: Date.now(),
-            // Kalem kalem muhasebe dağıtımları varsa korunacak
             muhasebeKalemleri: ayniTarihliKayit ? (ayniTarihliKayit.muhasebeKalemleri || {}) : {},
             sabitGiderPayi: ayniTarihliKayit ? (ayniTarihliKayit.sabitGiderPayi || 0) : 0
         };
@@ -881,7 +937,6 @@
             else { kayit[alan] = (alan === 'guzergah') ? "Belirtilmedi" : 0; }
         });
 
-        // OTOMATİK FİŞ DAĞITIMI (Eğer o aya ait fiş varsa ve güne henüz dağıtılmamışsa)
         const [yilStr, ayStr] = secilenTarih.split('-');
         const ayId = `${yilStr}_${parseInt(ayStr) - 1}`;
         
@@ -890,7 +945,6 @@
             if (fisDoc.exists()) {
                 const fis = fisDoc.data();
                 
-                // O aydaki toplam gün sayısını bul (kendisi dahil)
                 const oAyinKayitlari = kayitlar.filter(k => {
                     if(!k.tarih) return false;
                     const kTarihObj = new Date(k.tarih);
@@ -899,7 +953,6 @@
                 
                 const gunSayisi = oAyinKayitlari.length + 1;
 
-                // Eğer güncelleme yapılıyorsa ve zaten kalemler atanmışsa tekrar bölme
                 if (!ayniTarihliKayit || !ayniTarihliKayit.muhasebeKalemleri || Object.keys(ayniTarihliKayit.muhasebeKalemleri).length === 0) {
                     let toplamPay = 0;
                     kayit.muhasebeKalemleri = {};
@@ -951,7 +1004,6 @@
         } finally { btn.innerText = "Günü Kaydet (Buluta Gönder)"; btn.disabled = false; }
     }
 
-    // ARKA PLANDA ÇALIŞAN OTOMATİK DAĞITICI
     window.dinleVeriler = function() {
         if(!window.firebaseHazir) { setTimeout(window.dinleVeriler, 500); return; }
         const q = window.query(window.collection(window.db, "kayitlar"), window.orderBy("tarih", "desc")); 
@@ -963,7 +1015,6 @@
             if(document.getElementById('rapor').classList.contains('active')){ filtreleRapor(); }
             if(document.getElementById('giris').classList.contains('active')){ aracUyarilariniGuncelle(); }
 
-            // OTOMATİK DAĞITIM KONTROLÜ
             const fisSnapshot = await window.getDocs(window.collection(window.db, "muhasebeFisleri"));
             const fisler = {};
             fisSnapshot.forEach(d => { fisler[d.id] = d.data(); });
@@ -1018,8 +1069,6 @@
             }
         });
     }
-
-    // ========== SABİT GİDER FİŞİ FONKSİYONLARI ==========
 
     function guncelleToplamSabit() {
         const toplam = 
@@ -1233,8 +1282,6 @@
         }
     }
 
-    // ========== RAPOR FONKSİYONLARI ==========
-
     function filtreleRapor() {
         const baslangicStr = document.getElementById('filtreBaslangic').value;
         const bitisStr = document.getElementById('filtreBitis').value;
@@ -1288,7 +1335,6 @@
         document.getElementById('rOrtKar').innerText = ortKar.toLocaleString('tr-TR', {maximumFractionDigits: 2}) + " TL";
         document.getElementById('rSeferSayisi').innerText = gunSayisi + " Gün";
 
-        // YENİ: MALİ TABLOYU DOLDUR
         maliTabloDoldur(tKazanc, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
 
         cizTrendGrafigi(filtrelenmisKayitlar);
@@ -1305,6 +1351,7 @@
         tbody.innerHTML = '';
 
         const oran = (tutar) => tKazanc > 0 ? ((tutar / tKazanc) * 100).toFixed(2) + "%" : "0%";
+        
         const trEkle = (baslik, tutar, isGrup = false, isToplam = false, isKar = false) => {
             const tr = document.createElement('tr');
             if (isGrup) tr.className = 'grup-baslik';
@@ -1313,8 +1360,8 @@
             
             tr.innerHTML = `
                 <td>${baslik}</td>
-                <td style="text-align:right;">${tutar.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} TL</td>
-                <td style="text-align:right;">${isGrup ? '-' : oran(tutar)}</td>
+                <td>${tutar.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} TL</td>
+                <td>${isGrup ? '-' : oran(tutar)}</td>
             `;
             tbody.appendChild(tr);
         };
@@ -1406,12 +1453,10 @@
         const data = [mazot, sivi, tamir, parca, diger, sofor];
         const colors = ['#e74c3c', '#3498db', '#f1c40f', '#9b59b6', '#95a5a6', '#2ecc71'];
 
-        // Muhasebe kalemlerini tek tek ekle
         if(muhasebe.stopaj > 0) { labels.push('Stopaj'); data.push(muhasebe.stopaj); colors.push('#34495e'); }
         if(muhasebe.kdv > 0) { labels.push('KDV'); data.push(muhasebe.kdv); colors.push('#1abc9c'); }
         if(muhasebe.sigorta > 0) { labels.push('Sigorta'); data.push(muhasebe.sigorta); colors.push('#d35400'); }
         if(muhasebe.bagKur > 0) { labels.push('Bağ-Kur'); data.push(muhasebe.bagKur); colors.push('#c0392b'); }
-        // Diğerleri
         const digerMuhasebe = (muhasebe.pesinVergi||0) + (muhasebe.gelirVergisi||0) + (muhasebe.matbaaNoter||0) + (muhasebe.muhasebe||0) + (muhasebe.sabitDigerGider||0);
         if(digerMuhasebe > 0) { labels.push('Diğer Sabit'); data.push(digerMuhasebe); colors.push('#7f8c8d'); }
 
