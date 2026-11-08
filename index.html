@@ -493,7 +493,7 @@
                 <button class="btn-dagit" id="sabitGiderKaydetBtn" onclick="sabitGiderleriDagit()">Sabit Giderleri Seçilen Aya Dağıt</button>
             </div>
             <div id="sabitGiderMesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
-            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Fiş tarihini seçtiğinizde sistem, giderleri <b>otomatik olarak bir önceki aya</b> dağıtır. Eğer o aya ait daha önce bir fiş kaydedilmişse, kutulara eski verileri yükler. Düzeltip tekrar dağıtabilirsiniz.</p>
+            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Fiş tarihini seçtiğinizde sistem, giderleri <b>otomatik olarak bir önceki aya</b> dağıtır. Eğer o ayda günlük sefer kaydı yoksa, sadece fiş arşive kaydedilir. O aya ait günlük seferler eklendiğinde, gider otomatik olarak günlere yayılır.</p>
         </div>
     </div>
 </div>
@@ -846,6 +846,27 @@
             else { kayit[alan] = (alan === 'guzergah') ? "Belirtilmedi" : 0; }
         });
 
+        // Otomatik sabit gider payı hesaplama (Eğer bu ay için bir fiş kesilmişse)
+        const [yilStr, ayStr] = secilenTarih.split('-');
+        const ayId = `${yilStr}_${parseInt(ayStr) - 1}`;
+        
+        try {
+            const fisDoc = await window.getDoc(window.doc(window.db, "muhasebeFisleri", ayId));
+            if (fisDoc.exists()) {
+                const fis = fisDoc.data();
+                // O ayda kaç gün varsa hesapla (kendisi dahil)
+                const oAyinKayitlari = kayitlar.filter(k => {
+                    if(!k.tarih) return false;
+                    const kTarihObj = new Date(k.tarih);
+                    return kTarihObj.getFullYear() === parseInt(yilStr) && kTarihObj.getMonth() === (parseInt(ayStr) - 1) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : '');
+                });
+                
+                // Kendisini de sayıya ekle
+                const gunSayisi = oAyinKayitlari.length + 1;
+                kayit.sabitGiderPayi = fis.toplam / gunSayisi;
+            }
+        } catch(e) { console.log("Fiş kontrol hatası:", e); }
+
         kayit.toplamGider = kayit.mazotTL + kayit.siviBakim + kayit.tamir + kayit.parca + kayit.diger + kayit.gunlukSoforUcret + kayit.sabitGiderPayi;
 
         try {
@@ -879,15 +900,61 @@
         } finally { btn.innerText = "Günü Kaydet (Buluta Gönder)"; btn.disabled = false; }
     }
 
+    // ARKA PLANDA ÇALIŞAN OTOMATİK DAĞITICI
     window.dinleVeriler = function() {
         if(!window.firebaseHazir) { setTimeout(window.dinleVeriler, 500); return; }
         const q = window.query(window.collection(window.db, "kayitlar"), window.orderBy("tarih", "desc")); 
         
-        window.onSnapshot(q, (snapshot) => {
+        window.onSnapshot(q, async (snapshot) => {
             kayitlar = [];
             snapshot.forEach((doc) => { kayitlar.push({ id: doc.id, ...doc.data() }); });
+            
             if(document.getElementById('rapor').classList.contains('active')){ filtreleRapor(); }
             if(document.getElementById('giris').classList.contains('active')){ aracUyarilariniGuncelle(); }
+
+            // OTOMATİK DAĞITIM KONTROLÜ
+            // Veritabanındaki tüm fişleri çek
+            const fisSnapshot = await window.getDocs(window.collection(window.db, "muhasebeFisleri"));
+            const fisler = {};
+            fisSnapshot.forEach(d => { fisler[d.id] = d.data(); });
+
+            let dagitimGerekiyor = false;
+            const batch = window.writeBatch(window.db);
+            const guncellenecekler = new Set();
+
+            for (const fisId in fisler) {
+                const fis = fisler[fisId];
+                const [yil, ay] = fisId.split('_').map(Number);
+                
+                // O aya ait tüm kayıtları bul
+                const oAyinKayitlari = kayitlar.filter(k => {
+                    if(!k.tarih) return false;
+                    const kTarihObj = new Date(k.tarih);
+                    return kTarihObj.getFullYear() === yil && kTarihObj.getMonth() === ay;
+                });
+
+                if (oAyinKayitlari.length > 0) {
+                    const gunlukPay = fis.toplam / oAyinKayitlari.length;
+                    
+                    for (const kayit of oAyinKayitlari) {
+                        // Eğer sabitGiderPayi atanmamışsa veya farklıysa (ve daha önce güncellenmemişse)
+                        if (kayit.sabitGiderPayi === 0 || !kayit.sabitGiderPayi) {
+                            const yeniToplam = (kayit.toplamGider || 0) + gunlukPay;
+                            batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
+                                sabitGiderPayi: gunlukPay, 
+                                toplamGider: yeniToplam 
+                            });
+                            guncellenecekler.add(kayit.id);
+                            dagitimGerekiyor = true;
+                        }
+                    }
+                }
+            }
+
+            if (dagitimGerekiyor) {
+                await batch.commit();
+                console.log("Otomatik dağıtım yapıldı.");
+            }
         });
     }
 
@@ -915,7 +982,6 @@
             return;
         }
 
-        // 1. Bir önceki ayı hesapla
         const fisTarihi = new Date(fisTarihiStr);
         fisTarihi.setMonth(fisTarihi.getMonth() - 1);
         
@@ -926,10 +992,8 @@
         
         const ayIsimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
         
-        // 2. Ekrana yazdır
         document.getElementById('hedefAyGosterge').innerText = `${ayIsimleri[hedefAy]} ${hedefYil}`;
 
-        // 3. Veritabanında bu ay için kayıt var mı kontrol et ve doldur
         sabitGiderFisiKontrolEt();
     }
 
@@ -1030,6 +1094,7 @@
         if(toplamDagitilacakTutar <= 0) { alert("Dağıtılacak tutar girmediniz!"); return; }
 
         const [secilenYil, secilenAy] = secilenHedefAy.split('_').map(Number);
+        const ayIsimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 
         const oAyinKayitlari = kayitlar.filter(k => {
             if(!k.tarih) return false;
@@ -1038,7 +1103,18 @@
         });
 
         if(oAyinKayitlari.length === 0) { 
-            alert("Seçilen ayda (otomatik hesaplanan geçmiş ay) sefer/kazanç kaydı yok! Lütfen önce o aya ait günlük girişleri yapın."); 
+            // KAYIT YOKSA ARŞİVE KAYDETME MANTIĞI
+            const onay = confirm(`Seçilen ${ayIsimleri[secilenAy]} ${secilenYil} ayına ait henüz günlük sefer/kazanç kaydı yok!\n\nGideri arşive (fiş olarak) kaydetmek istiyor musunuz? \n\nOnaylarsanız; ileride o aya günlük kayıt eklendiğinde sistem bu gideri otomatik olarak günlere bölecektir.`);
+            if(!onay) return;
+
+            try {
+                await sabitGiderFisiKaydet();
+                const mesajEl = document.getElementById('sabitGiderMesaj');
+                mesajEl.style.color = "green";
+                mesajEl.innerText = "✅ Fiş arşive kaydedildi! Günlük seferler girildiğinde otomatik dağıtılacak.";
+                setTimeout(() => { mesajEl.innerText = ""; }, 4000);
+                alert("✅ Başarılı! Fiş arşive kaydedildi. O aya ait kayıtlar girildiğinde arka planda otomatik olarak günlere dağıtılacaktır.");
+            } catch(e) { alert("Arşive kaydedilirken hata oluştu!"); }
             return; 
         }
         
@@ -1047,8 +1123,6 @@
 
         const docId = document.getElementById('sabitGiderDocId').value;
         const isUpdate = !!docId;
-        
-        const ayIsimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
         
         const mesaj = `Toplam ${toplamDagitilacakTutar.toLocaleString('tr-TR')} TL gider, ${ayIsimleri[secilenAy]} ${secilenYil} ayındaki ${gunSayisi} güne bölünecek.\nGünlük pay: ${gunlukPay.toLocaleString('tr-TR')} TL\n\n` + 
                       (isUpdate ? "Bu aya ait fiş GÜNCELLENECEK." : "Yeni fiş oluşturulacak.") + 
@@ -1387,11 +1461,9 @@
     window.onload = function() {
         setTimeout(() => { aracAyarlariniBuluttanYukle(); }, 1000); 
         
-        // Sabit gider fişi tarihini bugüne ayarla
         const sabitTarihEl = document.getElementById('sabitGiderTarih');
         if (sabitTarihEl) {
             sabitTarihEl.value = formatTarih(new Date());
-            // Sayfa yüklendiğinde de tarihi simüle et ki ayı hesaplasın
             setTimeout(() => { sabitGiderTarihiDegisti(); }, 1200); 
         }
     };
