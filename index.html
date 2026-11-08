@@ -66,7 +66,7 @@
         button.btn-primary { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
         
         .rapor-filtre-alani { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; background: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .rapor-filtre-alani .input-grup { margin-top: 0; flex: 1; min-width: 150px; }
+        .rapor-filtre-alani .input-grup { margin-top: 0; flex: 1; min-width: 120px; }
         .rapor-filtre-alani button { padding: 12px 20px; background: var(--info); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; height: 46px; }
         
         .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
@@ -90,7 +90,6 @@
         .text-muted { color: #7f8c8d; font-size: 12px; }
 
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        /* SADECE ALT DETAY TABLOSU İÇİN GEÇERLİ OLAN KURAL */
         .detay-tablo { width: 100%; min-width: 1400px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
         .detay-tablo th, .detay-tablo td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
         .detay-tablo th { background: #ecf0f1; font-weight: bold; }
@@ -109,7 +108,6 @@
         .input-grup select { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg fill='%237f8c8d' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>"); background-repeat: no-repeat; background-position-x: 95%; background-position-y: center; cursor: pointer;}
         .input-grup .select-label { position: absolute; left: 15px; top: 5px; color: var(--primary); font-size: 11px; font-weight: bold; margin: 0; }
 
-        /* Hedef ay göstergesi için özel stil */
         .hedef-ay-kutu { padding: 22px 15px 10px 15px; border: 1px solid var(--purple); border-radius: 8px; font-size: 16px; background: #f4ecf7; color: var(--purple); font-weight: bold; box-sizing: border-box; height: 100%; display: flex; align-items: center; }
 
         .toplam-sabit { grid-column: span 2; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid var(--primary); margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
@@ -120,7 +118,6 @@
         .btn-duzenle { background: var(--warning); }
         
         .btn-dagit { background: var(--purple); width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
-        /* Yeni eklenen sil butonu stili */
         .btn-sil-fis { background: var(--danger); width: 100%; padding: 10px; margin-top: 5px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; grid-column: span 2; display: none;}
 
         .uyari-panosu { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
@@ -136,70 +133,19 @@
 
         .chart-full-width { grid-column: span 2; }
 
-        /* ==================================================== */
-        /* MUHASEBE RAPOR TABLOSU İÇİN ÖZEL İZOLE EDİLMİŞ STİLLER */
-        /* ==================================================== */
-        .mali-tablo-wrapper {
-            width: 100%;
-            overflow-x: hidden; /* Yatay kaydırmayı kapat */
-        }
-        
-        .mali-tablo { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 10px; 
-            font-size: 14px; 
-            table-layout: fixed; /* Sütun genişliklerini sabitler */
-        }
-        
-        /* Sütun Genişlikleri */
+        .mali-tablo-wrapper { width: 100%; overflow-x: hidden; }
+        .mali-tablo { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; table-layout: fixed; }
         .mali-tablo th:nth-child(1) { width: 60%; text-align: left; }
         .mali-tablo th:nth-child(2) { width: 25%; text-align: right; }
         .mali-tablo th:nth-child(3) { width: 15%; text-align: right; }
-        
-        .mali-tablo th { 
-            background: var(--primary); 
-            color: white; 
-            padding: 12px; 
-        }
-        
-        .mali-tablo td { 
-            padding: 10px 12px; 
-            border-bottom: 1px solid #eee; 
-            white-space: normal; /* Metinlerin alt satıra inmesine izin ver */
-            word-wrap: break-word;
-        }
-        
-        /* Hücre Hizalamaları */
+        .mali-tablo th { background: var(--primary); color: white; padding: 12px; }
+        .mali-tablo td { padding: 10px 12px; border-bottom: 1px solid #eee; white-space: normal; word-wrap: break-word; }
         .mali-tablo td:nth-child(1) { text-align: left; }
         .mali-tablo td:nth-child(2) { text-align: right; }
         .mali-tablo td:nth-child(3) { text-align: right; font-weight: bold; color: var(--primary); }
-
-        /* Satır Renklendirmeleri */
-        .mali-tablo .grup-baslik td { 
-            font-weight: bold; 
-            background: #f8f9fa; 
-            color: var(--primary); 
-            text-transform: uppercase; 
-            font-size: 12px; 
-            padding-top: 15px; 
-            padding-bottom: 5px; 
-            border-bottom: 2px solid var(--primary); 
-        }
-        .mali-tablo .toplam-row td { 
-            font-weight: bold; 
-            background: #ecf0f1; 
-            border-top: 2px solid var(--primary); 
-            font-size: 15px; 
-            color: var(--primary); 
-        }
-        .mali-tablo .kar-row td { 
-            font-weight: bold; 
-            background: #e8f8f5; 
-            color: var(--success); 
-            font-size: 16px; 
-            border-top: 2px solid var(--success); 
-        }
+        .mali-tablo .grup-baslik td { font-weight: bold; background: #f8f9fa; color: var(--primary); text-transform: uppercase; font-size: 12px; padding-top: 15px; padding-bottom: 5px; border-bottom: 2px solid var(--primary); }
+        .mali-tablo .toplam-row td { font-weight: bold; background: #ecf0f1; border-top: 2px solid var(--primary); font-size: 15px; color: var(--primary); }
+        .mali-tablo .kar-row td { font-weight: bold; background: #e8f8f5; color: var(--success); font-size: 16px; border-top: 2px solid var(--success); }
 
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
@@ -232,8 +178,6 @@
             .toplam-sabit { flex-direction: column; align-items: flex-start; gap: 5px; }
             .toplam-sabit strong { font-size: 18px; }
             .rapor-filtre-alani { flex-direction: column; align-items: stretch; }
-            
-            /* Mobil için Mali Tablo sütun genişlikleri */
             .mali-tablo th:nth-child(1) { width: 50%; }
             .mali-tablo th:nth-child(2) { width: 30%; }
             .mali-tablo th:nth-child(3) { width: 20%; }
@@ -340,6 +284,33 @@
     <div id="rapor" class="tab-content">
         
         <div class="rapor-filtre-alani">
+            <!-- YENİ EKLENEN YIL VE AY SEÇENEKLERİ -->
+            <div class="input-grup">
+                <label for="filtreYil" class="select-label">Yıl Seçimi</label>
+                <select id="filtreYil" onchange="yilAyDegisti()">
+                    <option value="">Tümü</option>
+                    <!-- JS ile doldurulacak -->
+                </select>
+            </div>
+            <div class="input-grup">
+                <label for="filtreAy" class="select-label">Ay Seçimi</label>
+                <select id="filtreAy" onchange="yilAyDegisti()">
+                    <option value="">Tümü</option>
+                    <option value="0">Ocak</option>
+                    <option value="1">Şubat</option>
+                    <option value="2">Mart</option>
+                    <option value="3">Nisan</option>
+                    <option value="4">Mayıs</option>
+                    <option value="5">Haziran</option>
+                    <option value="6">Temmuz</option>
+                    <option value="7">Ağustos</option>
+                    <option value="8">Eylül</option>
+                    <option value="9">Ekim</option>
+                    <option value="10">Kasım</option>
+                    <option value="11">Aralık</option>
+                </select>
+            </div>
+            <!-- MEVCUT TARİH SEÇİCİLERİ KORUNDU -->
             <div class="input-grup">
                 <input type="date" id="filtreBaslangic">
                 <label for="filtreBaslangic">Başlangıç Tarihi</label>
@@ -583,7 +554,6 @@
                     <strong id="toplamAylikSabit">0 TL</strong>
                 </div>
                 <button class="btn-dagit" id="sabitGiderKaydetBtn" onclick="sabitGiderleriDagit()">Sabit Giderleri Seçilen Aya Dağıt</button>
-                <!-- YENİ EKLENEN SİL BUTONU -->
                 <button class="btn-sil-fis" id="sabitGiderSilBtn" onclick="sabitGiderFisiSil()">Bu Aya Ait Fişi ve Dağıtımını İptal Et (Sil)</button>
             </div>
             <div id="sabitGiderMesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
@@ -595,7 +565,7 @@
 <script>
     let kayitlar = [];
     let filtrelenmisKayitlar = [];
-    let secilenHedefAy = ""; // Otomatik hesaplanan ay
+    let secilenHedefAy = ""; 
     
     let chartTrend = null;
     let chartGider = null;
@@ -671,6 +641,7 @@
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
+            yilSecenekleriniDoldur(); // Yılları doldur
         } else if (girilenSifre === SOFOR_SIFRESI) {
             document.getElementById('loginEkrani').style.display = 'none';
             document.getElementById('uygulamaEkrani').style.display = 'block';
@@ -695,6 +666,56 @@
         if(tabId === 'rapor') { filtreleRapor(); }
         if(tabId === 'giris') { aracUyarilariniGuncelle(); }
         if(tabId === 'ayarlar') { aracAyarlariniBuluttanYukle(); }
+    }
+
+    // YENİ: Yıl seçeneklerini doldurma
+    function yilSecenekleriniDoldur() {
+        const yilSelect = document.getElementById('filtreYil');
+        const simdikiYil = new Date().getFullYear();
+        let secenekler = '<option value="">Tümü</option>';
+        for (let y = simdikiYil - 2; y <= simdikiYil + 1; y++) {
+            secenekler += `<option value="${y}">${y}</option>`;
+        }
+        yilSelect.innerHTML = secenekler;
+    }
+
+    // YENİ: Yıl veya Ay seçildiğinde çalışacak fonksiyon
+    function yilAyDegisti() {
+        const secilenYil = document.getElementById('filtreYil').value;
+        const secilenAy = document.getElementById('filtreAy').value;
+        const baslangicInput = document.getElementById('filtreBaslangic');
+        const bitisInput = document.getElementById('filtreBitis');
+
+        if (secilenYil) {
+            if (secilenAy !== "") {
+                // Hem Yıl hem Ay seçildi (Örn: 2026 Ekim)
+                const ayInt = parseInt(secilenAy);
+                const ilkGun = new Date(secilenYil, ayInt, 1);
+                const sonGun = new Date(secilenYil, ayInt + 1, 0); // Bir sonraki ayın 0. günü = bu ayın son günü
+                baslangicInput.value = formatTarih(ilkGun);
+                bitisInput.value = formatTarih(sonGun);
+            } else {
+                // Sadece Yıl seçildi (Örn: 2026 Tüm Yıl)
+                const ilkGun = new Date(secilenYil, 0, 1);
+                const sonGun = new Date(secilenYil, 11, 31);
+                baslangicInput.value = formatTarih(ilkGun);
+                bitisInput.value = formatTarih(sonGun);
+            }
+        } else if (secilenAy !== "") {
+            // Sadece Ay seçildi (Örn: Tüm yılların Ekim ayı - pek kullanılmaz ama mantık)
+            const ayInt = parseInt(secilenAy);
+            // İçinde bulunulan yılı baz alalım
+            const simdikiYil = new Date().getFullYear();
+            const ilkGun = new Date(simdikiYil, ayInt, 1);
+            const sonGun = new Date(simdikiYil, ayInt + 1, 0);
+            baslangicInput.value = formatTarih(ilkGun);
+            bitisInput.value = formatTarih(sonGun);
+        }
+        
+        // Seçim yapıldıysa otomatik filtrele
+        if (secilenYil || secilenAy !== "") {
+            filtreleRapor();
+        }
     }
 
     async function aracAyarlariniKaydet() {
@@ -1019,7 +1040,6 @@
             if(document.getElementById('rapor').classList.contains('active')){ filtreleRapor(); }
             if(document.getElementById('giris').classList.contains('active')){ aracUyarilariniGuncelle(); }
 
-            // OTOMATİK DAĞITIM KONTROLÜ
             const fisSnapshot = await window.getDocs(window.collection(window.db, "muhasebeFisleri"));
             const fisler = {};
             fisSnapshot.forEach(d => { fisler[d.id] = d.data(); });
@@ -1140,7 +1160,7 @@
                 document.getElementById('sabitDigerGider').value = sayiyiFormatla(fis.sabitDigerGider) || "";
 
                 btn.innerText = "Fişi Güncelle ve Dağıt";
-                silBtn.style.display = 'block'; // Veri varsa sil butonunu göster
+                silBtn.style.display = 'block'; 
                 guncelleToplamSabit();
             } else {
                 document.getElementById('pesinVergi').value = "";
@@ -1153,7 +1173,7 @@
                 document.getElementById('muhasebe').value = "";
                 document.getElementById('sabitDigerGider').value = "";
                 btn.innerText = "Sabit Giderleri Seçilen Aya Dağıt";
-                silBtn.style.display = 'none'; // Veri yoksa sil butonunu gizle
+                silBtn.style.display = 'none'; 
                 guncelleToplamSabit();
             }
         } catch(e) { console.error(e); }
@@ -1296,7 +1316,6 @@
         }
     }
 
-    // YENİ EKLENEN FONKSİYON: FİŞİ VE DAĞITIMINI SİLME
     async function sabitGiderFisiSil() {
         if(!window.firebaseHazir || !secilenHedefAy) return;
         
@@ -1306,10 +1325,8 @@
         const [secilenYil, secilenAy] = secilenHedefAy.split('_').map(Number);
         
         try {
-            // 1. Fişi sil
             await window.deleteDoc(window.doc(window.db, "muhasebeFisleri", secilenHedefAy));
 
-            // 2. O aya ait kayıtlardan sabit gider paylarını temizle
             const oAyinKayitlari = kayitlar.filter(k => {
                 if(!k.tarih) return false;
                 const kTarihObj = new Date(k.tarih);
@@ -1323,13 +1340,12 @@
                 
                 batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
                     sabitGiderPayi: 0, 
-                    muhasebeKalemleri: {}, // Kalemleri sıfırla
+                    muhasebeKalemleri: {},
                     toplamGider: yeniToplamGider 
                 });
             });
             await batch.commit();
 
-            // 3. Formu temizle
             document.getElementById('pesinVergi').value = "";
             document.getElementById('stopaj').value = "";
             document.getElementById('kdv').value = "";
@@ -1725,6 +1741,7 @@
 
     window.onload = function() {
         setTimeout(() => { aracAyarlariniBuluttanYukle(); }, 1000); 
+        yilSecenekleriniDoldur(); // Yılları doldur
         
         const sabitTarihEl = document.getElementById('sabitGiderTarih');
         if (sabitTarihEl) {
