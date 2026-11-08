@@ -1378,7 +1378,7 @@
         }
     }
 
-    async function ukomeSil() {
+        async function ukomeSil() {
         if(!secilenUkomeAyId) {
             alert("Lütfen önce bir yıl ve ay seçin!");
             return;
@@ -1402,7 +1402,7 @@
             const batch = window.writeBatch(window.db);
             oAyinKayitlari.forEach(kayit => {
                 batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
-                    ukomeGeliri: 0
+                    ukomeGeliri: 0 // Günlük kayıtlardaki desteği sıfırla
                 });
             });
             await batch.commit();
@@ -1411,6 +1411,10 @@
             document.getElementById('ukomeSilBtn').style.display = 'none';
             document.getElementById('ukomeDagitBtn').innerText = "Devlet Desteğini Bu Aya Dağıt";
             document.getElementById('ukomeMesaj').innerText = "";
+
+            // YENİ EKLENEN KISIM: Yerel dizideki veriyi de güncelle ve raporu yenile
+            oAyinKayitlari.forEach(k => { k.ukomeGeliri = 0; });
+            filtreleRapor(); // Raporu anında güncelle
 
             alert("✅ Devlet desteği ve o aya ait tüm dağıtımlar başarıyla silindi. Raporlar güncellendi.");
             switchTab('rapor', document.getElementById('raporTabBtn'));
@@ -1537,7 +1541,7 @@
         }
     }
 
-    async function geciciVergiSil() {
+        async function geciciVergiSil() {
         const yil = document.getElementById('geciciVergiYil').value;
         const donem = document.getElementById('geciciVergiDonem').value;
 
@@ -1582,6 +1586,11 @@
                     sabitGiderPayi: yeniSabitPay,
                     toplamGider: yeniToplamGider
                 });
+                
+                // Yerel veriyi güncelle
+                kayit.muhasebeKalemleri = mevcutKalemler;
+                kayit.sabitGiderPayi = yeniSabitPay;
+                kayit.toplamGider = yeniToplamGider;
             });
             await batch.commit();
 
@@ -1589,6 +1598,9 @@
             document.getElementById('geciciVergiSilBtn').style.display = 'none';
             document.getElementById('geciciVergiDagitBtn').innerText = "Geçici Vergiyi Döneme Dağıt";
             document.getElementById('geciciVergiMesaj').innerText = "";
+
+            // YENİ EKLENEN KISIM: Raporu anında güncelle
+            filtreleRapor();
 
             alert("✅ Geçici Vergi ve o döneme ait tüm dağıtımlar başarıyla silindi. Raporlar güncellendi.");
             switchTab('rapor', document.getElementById('raporTabBtn'));
