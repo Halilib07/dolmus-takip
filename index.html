@@ -568,7 +568,7 @@
         <p id="pdfTarihAraligi">01.11.2026 - 07.11.2026</p>
     </div>
 
-    <!-- YENİ: PDF'E EKLENEN GRAFİK RESMİ -->
+    <!-- PDF'E EKLENEN GRAFİK RESMİ -->
     <div class="pdf-section">
         <div class="pdf-section-title">📈 Kazanç - Gider Trendi (Günlük)</div>
         <img id="pdfGrafikResim" src="" alt="Grafik Yükleniyor...">
@@ -1390,29 +1390,51 @@
             pdfGuzergahTbody.appendChild(tr);
         });
 
-        // --- YENİ: EKRANDAKİ GRAFİĞİN RESMİNİ ÇEK VE PDF'E KOY ---
+        // --- YENİ: GRAFİĞİ YÜKSEK ÇÖZÜNÜRLÜKLÜ VE BEYAZ ARKAPLANLI ÇEKME ---
         if(chartTrend) {
-            const grafikResimBase64 = chartTrend.toBase64Image();
-            document.getElementById('pdfGrafikResim').src = grafikResimBase64;
+            // Grafiğin arka planını geçici olarak beyaz yap (PDF'te şeffaf görünmemesi için)
+            const orijinalArkaPlan = chartTrend.options.plugins.customCanvasBackgroundColor;
+            chartTrend.options.plugins.customCanvasBackgroundColor = 'white';
+            
+            // Chart.js'in orijinal canvas elementinden yüksek çözünürlüklü resim al
+            const canvas = chartTrend.canvas;
+            
+            // Geçici bir canvas oluşturup arka planı beyaz yapalım ve ölçeği büyütelim
+            const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = canvas.width * 2; // 2 kat daha yüksek çözünürlük
+            tmpCanvas.height = canvas.height * 2;
+            const ctx = tmpCanvas.getContext('2d');
+            
+            // Beyaz arka plan çiz
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
+            
+            // Orijinal grafiği yeni boyuta ölçekleyerek çiz
+            ctx.drawImage(canvas, 0, 0, tmpCanvas.width, tmpCanvas.height);
+            
+            // Resmi PDF'teki etikete yükle
+            document.getElementById('pdfGrafikResim').src = tmpCanvas.toDataURL("image/png", 1.0);
+            
+            // Arka planı eski haline getir
+            chartTrend.options.plugins.customCanvasBackgroundColor = orijinalArkaPlan;
         }
 
         // 3. PDF'i Oluştur ve İndir
         const element = document.getElementById('pdfRaporAlani');
         
-        // Tarayıcıda anlık görünür yap (html2pdf render edebilsin diye)
+        // Tarayıcıda anlık görünür yap
         element.style.display = 'block'; 
 
         const opt = {
-            margin:       [0.2, 0.2, 0.2, 0.2], // Kenar boşlukları
+            margin:       [0.2, 0.2, 0.2, 0.2],
             filename:     `Dolmus_Raporu_${baslangicStr}_${bitisStr}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
+            image:        { type: 'jpeg', quality: 1.0 }, // En yüksek kalite
             html2canvas:  { scale: 2, useCORS: true, scrollY: 0 }, 
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' } // A4 formatı
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
 
         // PDF oluştur ve indir
         html2pdf().set(opt).from(element).save().then(() => {
-            // İşlem bitince tekrar gizle
             element.style.display = 'none';
         });
     }
