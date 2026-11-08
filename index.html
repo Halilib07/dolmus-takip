@@ -108,6 +108,9 @@
         .input-grup select { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg fill='%237f8c8d' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>"); background-repeat: no-repeat; background-position-x: 95%; background-position-y: center; cursor: pointer;}
         .input-grup .select-label { position: absolute; left: 15px; top: 5px; color: var(--primary); font-size: 11px; font-weight: bold; margin: 0; }
 
+        /* Hedef ay göstergesi için özel stil */
+        .hedef-ay-kutu { padding: 22px 15px 10px 15px; border: 1px solid var(--purple); border-radius: 8px; font-size: 16px; background: #f4ecf7; color: var(--purple); font-weight: bold; box-sizing: border-box; height: 100%; display: flex; align-items: center; }
+
         .toplam-sabit { grid-column: span 2; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid var(--primary); margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
         .toplam-sabit span { font-weight: bold; font-size: 16px; }
         .toplam-sabit strong { font-size: 20px; color: var(--primary); }
@@ -151,6 +154,7 @@
             .input-grup label { left: 12px; top: 14px; font-size: 13px; }
             .input-grup .select-label { left: 12px; top: 3px; font-size: 10px; }
             .input-grup input:focus + label, .input-grup input:not(:placeholder-shown) + label { top: 3px; font-size: 10px; }
+            .hedef-ay-kutu { padding: 18px 12px 8px 12px; font-size: 15px; }
             .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
             .stat-box { padding: 10px; }
             .stat-box p { font-size: 16px; }
@@ -434,17 +438,15 @@
             <div class="form-grid">
                 <input type="hidden" id="sabitGiderDocId" value="">
                 
+                <!-- FİŞ TARİHİ VE OTOMATİK HEDEF AY GÖSTERGESİ -->
                 <div class="input-grup">
-                    <input type="date" id="sabitGiderTarih">
+                    <input type="date" id="sabitGiderTarih" onchange="sabitGiderTarihiDegisti()">
                     <label for="sabitGiderTarih">Fişin Kesim Tarihi (Arşiv)</label>
                 </div>
                 
-                <!-- YENİ EKLENEN: HEDEF AY SEÇİMİ -->
                 <div class="input-grup">
-                    <label for="sabitGiderHedefAy" class="select-label">Giderlerin Dağıtılacağı Ay</label>
-                    <select id="sabitGiderHedefAy" onchange="sabitGiderFisiKontrolEt()" style="border-color: var(--purple); font-weight: bold; color: var(--purple);">
-                        <!-- Seçenekler JS ile doldurulacak -->
-                    </select>
+                    <label class="select-label" style="color:var(--purple);">Dağıtılacak Dönem (Otomatik)</label>
+                    <div class="hedef-ay-kutu" id="hedefAyGosterge">Seçilmedi...</div>
                 </div>
 
                 <div class="input-grup">
@@ -491,7 +493,7 @@
                 <button class="btn-dagit" id="sabitGiderKaydetBtn" onclick="sabitGiderleriDagit()">Sabit Giderleri Seçilen Aya Dağıt</button>
             </div>
             <div id="sabitGiderMesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
-            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Fiş tarihi sadece arşiv amaçlıdır. Dağıtım işlemi, yukarıdaki açılır menüden <b>seçtiğiniz aya</b> ait kayıtlara (günlere) yapılır.</p>
+            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Fiş tarihini seçtiğinizde sistem, giderleri <b>otomatik olarak bir önceki aya</b> dağıtır. Eğer o aya ait daha önce bir fiş kaydedilmişse, kutulara eski verileri yükler. Düzeltip tekrar dağıtabilirsiniz.</p>
         </div>
     </div>
 </div>
@@ -499,6 +501,7 @@
 <script>
     let kayitlar = [];
     let filtrelenmisKayitlar = [];
+    let secilenHedefAy = ""; // Otomatik hesaplanan ay
     
     let chartTrend = null;
     let chartGider = null;
@@ -737,25 +740,17 @@
         const parcaDeger = formatiCoz(document.getElementById('parca').value);
         const digerDeger = formatiCoz(document.getElementById('diger').value);
 
-        // 0) En az bir gerçek veri girilmiş olmalı (sadece tarih veya sadece güzergah yetmez)
         const herhangiBirVeriVar =
-            hasilatDeger > 0 ||
-            kmDeger > 0 ||
-            mazotDeger > 0 ||
-            siviBakimDeger > 0 ||
-            tamirDeger > 0 ||
-            parcaDeger > 0 ||
-            digerDeger > 0 ||
-            soforDeger > 0;
+            hasilatDeger > 0 || kmDeger > 0 || mazotDeger > 0 ||
+            siviBakimDeger > 0 || tamirDeger > 0 || parcaDeger > 0 ||
+            digerDeger > 0 || soforDeger > 0;
 
         if (!herhangiBirVeriVar && !ayniTarihliKayit) {
             alert("⚠️ Hiçbir veri girmediniz. Kaydetmek için en az bir kazanç veya gider tutarı giriniz.");
             return;
         }
 
-        // 1.5) KM tutarlılık kontrolü (geriye ve ileriye dönük) — sadece KM girildiyse
         if (kmDeger > 0) {
-            // GERİYE DÖNÜK: seçilen tarihten önceki en yakın kayıt
             const oncekiKayitlar = kayitlar.filter(k => {
                 if (!k.tarih || !k.km || k.km <= 0) return false;
                 if (ayniTarihliKayit && k.id === ayniTarihliKayit.id) return false;
@@ -773,7 +768,6 @@
                 }
             }
 
-            // İLERİYE DÖNÜK: seçilen tarihten sonraki en yakın kayıt
             const sonrakiKayitlar = kayitlar.filter(k => {
                 if (!k.tarih || !k.km || k.km <= 0) return false;
                 if (ayniTarihliKayit && k.id === ayniTarihliKayit.id) return false;
@@ -792,18 +786,15 @@
             }
         }
 
-        // Efektif değerler: güncellemede eski kayıttaki değerler de hesaba katılır
         const efektifKm = kmDeger > 0 ? kmDeger : (ayniTarihliKayit ? (ayniTarihliKayit.km || 0) : 0);
         const efektifSofor = soforDeger > 0 ? soforDeger : (ayniTarihliKayit ? (ayniTarihliKayit.gunlukSoforUcret || 0) : 0);
         const efektifGuzergah = secilenGuzergah || (ayniTarihliKayit ? (ayniTarihliKayit.guzergah || "") : "");
 
-        // 1) Sıvı bakım girildiyse KM zorunlu (efektif KM hesaba katılır)
         if (siviBakimDeger > 0 && efektifKm === 0) {
             alert("⚠️ DİKKAT: Sıvı Bakım tutarı girdiniz. Lütfen Güncel KM'yi de giriniz!");
             document.getElementById('km').focus(); return; 
         }
 
-        // 2) Günlük kazanç girildiyse Güzergah + KM + Şoför ücreti zorunlu (efektif değerler hesaba katılır)
         if (hasilatDeger > 0) {
             if (!efektifGuzergah) {
                 alert("⚠️ Günlük Kazanç girdiniz. Lütfen Güzergah seçin!");
@@ -916,11 +907,34 @@
         document.getElementById('toplamAylikSabit').innerText = toplam.toLocaleString('tr-TR') + " TL";
     }
 
-    async function sabitGiderFisiKontrolEt() {
-        if(!window.firebaseHazir) return;
+    function sabitGiderTarihiDegisti() {
+        const fisTarihiStr = document.getElementById('sabitGiderTarih').value;
+        if(!fisTarihiStr) {
+            document.getElementById('hedefAyGosterge').innerText = "Seçilmedi...";
+            secilenHedefAy = "";
+            return;
+        }
+
+        // 1. Bir önceki ayı hesapla
+        const fisTarihi = new Date(fisTarihiStr);
+        fisTarihi.setMonth(fisTarihi.getMonth() - 1);
         
-        const secilenHedefAy = document.getElementById('sabitGiderHedefAy').value;
-        if(!secilenHedefAy) return;
+        const hedefYil = fisTarihi.getFullYear();
+        const hedefAy = fisTarihi.getMonth();
+        
+        secilenHedefAy = `${hedefYil}_${hedefAy}`;
+        
+        const ayIsimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+        
+        // 2. Ekrana yazdır
+        document.getElementById('hedefAyGosterge').innerText = `${ayIsimleri[hedefAy]} ${hedefYil}`;
+
+        // 3. Veritabanında bu ay için kayıt var mı kontrol et ve doldur
+        sabitGiderFisiKontrolEt();
+    }
+
+    async function sabitGiderFisiKontrolEt() {
+        if(!window.firebaseHazir || !secilenHedefAy) return;
 
         document.getElementById('sabitGiderDocId').value = secilenHedefAy;
 
@@ -941,9 +955,6 @@
                 document.getElementById('matbaaNoter').value = sayiyiFormatla(fis.matbaaNoter) || "";
                 document.getElementById('muhasebe').value = sayiyiFormatla(fis.muhasebe) || "";
                 document.getElementById('sabitDigerGider').value = sayiyiFormatla(fis.sabitDigerGider) || "";
-                
-                // Fiş tarihi de yüklenebilir
-                if(fis.fisTarihi) document.getElementById('sabitGiderTarih').value = fis.fisTarihi;
 
                 btn.innerText = "Fişi Güncelle ve Dağıt";
                 guncelleToplamSabit();
@@ -964,10 +975,7 @@
     }
 
     async function sabitGiderFisiKaydet() {
-        if(!window.firebaseHazir) return;
-        
-        const secilenHedefAy = document.getElementById('sabitGiderHedefAy').value;
-        if(!secilenHedefAy) { alert("Lütfen giderlerin dağıtılacağı ayı seçin!"); return; }
+        if(!window.firebaseHazir || !secilenHedefAy) return;
 
         const fisTarihi = document.getElementById('sabitGiderTarih').value; 
 
@@ -1006,9 +1014,7 @@
 
     async function sabitGiderleriDagit() {
         if(!window.firebaseHazir) return;
-        
-        const secilenHedefAy = document.getElementById('sabitGiderHedefAy').value;
-        if(!secilenHedefAy) { alert("Lütfen giderlerin dağıtılacağı ayı seçin!"); return; }
+        if(!secilenHedefAy) { alert("Lütfen önce Fiş Tarihini seçin!"); return; }
 
         const pesinVergi = formatiCoz(document.getElementById('pesinVergi').value);
         const stopaj = formatiCoz(document.getElementById('stopaj').value);
@@ -1023,7 +1029,6 @@
         const toplamDagitilacakTutar = pesinVergi + stopaj + kdv + gelirVergisi + bagKur + sigorta + matbaaNoter + muhasebe + sabitDigerGider;
         if(toplamDagitilacakTutar <= 0) { alert("Dağıtılacak tutar girmediniz!"); return; }
 
-        // Hedef ayı yıl ve ay olarak ayır (Örn: "2026_8" -> 2026, 8)
         const [secilenYil, secilenAy] = secilenHedefAy.split('_').map(Number);
 
         const oAyinKayitlari = kayitlar.filter(k => {
@@ -1033,7 +1038,7 @@
         });
 
         if(oAyinKayitlari.length === 0) { 
-            alert("Seçilen ayda sefer/kazanç kaydı yok! Lütfen önce o aya ait günlük girişleri yapın."); 
+            alert("Seçilen ayda (otomatik hesaplanan geçmiş ay) sefer/kazanç kaydı yok! Lütfen önce o aya ait günlük girişleri yapın."); 
             return; 
         }
         
@@ -1384,33 +1389,11 @@
         
         // Sabit gider fişi tarihini bugüne ayarla
         const sabitTarihEl = document.getElementById('sabitGiderTarih');
-        if (sabitTarihEl && !sabitTarihEl.value) {
+        if (sabitTarihEl) {
             sabitTarihEl.value = formatTarih(new Date());
+            // Sayfa yüklendiğinde de tarihi simüle et ki ayı hesaplasın
+            setTimeout(() => { sabitGiderTarihiDegisti(); }, 1200); 
         }
-
-        // HEDEF AY SEÇENEKLERİNİ DOLDUR
-        const hedefAySelect = document.getElementById('sabitGiderHedefAy');
-        if (hedefAySelect) {
-            const aylar = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-            const simdikiYil = new Date().getFullYear();
-            let secenekler = "";
-            
-            // 2025 - 2027 arası yıllar
-            for (let y = simdikiYil - 1; y <= simdikiYil + 1; y++) {
-                for (let m = 0; m < 12; m++) {
-                    const deger = `${y}_${m}`; 
-                    secenekler += `<option value="${deger}">${aylar[m]} ${y}</option>`;
-                }
-            }
-            hedefAySelect.innerHTML = secenekler;
-            
-            // Varsayılan olarak BİR ÖNCEKİ AYI seç
-            const oncekiAy = new Date();
-            oncekiAy.setMonth(oncekiAy.getMonth() - 1);
-            hedefAySelect.value = `${oncekiAy.getFullYear()}_${oncekiAy.getMonth()}`;
-        }
-
-        setTimeout(() => { sabitGiderFisiKontrolEt(); }, 1500);
     };
 </script>
 </body>
