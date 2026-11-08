@@ -138,16 +138,30 @@
         /* =========================================
            PDF RAPOR TASARIMI 
            ========================================= */
-        #pdfRaporAlani { 
-            display: none; 
-            width: 100%; 
-            max-width: 800px; 
+        #pdfRaporAlani {
+            display: none;
+            width: 190mm;
+            max-width: none;
             margin: 0 auto;
-            background: white; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            color: #2c3e50;
-            padding: 30px;
+            padding: 8mm;
             box-sizing: border-box;
+            background: #ffffff;
+            color: #2c3e50;
+            font-family: Arial, sans-serif;
+        }
+
+        .pdf-section,
+        .pdf-stats-grid,
+        .pdf-2col {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        #pdfGrafikResim {
+            width: 100%;
+            height: 65mm;
+            max-height: 65mm;
+            object-fit: contain;
         }
 
         .pdf-header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #2c3e50; }
@@ -1332,7 +1346,7 @@
         }
     }
 
-    function pdfIndir() {
+    async function pdfIndir() {
         if(filtrelenmisKayitlar.length === 0) {
             alert("PDF oluşturmak için önce filtreleyip veri getirmelisiniz.");
             return;
@@ -1416,53 +1430,101 @@
             pdfGuzergahTbody.appendChild(div);
         });
 
-        // --- YENİ: GRAFİĞİ YÜKSEK ÇÖZÜNÜRLÜKLÜ VE BEYAZ ARKAPLANLI ÇEKME ---
-        if(chartTrend) {
-            // Grafiğin arka planını geçici olarak beyaz yap (PDF'te şeffaf görünmemesi için)
-            const orijinalArkaPlan = chartTrend.options.plugins.customCanvasBackgroundColor;
-            chartTrend.options.plugins.customCanvasBackgroundColor = 'white';
-            
-            // Chart.js'in orijinal canvas elementinden yüksek çözünürlüklü resim al
+        // GRAFİĞİ PDF İÇİN HAZIRLA
+        if (chartTrend) {
             const canvas = chartTrend.canvas;
-            
-            // Geçici bir canvas oluşturup arka planı beyaz yapalım ve ölçeği büyütelim
+
             const tmpCanvas = document.createElement('canvas');
-            tmpCanvas.width = canvas.width * 2; // 2 kat daha yüksek çözünürlük
+            tmpCanvas.width = canvas.width * 2;
             tmpCanvas.height = canvas.height * 2;
+
             const ctx = tmpCanvas.getContext('2d');
-            
-            // Beyaz arka plan çiz
-            ctx.fillStyle = 'white';
+
+            ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
-            
-            // Orijinal grafiği yeni boyuta ölçekleyerek çiz
-            ctx.drawImage(canvas, 0, 0, tmpCanvas.width, tmpCanvas.height);
-            
-            // Resmi PDF'teki etikete yükle
-            document.getElementById('pdfGrafikResim').src = tmpCanvas.toDataURL("image/png", 1.0);
-            
-            // Arka planı eski haline getir
-            chartTrend.options.plugins.customCanvasBackgroundColor = orijinalArkaPlan;
+
+            ctx.drawImage(
+                canvas,
+                0,
+                0,
+                tmpCanvas.width,
+                tmpCanvas.height
+            );
+
+            const grafikResim = document.getElementById('pdfGrafikResim');
+
+            grafikResim.src = tmpCanvas.toDataURL('image/png');
+
+            if (grafikResim.decode) {
+                await grafikResim.decode();
+            }
         }
 
-        // 3. PDF'i Oluştur ve İndir
+        // PDF OLUŞTUR
         const element = document.getElementById('pdfRaporAlani');
-        
-        // Tarayıcıda anlık görünür yap
-        element.style.display = 'block'; 
 
-        const opt = {
-            margin:       [0.2, 0.2, 0.2, 0.2],
-            filename:     `Dolmus_Raporu_${baslangicStr}_${bitisStr}.pdf`,
-            image:        { type: 'jpeg', quality: 1.0 }, // En yüksek kalite
-            html2canvas:  { scale: 2, useCORS: true, scrollY: 0 }, 
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-        };
+        const eskiDisplay = element.style.display;
+        const eskiPosition = element.style.position;
+        const eskiLeft = element.style.left;
+        const eskiTop = element.style.top;
 
-        // PDF oluştur ve indir
-        html2pdf().set(opt).from(element).save().then(() => {
-            element.style.display = 'none';
-        });
+        try {
+            element.style.display = 'block';
+            element.style.position = 'absolute';
+            element.style.left = '0';
+            element.style.top = '0';
+
+            await new Promise(resolve => requestAnimationFrame(() => resolve()));
+
+            const opt = {
+                margin: [8, 8, 8, 8],
+
+                filename:
+                    `Dolmus_Raporu_${baslangicStr}_${bitisStr}.pdf`,
+
+                image: {
+                    type: 'jpeg',
+                    quality: 0.98
+                },
+
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                },
+
+                pagebreak: {
+                    mode: ['avoid-all', 'css', 'legacy']
+                }
+            };
+
+            await html2pdf()
+                .set(opt)
+                .from(element)
+                .save();
+
+        } catch (error) {
+
+            console.error('PDF Hatası:', error);
+
+            alert('PDF oluşturulurken hata meydana geldi.');
+
+        } finally {
+
+            element.style.display = eskiDisplay || 'none';
+            element.style.position = eskiPosition;
+            element.style.left = eskiLeft;
+            element.style.top = eskiTop;
+        }
     }
 
     window.onload = function() {
