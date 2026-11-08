@@ -136,25 +136,148 @@
         .btn-pdf:hover { background-color: #e67e22; }
         
         /* =========================================
-           PDF RAPOR TASARIMI 
+           PDF RAPOR ALANI (YENİ - SAYFALI YAPI)
            ========================================= */
         #pdfRaporAlani {
             display: none;
             width: 190mm;
-            max-width: none;
             margin: 0 auto;
-            padding: 8mm;
-            box-sizing: border-box;
-            background: #ffffff;
-            color: #2c3e50;
+            padding: 0;
+            background: #fff;
+            color: #263445;
             font-family: Arial, sans-serif;
+            box-sizing: border-box;
+            position: relative;
         }
 
-        .pdf-section,
-        .pdf-stats-grid,
-        .pdf-2col {
-            page-break-inside: avoid;
+        .pdf-page {
+            width: 190mm;
+            min-height: 277mm;
+            padding: 8mm;
+            box-sizing: border-box;
+            background: #fff;
+            position: relative;
+            page-break-after: always;
+            break-after: page;
+        }
+
+        .pdf-page:last-child {
+            page-break-after: auto;
+            break-after: auto;
+        }
+
+        .pdf-header {
+            text-align: center;
+            border-bottom: 2px solid #263445;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+        }
+
+        .pdf-header .logo {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .pdf-header h1 {
+            font-size: 23px;
+            margin: 8px 0;
+            color: #263445;
+            letter-spacing: 1px;
+        }
+
+        .pdf-header p {
+            margin: 0;
+            font-size: 13px;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+
+        .pdf-section {
+            margin-bottom: 18px;
             break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .pdf-section-title {
+            font-size: 15px;
+            font-weight: bold;
+            padding: 10px;
+            background: #edf2f7;
+            border-left: 4px solid #27ae60;
+            margin-bottom: 10px;
+            color: #263445;
+        }
+
+        .pdf-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .pdf-stat-box {
+            border: 1px solid #ddd;
+            border-radius: 7px;
+            padding: 15px;
+            text-align: center;
+            break-inside: avoid;
+            page-break-inside: avoid;
+            background: #fdfdfd;
+        }
+
+        .pdf-stat-box h4 {
+            font-size: 12px;
+            color: #64748b;
+            margin: 0 0 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pdf-stat-box p {
+            font-size: 21px;
+            font-weight: bold;
+            margin: 8px 0 0 0;
+            color: #263445;
+        }
+
+        .pdf-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .pdf-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .pdf-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #eee;
+            font-size: 13px;
+            color: #34495e;
+        }
+
+        .pdf-list li:last-child {
+            border-bottom: none;
+        }
+
+        .pdf-list li strong {
+            color: #263445;
+            font-weight: 600;
+        }
+
+        .pdf-footer {
+            border-top: 1px solid #ddd;
+            margin-top: 20px;
+            padding-top: 10px;
+            text-align: center;
+            color: #888;
+            font-size: 10px;
         }
 
         #pdfGrafikResim {
@@ -162,64 +285,38 @@
             height: 65mm;
             max-height: 65mm;
             object-fit: contain;
+            display: block;
+            margin: 0 auto;
         }
 
-        .pdf-header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #2c3e50; }
-        .pdf-header h1 { margin: 0 0 5px 0; font-size: 22px; color: #2c3e50; letter-spacing: 1px; }
-        .pdf-header p { margin: 0; font-size: 13px; color: #7f8c8d; font-weight: bold; }
-        .pdf-header .logo { font-size: 32px; margin-bottom: 5px; }
-
-        .pdf-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-        .pdf-stat-box { border: 1px solid #ecf0f1; border-top: 3px solid #2c3e50; padding: 10px; border-radius: 6px; text-align: center; background: #fdfdfd; }
-        .pdf-stat-box h4 { margin: 0 0 5px 0; font-size: 10px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.5px; }
-        .pdf-stat-box p { margin: 0; font-size: 16px; font-weight: bold; color: #2c3e50; }
-
-        .pdf-section { margin-bottom: 20px; }
-        .pdf-section-title { font-size: 14px; color: #2c3e50; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #ddd; font-weight: bold; }
-
-        .pdf-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        
-        .pdf-list { list-style: none; padding: 0; margin: 0; }
-        .pdf-list li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #eee; font-size: 12px; color: #34495e; }
-        .pdf-list li:last-child { border-bottom: none; }
-        .pdf-list li strong { color: #2c3e50; font-weight: 600; }
-
-        .pdf-footer { text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 10px; color: #95a5a6; }
-        
-        /* PDF İçindeki Grafik Resmi */
-        #pdfGrafikResim {
-            width: 100%;
-            max-height: 250px;
-            object-fit: contain;
-            margin-bottom: 20px;
-        }
-
-        /* =========================================
-           YENİ PDF GÜZERGAH TABLOSU (SABİT DIV)
-           ========================================= */
+        /* PDF GÜZERGAH TABLOSU */
         .pdf-custom-table {
             width: 100%;
-            margin-top: 5px;
-            font-size: 12px;
+            font-size: 13px;
             color: #34495e;
             border: 1px solid #eee;
             border-radius: 6px;
             overflow: hidden;
         }
+
         .pdf-custom-row {
             display: flex;
             padding: 10px;
             border-bottom: 1px solid #eee;
             align-items: center;
         }
-        .pdf-custom-row:last-child { border-bottom: none; }
+
+        .pdf-custom-row:last-child {
+            border-bottom: none;
+        }
+
         .pdf-custom-header {
-            background-color: #ecf0f1;
+            background-color: #edf2f7;
             font-weight: bold;
-            color: #2c3e50;
+            color: #263445;
             border-bottom: 1px solid #ddd;
         }
-        
+
         .pdf-c-1 { flex: 1; width: 30%; }
         .pdf-c-2 { flex: 1; width: 15%; text-align: center; }
         .pdf-c-3 { flex: 1; width: 30%; font-weight: bold; }
@@ -255,11 +352,6 @@
             .toplam-sabit { flex-direction: column; align-items: flex-start; gap: 5px; }
             .toplam-sabit strong { font-size: 18px; }
             .rapor-filtre-alani { flex-direction: column; align-items: stretch; }
-            #pdfRaporAlani { padding: 15px; }
-            .pdf-stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .pdf-2col { grid-template-columns: 1fr; gap: 10px; }
-            .pdf-header h1 { font-size: 18px; }
-            .pdf-custom-row { font-size: 10px; padding: 8px 5px; }
         }
     </style>
 </head>
@@ -383,7 +475,6 @@
             <button onclick="filtreleRapor()">Filtrele / Raporla</button>
         </div>
 
-        <!-- PDF İNDİR BUTONU -->
         <div class="pdf-btn-container">
             <button class="btn-pdf" onclick="pdfIndir()">
                 📄 Bu Dönemin Raporunu PDF İndir
@@ -591,82 +682,100 @@
 </div>
 
 <!-- ========================================= -->
-<!-- PDF RAPOR ŞABLONU -->
+<!-- PDF RAPOR ŞABLONU (SAYFALI YAPI) -->
 <!-- ========================================= -->
 <div id="pdfRaporAlani">
-    <div class="pdf-header">
-        <div class="logo">🚐</div>
-        <h1>Dolmuş İşletme Raporu</h1>
-        <p id="pdfTarihAraligi">01.11.2026 - 07.11.2026</p>
-    </div>
 
-    <!-- PDF'E EKLENEN GRAFİK RESMİ -->
-    <div class="pdf-section">
-        <div class="pdf-section-title">📈 Kazanç - Gider Trendi (Günlük)</div>
-        <img id="pdfGrafikResim" src="" alt="Grafik Yükleniyor...">
-    </div>
+    <!-- 1. SAYFA: Başlık + Grafik + İstatistikler -->
+    <div class="pdf-page">
+        <div class="pdf-header">
+            <div class="logo">🚐</div>
+            <h1>Dolmuş İşletme Raporu</h1>
+            <p id="pdfTarihAraligi">01.11.2026 - 07.11.2026</p>
+        </div>
 
-    <div class="pdf-stats-grid">
-        <div class="pdf-stat-box" style="border-top-color: #27ae60;">
-            <h4>Toplam Kazanç</h4>
-            <p id="pdfKazanc">0 TL</p>
+        <div class="pdf-section">
+            <div class="pdf-section-title">📈 Kazanç - Gider Trendi (Günlük)</div>
+            <img id="pdfGrafikResim" src="" alt="Grafik Yükleniyor...">
         </div>
-        <div class="pdf-stat-box" style="border-top-color: #e74c3c;">
-            <h4>Toplam Gider</h4>
-            <p id="pdfGider">0 TL</p>
-        </div>
-        <div class="pdf-stat-box" style="border-top-color: #2980b9;">
-            <h4>Net Kâr</h4>
-            <p id="pdfNetKar">0 TL</p>
-        </div>
-        <div class="pdf-stat-box" style="border-top-color: #8e44ad;">
-            <h4>Günlük Ort. Kâr</h4>
-            <p id="pdfOrtKar">0 TL</p>
-        </div>
-    </div>
 
-    <div class="pdf-section">
-        <div class="pdf-2col">
-            <div>
-                <div class="pdf-section-title">⭐ Öne Çıkanlar</div>
-                <ul class="pdf-list">
-                    <li><span>En İyi Gün:</span> <strong id="pdfEnIyiGun">-</strong></li>
-                    <li><span>En Yüksek Gider:</span> <strong id="pdfEnYuksekGider">-</strong></li>
-                    <li><span>Toplam Sefer (Gün):</span> <strong id="pdfSeferSayisi">0</strong></li>
-                    <li><span>Rapor Tarihi:</span> <strong id="pdfOlusturmaTarihi">-</strong></li>
-                </ul>
+        <div class="pdf-stats-grid">
+            <div class="pdf-stat-box" style="border-top: 3px solid #27ae60;">
+                <h4>Toplam Kazanç</h4>
+                <p id="pdfKazanc">0 TL</p>
             </div>
-            <div>
-                <div class="pdf-section-title">⛽ Gider Kalemleri</div>
-                <ul class="pdf-list">
-                    <li><span>Mazot:</span> <strong id="pdfMazot">0 TL</strong></li>
-                    <li><span>Şoför Ücretleri:</span> <strong id="pdfSofor">0 TL</strong></li>
-                    <li><span>Sabit Giderler (Vergi/Sigorta):</span> <strong id="pdfSabit">0 TL</strong></li>
-                    <li><span>Tamir & Parça:</span> <strong id="pdfTamirParca">0 TL</strong></li>
-                    <li><span>Diğer & Sıvı Bakım:</span> <strong id="pdfDigerSivi">0 TL</strong></li>
-                </ul>
+            <div class="pdf-stat-box" style="border-top: 3px solid #e74c3c;">
+                <h4>Toplam Gider</h4>
+                <p id="pdfGider">0 TL</p>
+            </div>
+            <div class="pdf-stat-box" style="border-top: 3px solid #2980b9;">
+                <h4>Net Kâr</h4>
+                <p id="pdfNetKar">0 TL</p>
+            </div>
+            <div class="pdf-stat-box" style="border-top: 3px solid #8e44ad;">
+                <h4>Günlük Ort. Kâr</h4>
+                <p id="pdfOrtKar">0 TL</p>
             </div>
         </div>
-    </div>
 
-    <div class="pdf-section" style="page-break-inside: avoid;">
-        <div class="pdf-section-title">🛣️ Güzergah Verimlilik Analizi</div>
-        <div class="pdf-custom-table">
-            <div class="pdf-custom-row pdf-custom-header">
-                <div class="pdf-c-1">Güzergah</div>
-                <div class="pdf-c-2">Sefer</div>
-                <div class="pdf-c-3">Toplam Kâr</div>
-                <div class="pdf-c-4">Ort. Kâr/Sefer</div>
-            </div>
-            <!-- Veriler buraya JavaScript ile eklenecek -->
-            <div id="pdfGuzergahTabloFlex">
-            </div>
+        <div class="pdf-footer">
+            Bu rapor Dolmuş İşletme Yönetim Paneli tarafından otomatik olarak oluşturulmuştur.
         </div>
     </div>
 
-    <div class="pdf-footer">
-        Bu rapor Dolmuş İşletme Yönetim Paneli tarafından otomatik olarak oluşturulmuştur.
+    <!-- 2. SAYFA: Öne Çıkanlar + Gider Kalemleri -->
+    <div class="pdf-page">
+        <div class="pdf-section">
+            <div class="pdf-section-title">⭐ Öne Çıkanlar & Gider Kalemleri</div>
+            <div class="pdf-2col">
+                <div>
+                    <h4 style="margin-top:0; color:#263445; font-size:13px;">⭐ Öne Çıkanlar</h4>
+                    <ul class="pdf-list">
+                        <li><span>En İyi Gün:</span> <strong id="pdfEnIyiGun">-</strong></li>
+                        <li><span>En Yüksek Gider:</span> <strong id="pdfEnYuksekGider">-</strong></li>
+                        <li><span>Toplam Sefer (Gün):</span> <strong id="pdfSeferSayisi">0</strong></li>
+                        <li><span>Rapor Tarihi:</span> <strong id="pdfOlusturmaTarihi">-</strong></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="margin-top:0; color:#263445; font-size:13px;">⛽ Gider Kalemleri</h4>
+                    <ul class="pdf-list">
+                        <li><span>Mazot:</span> <strong id="pdfMazot">0 TL</strong></li>
+                        <li><span>Şoför Ücretleri:</span> <strong id="pdfSofor">0 TL</strong></li>
+                        <li><span>Sabit Giderler:</span> <strong id="pdfSabit">0 TL</strong></li>
+                        <li><span>Tamir & Parça:</span> <strong id="pdfTamirParca">0 TL</strong></li>
+                        <li><span>Diğer & Sıvı Bakım:</span> <strong id="pdfDigerSivi">0 TL</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="pdf-footer">
+            Bu rapor Dolmuş İşletme Yönetim Paneli tarafından otomatik olarak oluşturulmuştur.
+        </div>
     </div>
+
+    <!-- 3. SAYFA: Güzergah Analizi -->
+    <div class="pdf-page">
+        <div class="pdf-section">
+            <div class="pdf-section-title">🛣️ Güzergah Verimlilik Analizi</div>
+            <div class="pdf-custom-table">
+                <div class="pdf-custom-row pdf-custom-header">
+                    <div class="pdf-c-1">Güzergah</div>
+                    <div class="pdf-c-2">Sefer</div>
+                    <div class="pdf-c-3">Toplam Kâr</div>
+                    <div class="pdf-c-4">Ort. Kâr/Sefer</div>
+                </div>
+                <div id="pdfGuzergahTabloFlex">
+                </div>
+            </div>
+        </div>
+
+        <div class="pdf-footer">
+            Bu rapor Dolmuş İşletme Yönetim Paneli tarafından otomatik olarak oluşturulmuştur.
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -908,7 +1017,6 @@
 
         const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
 
-        // GÜZERGAH KONTROLÜ: Yeni kayıtta boş bırakılamaz, düzenlemede eski değer korunur
         const secilenGuzergah = document.getElementById('guzergah').value;
         if (!secilenGuzergah && !ayniTarihliKayit) {
             alert("⚠️ Lütfen güzergah seçin!");
@@ -977,7 +1085,7 @@
             document.getElementById('mazotTL').value = ''; document.getElementById('siviBakim').value = '';
             document.getElementById('tamir').value = ''; document.getElementById('parca').value = '';
             document.getElementById('diger').value = ''; document.getElementById('gunlukSoforUcret').value = '';
-            document.getElementById('guzergah').value = ''; // Seçimi sıfırla
+            document.getElementById('guzergah').value = '';
             
             setTimeout(() => { mesajEl.innerText = ""; }, 3000);
         } catch (e) {
@@ -1346,6 +1454,72 @@
         }
     }
 
+    // =============================================
+    // PDF OLUŞTURMA VE İNDİRME
+    // =============================================
+    async function pdfOlusturVeIndir(element, baslangicStr, bitisStr) {
+        if (!element) {
+            alert("PDF rapor alanı bulunamadı!");
+            return;
+        }
+
+        const oncekiDisplay = element.style.display;
+
+        try {
+            element.style.display = "block";
+
+            // Grafik resminin yüklenmesini bekle
+            const grafik = document.getElementById("pdfGrafikResim");
+            if (grafik && grafik.src) {
+                await new Promise((resolve, reject) => {
+                    if (grafik.complete && grafik.naturalWidth > 0) {
+                        resolve();
+                        return;
+                    }
+                    grafik.onload = resolve;
+                    grafik.onerror = reject;
+                });
+                if (grafik.decode) {
+                    await grafik.decode().catch(() => {});
+                }
+            }
+
+            // Layout'un oturmasını bekle
+            await new Promise(r => setTimeout(r, 200));
+            void element.offsetHeight;
+
+            const ayarlar = {
+                margin: [8, 8, 8, 8],
+                filename: `Dolmus_Raporu_${baslangicStr}_${bitisStr}.pdf`,
+                image: { type: "jpeg", quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: "#ffffff",
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: element.scrollWidth,
+                    windowHeight: element.scrollHeight
+                },
+                jsPDF: {
+                    unit: "mm",
+                    format: "a4",
+                    orientation: "portrait"
+                },
+                pagebreak: { mode: ["css"] }
+            };
+
+            await html2pdf().set(ayarlar).from(element).save();
+
+        } catch (hata) {
+            console.error("PDF Hatası:", hata);
+            alert("PDF oluşturulamadı. Ayrıntılar için konsolu kontrol edin.");
+        } finally {
+            element.style.display = oncekiDisplay || "none";
+        }
+    }
+
     async function pdfIndir() {
         if(filtrelenmisKayitlar.length === 0) {
             alert("PDF oluşturmak için önce filtreleyip veri getirmelisiniz.");
@@ -1404,7 +1578,7 @@
         document.getElementById('pdfTamirParca').innerText = (tTamir + tParca).toLocaleString('tr-TR') + " TL";
         document.getElementById('pdfDigerSivi').innerText = (tDiger + tSivi).toLocaleString('tr-TR') + " TL";
 
-        // Güzergah Tablosunu Doldur (Flexbox Yapısı)
+        // Güzergah Tablosunu Doldur
         const pdfGuzergahTbody = document.getElementById('pdfGuzergahTabloFlex');
         pdfGuzergahTbody.innerHTML = '';
         
@@ -1452,79 +1626,15 @@
             );
 
             const grafikResim = document.getElementById('pdfGrafikResim');
-
             grafikResim.src = tmpCanvas.toDataURL('image/png');
-
-            if (grafikResim.decode) {
-                await grafikResim.decode();
-            }
         }
 
-        // PDF OLUŞTUR
-        const element = document.getElementById('pdfRaporAlani');
-
-        const eskiDisplay = element.style.display;
-        const eskiPosition = element.style.position;
-        const eskiLeft = element.style.left;
-        const eskiTop = element.style.top;
-
-        try {
-            element.style.display = 'block';
-            element.style.position = 'absolute';
-            element.style.left = '0';
-            element.style.top = '0';
-
-            await new Promise(resolve => requestAnimationFrame(() => resolve()));
-
-            const opt = {
-                margin: [8, 8, 8, 8],
-
-                filename:
-                    `Dolmus_Raporu_${baslangicStr}_${bitisStr}.pdf`,
-
-                image: {
-                    type: 'jpeg',
-                    quality: 0.98
-                },
-
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    backgroundColor: '#ffffff',
-                    logging: false,
-                    scrollX: 0,
-                    scrollY: 0
-                },
-
-                jsPDF: {
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'portrait'
-                },
-
-                pagebreak: {
-                    mode: ['avoid-all', 'css', 'legacy']
-                }
-            };
-
-            await html2pdf()
-                .set(opt)
-                .from(element)
-                .save();
-
-        } catch (error) {
-
-            console.error('PDF Hatası:', error);
-
-            alert('PDF oluşturulurken hata meydana geldi.');
-
-        } finally {
-
-            element.style.display = eskiDisplay || 'none';
-            element.style.position = eskiPosition;
-            element.style.left = eskiLeft;
-            element.style.top = eskiTop;
-        }
+        // PDF OLUŞTUR VE İNDİR
+        await pdfOlusturVeIndir(
+            document.getElementById('pdfRaporAlani'),
+            baslangicStr,
+            bitisStr
+        );
     }
 
     window.onload = function() {
