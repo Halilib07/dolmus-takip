@@ -130,34 +130,108 @@
 
         .chart-full-width { grid-column: span 2; }
 
-        /* PDF BUTONU VE GİZLİ ALAN */
+        /* PDF BUTONU */
         .pdf-btn-container { text-align: right; margin-bottom: 20px; }
         .btn-pdf { background-color: #d35400; color: white; padding: 12px 24px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s;}
         .btn-pdf:hover { background-color: #e67e22; }
         
-        /* Sadece PDF'e gidecek alan */
-        #pdfRaporAlani { display: none; padding: 40px; background: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .pdf-header { text-align: center; border-bottom: 3px solid var(--primary); padding-bottom: 20px; margin-bottom: 30px; }
-        .pdf-header h1 { margin: 0; color: var(--primary); font-size: 28px; }
-        .pdf-header p { margin: 5px 0 0 0; color: #7f8c8d; font-size: 16px; }
-        
-        .pdf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .pdf-box { border: 1px solid #eee; padding: 20px; border-radius: 8px; background: #f9f9f9; }
-        .pdf-box h3 { margin: 0 0 15px 0; color: var(--primary); font-size: 18px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-        .pdf-box p { margin: 8px 0; font-size: 15px; display: flex; justify-content: space-between; }
-        .pdf-box strong { font-weight: bold; }
-        
-        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        .pdf-table th, .pdf-table td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
-        .pdf-table th { background-color: var(--primary); color: white; }
-        
-        .pdf-footer { text-align: center; margin-top: 50px; font-size: 12px; color: #95a5a6; border-top: 1px solid #eee; padding-top: 10px; }
+        /* =========================================
+           YENİ NESİL, ÇOK DAHA ŞIK PDF RAPOR TASARIMI 
+           ========================================= */
+        #pdfRaporAlani { 
+            display: none; 
+            width: 800px; /* Sabit genişlik PDF için daha iyi sonuç verir */
+            margin: 0 auto;
+            background: white; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            color: #2c3e50;
+            padding: 40px;
+            box-sizing: border-box;
+        }
 
+        /* PDF Başlık */
+        .pdf-header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            padding-bottom: 20px;
+            border-bottom: 2px solid #2c3e50;
+        }
+        .pdf-header h1 { margin: 0 0 5px 0; font-size: 26px; color: #2c3e50; letter-spacing: 1px; }
+        .pdf-header p { margin: 0; font-size: 14px; color: #7f8c8d; font-weight: bold; }
+        .pdf-header .logo { font-size: 40px; margin-bottom: 10px; }
+
+        /* Özet Kartları (Grid) */
+        .pdf-stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 15px; 
+            margin-bottom: 30px; 
+        }
+        .pdf-stat-box { 
+            border: 1px solid #ecf0f1; 
+            border-top: 4px solid #2c3e50;
+            padding: 15px; 
+            border-radius: 6px; 
+            text-align: center;
+            background: #fdfdfd;
+        }
+        .pdf-stat-box h4 { margin: 0 0 10px 0; font-size: 11px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.5px; }
+        .pdf-stat-box p { margin: 0; font-size: 20px; font-weight: bold; color: #2c3e50; }
+        
+        /* Renkli Etiketler */
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 5px; color: white; }
+        .badge-success { background-color: #27ae60; }
+        .badge-danger { background-color: #e74c3c; }
+
+        /* Detay Bölümleri */
+        .pdf-section { margin-bottom: 30px; }
+        .pdf-section-title { 
+            font-size: 16px; 
+            color: #2c3e50; 
+            margin-bottom: 15px; 
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+        }
+
+        /* 2 Sütunlu Bilgi Alanı */
+        .pdf-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        
+        .pdf-list { list-style: none; padding: 0; margin: 0; }
+        .pdf-list li { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 8px 0; 
+            border-bottom: 1px dashed #eee; 
+            font-size: 14px;
+            color: #34495e;
+        }
+        .pdf-list li:last-child { border-bottom: none; }
+        .pdf-list li strong { color: #2c3e50; font-weight: 600; }
+
+        /* Tablo */
+        .pdf-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .pdf-table th, .pdf-table td { padding: 12px 10px; text-align: left; font-size: 13px; }
+        .pdf-table thead { background-color: #2c3e50; color: white; }
+        .pdf-table th { font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        .pdf-table tbody tr { border-bottom: 1px solid #ecf0f1; }
+        .pdf-table tbody tr:nth-child(even) { background-color: #f9f9f9; }
+        .pdf-table td:last-child { text-align: right; }
+
+        .pdf-footer { 
+            text-align: center; 
+            margin-top: 40px; 
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            font-size: 11px; 
+            color: #95a5a6; 
+        }
+
+        /* Mobil */
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
             .chart-grid { grid-template-columns: 1fr; } 
             .chart-full-width { grid-column: span 1; }
-            .pdf-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 768px) {
             body { padding: 10px; }
@@ -309,7 +383,7 @@
         <!-- PDF İNDİR BUTONU -->
         <div class="pdf-btn-container">
             <button class="btn-pdf" onclick="pdfIndir()">
-                📄 Seçili Dönemin Raporunu PDF İndir
+                📄 Bu Dönemin Raporunu PDF İndir
             </button>
         </div>
 
@@ -513,53 +587,76 @@
     </div>
 </div>
 
-<!-- GİZLİ PDF RAPOR ALANI -->
+<!-- ========================================= -->
+<!-- YENİ NESİL, ÇOK DAHA ŞIK PDF RAPOR ŞABLONU -->
+<!-- ========================================= -->
 <div id="pdfRaporAlani">
     <div class="pdf-header">
-        <h1>🚐 Dolmuş İşletme Raporu</h1>
+        <div class="logo">🚐</div>
+        <h1>Dolmuş İşletme Raporu</h1>
         <p id="pdfTarihAraligi">01.11.2026 - 07.11.2026</p>
     </div>
 
-    <div class="pdf-grid">
-        <div class="pdf-box">
-            <h3>💰 Finansal Özet</h3>
-            <p><span>Toplam Kazanç:</span> <strong id="pdfKazanc">0 TL</strong></p>
-            <p><span>Toplam Gider:</span> <strong id="pdfGider" style="color:#e74c3c;">0 TL</strong></p>
-            <p><span>Net Kâr:</span> <strong id="pdfNetKar" style="color:#27ae60;">0 TL</strong></p>
-            <p><span>Günlük Ort. Kâr:</span> <strong id="pdfOrtKar">0 TL</strong></p>
+    <div class="pdf-stats-grid">
+        <div class="pdf-stat-box" style="border-top-color: #27ae60;">
+            <h4>Toplam Kazanç</h4>
+            <p id="pdfKazanc">0 TL</p>
         </div>
-        <div class="pdf-box">
-            <h3>📊 Öne Çıkanlar</h3>
-            <p><span>En İyi Gün:</span> <strong id="pdfEnIyiGun">-</strong></p>
-            <p><span>En Yüksek Gider:</span> <strong id="pdfEnYuksekGider">-</strong></p>
-            <p><span>Toplam Sefer (Gün):</span> <strong id="pdfSeferSayisi">0</strong></p>
-            <p><span>Rapor Tarihi:</span> <strong id="pdfOlusturmaTarihi">-</strong></p>
+        <div class="pdf-stat-box" style="border-top-color: #e74c3c;">
+            <h4>Toplam Gider</h4>
+            <p id="pdfGider">0 TL</p>
+        </div>
+        <div class="pdf-stat-box" style="border-top-color: #2980b9;">
+            <h4>Net Kâr</h4>
+            <p id="pdfNetKar">0 TL</p>
+        </div>
+        <div class="pdf-stat-box" style="border-top-color: #8e44ad;">
+            <h4>Günlük Ort. Kâr</h4>
+            <p id="pdfOrtKar">0 TL</p>
         </div>
     </div>
 
-    <div class="pdf-box" style="margin-bottom: 30px;">
-        <h3>⛽ Gider Kalemleri Detayı</h3>
-        <p><span>Mazot:</span> <strong id="pdfMazot">0 TL</strong></p>
-        <p><span>Sıvı Bakım:</span> <strong id="pdfSiviBakim">0 TL</strong></p>
-        <p><span>Tamir:</span> <strong id="pdfTamir">0 TL</strong></p>
-        <p><span>Parça:</span> <strong id="pdfParca">0 TL</strong></p>
-        <p><span>Diğer Harcamalar:</span> <strong id="pdfDiger">0 TL</strong></p>
-        <p><span>Şoför Ücretleri:</span> <strong id="pdfSofor">0 TL</strong></p>
-        <p><span>Sabit Giderler (Vergi/Sigorta):</span> <strong id="pdfSabit">0 TL</strong></p>
+    <div class="pdf-section">
+        <div class="pdf-2col">
+            <!-- Sol Sütun: Öne Çıkanlar -->
+            <div>
+                <div class="pdf-section-title">⭐ Öne Çıkanlar</div>
+                <ul class="pdf-list">
+                    <li><span>En İyi Gün:</span> <strong id="pdfEnIyiGun">-</strong></li>
+                    <li><span>En Yüksek Gider:</span> <strong id="pdfEnYuksekGider">-</strong></li>
+                    <li><span>Toplam Sefer (Gün):</span> <strong id="pdfSeferSayisi">0</strong></li>
+                    <li><span>Rapor Tarihi:</span> <strong id="pdfOlusturmaTarihi">-</strong></li>
+                </ul>
+            </div>
+            <!-- Sağ Sütun: Gider Detayı -->
+            <div>
+                <div class="pdf-section-title">⛽ Gider Kalemleri</div>
+                <ul class="pdf-list">
+                    <li><span>Mazot:</span> <strong id="pdfMazot">0 TL</strong></li>
+                    <li><span>Şoför Ücretleri:</span> <strong id="pdfSofor">0 TL</strong></li>
+                    <li><span>Sabit Giderler (Vergi/Sigorta):</span> <strong id="pdfSabit">0 TL</strong></li>
+                    <li><span>Tamir & Parça:</span> <strong id="pdfTamirParca">0 TL</strong></li>
+                    <li><span>Diğer & Sıvı Bakım:</span> <strong id="pdfDigerSivi">0 TL</strong></li>
+                </ul>
+            </div>
+        </div>
     </div>
 
-    <table class="pdf-table">
-        <thead>
-            <tr>
-                <th>Güzergah</th>
-                <th>Sefer</th>
-                <th>Toplam Kâr</th>
-                <th>Ortalama Kâr</th>
-            </tr>
-        </thead>
-        <tbody id="pdfGuzergahTablo">
-        </tbody>
-    </table>
+    <div class="pdf-section">
+        <div class="pdf-section-title">🛣️ Güzergah Verimlilik Analizi</div>
+        <table class="pdf-table">
+            <thead>
+                <tr>
+                    <th>Güzergah</th>
+                    <th>Sefer</th>
+                    <th>Toplam Kâr</th>
+                    <th>Ortalama Kâr/Sefer</th>
+                </tr>
+            </thead>
+            <tbody id="pdfGuzergahTablo">
+            </tbody>
+        </table>
+    </div>
 
     <div class="pdf-footer">
         Bu rapor Dolmuş İşletme Yönetim Paneli tarafından otomatik olarak oluşturulmuştur.
@@ -1235,14 +1332,12 @@
         }
     }
 
-    // --- YENİ: PDF RAPOR OLUŞTURMA FONKSİYONU ---
     function pdfIndir() {
         if(filtrelenmisKayitlar.length === 0) {
             alert("PDF oluşturmak için önce filtreleyip veri getirmelisiniz.");
             return;
         }
 
-        // 1. İstatistikleri Hesapla
         const baslangicStr = document.getElementById('filtreBaslangic').value;
         const bitisStr = document.getElementById('filtreBitis').value;
         const baslangic = new Date(baslangicStr);
@@ -1272,12 +1367,15 @@
         const gunSayisi = filtrelenmisKayitlar.length;
         const ortKar = gunSayisi > 0 ? netKar / gunSayisi : 0;
 
-        // 2. HTML'deki Gizli PDF Alanını Doldur
+        // HTML'deki Gizli PDF Alanını Doldur
         document.getElementById('pdfTarihAraligi').innerText = baslangic.toLocaleDateString('tr-TR') + " - " + bitis.toLocaleDateString('tr-TR');
         document.getElementById('pdfKazanc').innerText = tKazanc.toLocaleString('tr-TR') + " TL";
         document.getElementById('pdfGider').innerText = tGider.toLocaleString('tr-TR') + " TL";
-        document.getElementById('pdfNetKar').innerText = netKar.toLocaleString('tr-TR') + " TL";
-        document.getElementById('pdfNetKar').style.color = netKar >= 0 ? '#27ae60' : '#e74c3c';
+        
+        const pdfNetEl = document.getElementById('pdfNetKar');
+        pdfNetEl.innerText = netKar.toLocaleString('tr-TR') + " TL";
+        pdfNetEl.style.color = netKar >= 0 ? '#27ae60' : '#e74c3c';
+        
         document.getElementById('pdfOrtKar').innerText = ortKar.toLocaleString('tr-TR', {maximumFractionDigits: 2}) + " TL";
         
         document.getElementById('pdfSeferSayisi').innerText = gunSayisi + " Gün";
@@ -1287,12 +1385,10 @@
         document.getElementById('pdfOlusturmaTarihi').innerText = new Date().toLocaleDateString('tr-TR');
 
         document.getElementById('pdfMazot').innerText = tMazot.toLocaleString('tr-TR') + " TL";
-        document.getElementById('pdfSiviBakim').innerText = tSivi.toLocaleString('tr-TR') + " TL";
-        document.getElementById('pdfTamir').innerText = tTamir.toLocaleString('tr-TR') + " TL";
-        document.getElementById('pdfParca').innerText = tParca.toLocaleString('tr-TR') + " TL";
-        document.getElementById('pdfDiger').innerText = tDiger.toLocaleString('tr-TR') + " TL";
         document.getElementById('pdfSofor').innerText = tSofor.toLocaleString('tr-TR') + " TL";
         document.getElementById('pdfSabit').innerText = tSabit.toLocaleString('tr-TR') + " TL";
+        document.getElementById('pdfTamirParca').innerText = (tTamir + tParca).toLocaleString('tr-TR') + " TL";
+        document.getElementById('pdfDigerSivi').innerText = (tDiger + tSivi).toLocaleString('tr-TR') + " TL";
 
         // Güzergah Tablosunu Doldur
         const pdfGuzergahTbody = document.getElementById('pdfGuzergahTablo');
