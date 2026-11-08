@@ -194,6 +194,26 @@
             margin-bottom: 20px;
         }
 
+        /* PDF Güzergah Tablosu Özel Tasarımı (Resimdeki Tasarım) */
+        .analiz-tablo th, .analiz-tablo td { 
+            padding: 10px 8px !important; 
+            font-size: 12px !important; 
+            text-align: left !important; 
+            white-space: nowrap; 
+            border-bottom: 1px solid #eee;
+        }
+        .analiz-tablo thead { 
+            background-color: #ecf0f1 !important; 
+            color: #2c3e50 !important; 
+        }
+        .analiz-tablo th { 
+            font-weight: bold !important; 
+            text-transform: none !important; 
+        }
+        .analiz-tablo td:nth-child(2), .analiz-tablo td:nth-child(3), .analiz-tablo td:nth-child(4) { 
+            text-align: left !important; 
+        }
+
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
             .chart-grid { grid-template-columns: 1fr; } 
@@ -619,13 +639,13 @@
 
     <div class="pdf-section">
         <div class="pdf-section-title">🛣️ Güzergah Verimlilik Analizi</div>
-        <table class="pdf-table">
+        <table class="pdf-table analiz-tablo">
             <thead>
                 <tr>
                     <th>Güzergah</th>
                     <th>Sefer</th>
                     <th>Toplam Kâr</th>
-                    <th>Ort. Kâr</th>
+                    <th>Ort. Kâr/Sefer</th>
                 </tr>
             </thead>
             <tbody id="pdfGuzergahTablo">
@@ -1382,10 +1402,10 @@
             const ort = veri.sefer > 0 ? veri.toplamKar / veri.sefer : 0;
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${g}</td>
+                <td style="font-weight:bold; color:#2c3e50;">${g}</td>
                 <td>${veri.sefer}</td>
                 <td style="color:${veri.toplamKar >= 0 ? '#27ae60' : '#e74c3c'}; font-weight:bold;">${veri.toplamKar.toLocaleString('tr-TR')} TL</td>
-                <td>${ort.toLocaleString('tr-TR')} TL</td>
+                <td style="color:#7f8c8d;">${ort.toLocaleString('tr-TR')} TL</td>
             `;
             pdfGuzergahTbody.appendChild(tr);
         });
