@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dolmuş İşletme Yönetim Paneli</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, where, getDocs, writeBatch, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -129,10 +130,34 @@
 
         .chart-full-width { grid-column: span 2; }
 
+        /* PDF BUTONU VE GİZLİ ALAN */
+        .pdf-btn-container { text-align: right; margin-bottom: 20px; }
+        .btn-pdf { background-color: #d35400; color: white; padding: 12px 24px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s;}
+        .btn-pdf:hover { background-color: #e67e22; }
+        
+        /* Sadece PDF'e gidecek alan */
+        #pdfRaporAlani { display: none; padding: 40px; background: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .pdf-header { text-align: center; border-bottom: 3px solid var(--primary); padding-bottom: 20px; margin-bottom: 30px; }
+        .pdf-header h1 { margin: 0; color: var(--primary); font-size: 28px; }
+        .pdf-header p { margin: 5px 0 0 0; color: #7f8c8d; font-size: 16px; }
+        
+        .pdf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .pdf-box { border: 1px solid #eee; padding: 20px; border-radius: 8px; background: #f9f9f9; }
+        .pdf-box h3 { margin: 0 0 15px 0; color: var(--primary); font-size: 18px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .pdf-box p { margin: 8px 0; font-size: 15px; display: flex; justify-content: space-between; }
+        .pdf-box strong { font-weight: bold; }
+        
+        .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+        .pdf-table th, .pdf-table td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
+        .pdf-table th { background-color: var(--primary); color: white; }
+        
+        .pdf-footer { text-align: center; margin-top: 50px; font-size: 12px; color: #95a5a6; border-top: 1px solid #eee; padding-top: 10px; }
+
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
             .chart-grid { grid-template-columns: 1fr; } 
             .chart-full-width { grid-column: span 1; }
+            .pdf-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 768px) {
             body { padding: 10px; }
@@ -259,6 +284,7 @@
 
     <!-- YÖNETİCİ / RAPOR EKRANI -->
     <div id="rapor" class="tab-content">
+        
         <div class="rapor-filtre-alani">
             <div class="input-grup">
                 <input type="date" id="filtreBaslangic">
@@ -278,6 +304,13 @@
                 </select>
             </div>
             <button onclick="filtreleRapor()">Filtrele / Raporla</button>
+        </div>
+
+        <!-- PDF İNDİR BUTONU -->
+        <div class="pdf-btn-container">
+            <button class="btn-pdf" onclick="pdfIndir()">
+                📄 Seçili Dönemin Raporunu PDF İndir
+            </button>
         </div>
 
         <div class="stats-row">
@@ -480,6 +513,59 @@
     </div>
 </div>
 
+<!-- GİZLİ PDF RAPOR ALANI -->
+<div id="pdfRaporAlani">
+    <div class="pdf-header">
+        <h1>🚐 Dolmuş İşletme Raporu</h1>
+        <p id="pdfTarihAraligi">01.11.2026 - 07.11.2026</p>
+    </div>
+
+    <div class="pdf-grid">
+        <div class="pdf-box">
+            <h3>💰 Finansal Özet</h3>
+            <p><span>Toplam Kazanç:</span> <strong id="pdfKazanc">0 TL</strong></p>
+            <p><span>Toplam Gider:</span> <strong id="pdfGider" style="color:#e74c3c;">0 TL</strong></p>
+            <p><span>Net Kâr:</span> <strong id="pdfNetKar" style="color:#27ae60;">0 TL</strong></p>
+            <p><span>Günlük Ort. Kâr:</span> <strong id="pdfOrtKar">0 TL</strong></p>
+        </div>
+        <div class="pdf-box">
+            <h3>📊 Öne Çıkanlar</h3>
+            <p><span>En İyi Gün:</span> <strong id="pdfEnIyiGun">-</strong></p>
+            <p><span>En Yüksek Gider:</span> <strong id="pdfEnYuksekGider">-</strong></p>
+            <p><span>Toplam Sefer (Gün):</span> <strong id="pdfSeferSayisi">0</strong></p>
+            <p><span>Rapor Tarihi:</span> <strong id="pdfOlusturmaTarihi">-</strong></p>
+        </div>
+    </div>
+
+    <div class="pdf-box" style="margin-bottom: 30px;">
+        <h3>⛽ Gider Kalemleri Detayı</h3>
+        <p><span>Mazot:</span> <strong id="pdfMazot">0 TL</strong></p>
+        <p><span>Sıvı Bakım:</span> <strong id="pdfSiviBakim">0 TL</strong></p>
+        <p><span>Tamir:</span> <strong id="pdfTamir">0 TL</strong></p>
+        <p><span>Parça:</span> <strong id="pdfParca">0 TL</strong></p>
+        <p><span>Diğer Harcamalar:</span> <strong id="pdfDiger">0 TL</strong></p>
+        <p><span>Şoför Ücretleri:</span> <strong id="pdfSofor">0 TL</strong></p>
+        <p><span>Sabit Giderler (Vergi/Sigorta):</span> <strong id="pdfSabit">0 TL</strong></p>
+    </div>
+
+    <table class="pdf-table">
+        <thead>
+            <tr>
+                <th>Güzergah</th>
+                <th>Sefer</th>
+                <th>Toplam Kâr</th>
+                <th>Ortalama Kâr</th>
+            </tr>
+        </thead>
+        <tbody id="pdfGuzergahTablo">
+        </tbody>
+    </table>
+
+    <div class="pdf-footer">
+        Bu rapor Dolmuş İşletme Yönetim Paneli tarafından otomatik olarak oluşturulmuştur.
+    </div>
+</div>
+
 <script>
     let kayitlar = [];
     let filtrelenmisKayitlar = [];
@@ -490,7 +576,6 @@
     let chartAylik = null;
     let chartGunlukSutun = null;
 
-    // DÜZELTME: Tarih formatlama yardımcı fonksiyonu (YYYY-MM-DD)
     function formatTarih(dateObj) {
         let d = new Date(dateObj),
             month = '' + (d.getMonth() + 1),
@@ -506,10 +591,8 @@
     document.getElementById('tarih').value = formatTarih(new Date());
     
     const bugun = new Date();
-    // DÜZELTME: Ayın 1'ini almak için Date objesini sıfırlıyoruz
     const ayBasi = new Date(bugun.getFullYear(), bugun.getMonth(), 1);
     
-    // DÜZELTME: Değerleri güvenli formata çevirerek atıyoruz
     document.getElementById('filtreBaslangic').value = formatTarih(ayBasi);
     document.getElementById('filtreBitis').value = formatTarih(bugun);
 
@@ -1150,6 +1233,111 @@
             try { await window.deleteDoc(window.doc(window.db, "kayitlar", id)); } 
             catch (e) { alert("Hata!"); }
         }
+    }
+
+    // --- YENİ: PDF RAPOR OLUŞTURMA FONKSİYONU ---
+    function pdfIndir() {
+        if(filtrelenmisKayitlar.length === 0) {
+            alert("PDF oluşturmak için önce filtreleyip veri getirmelisiniz.");
+            return;
+        }
+
+        // 1. İstatistikleri Hesapla
+        const baslangicStr = document.getElementById('filtreBaslangic').value;
+        const bitisStr = document.getElementById('filtreBitis').value;
+        const baslangic = new Date(baslangicStr);
+        const bitis = new Date(bitisStr);
+        
+        let tKazanc = 0, tGider = 0, tMazot = 0, tSivi = 0, tTamir = 0, tParca = 0, tDiger = 0, tSofor = 0, tSabit = 0;
+        let enIyiGun = { tarih: "-", tutar: -9999999 };
+        let enYuksekGider = { tarih: "-", tutar: -1 };
+
+        filtrelenmisKayitlar.forEach(k => {
+            const kar = (k.hasilat || 0) - (k.toplamGider || 0);
+            tKazanc += k.hasilat || 0;
+            tGider += k.toplamGider || 0;
+            tMazot += k.mazotTL || 0;
+            tSivi += k.siviBakim || 0;
+            tTamir += k.tamir || 0;
+            tParca += k.parca || 0;
+            tDiger += k.diger || 0;
+            tSofor += k.gunlukSoforUcret || 0;
+            tSabit += k.sabitGiderPayi || 0;
+
+            if(kar > enIyiGun.tutar) { enIyiGun.tutar = kar; enIyiGun.tarih = k.tarih; }
+            if((k.toplamGider || 0) > enYuksekGider.tutar) { enYuksekGider.tutar = k.toplamGider; enYuksekGider.tarih = k.tarih; }
+        });
+
+        const netKar = tKazanc - tGider;
+        const gunSayisi = filtrelenmisKayitlar.length;
+        const ortKar = gunSayisi > 0 ? netKar / gunSayisi : 0;
+
+        // 2. HTML'deki Gizli PDF Alanını Doldur
+        document.getElementById('pdfTarihAraligi').innerText = baslangic.toLocaleDateString('tr-TR') + " - " + bitis.toLocaleDateString('tr-TR');
+        document.getElementById('pdfKazanc').innerText = tKazanc.toLocaleString('tr-TR') + " TL";
+        document.getElementById('pdfGider').innerText = tGider.toLocaleString('tr-TR') + " TL";
+        document.getElementById('pdfNetKar').innerText = netKar.toLocaleString('tr-TR') + " TL";
+        document.getElementById('pdfNetKar').style.color = netKar >= 0 ? '#27ae60' : '#e74c3c';
+        document.getElementById('pdfOrtKar').innerText = ortKar.toLocaleString('tr-TR', {maximumFractionDigits: 2}) + " TL";
+        
+        document.getElementById('pdfSeferSayisi').innerText = gunSayisi + " Gün";
+        document.getElementById('pdfEnIyiGun').innerText = enIyiGun.tarih !== "-" ? enIyiGun.tarih.split('-').reverse().join('.') + " (" + enIyiGun.tutar.toLocaleString('tr-TR') + " TL)" : "-";
+        document.getElementById('pdfEnYuksekGider').innerText = enYuksekGider.tarih !== "-" ? enYuksekGider.tarih.split('-').reverse().join('.') + " (" + enYuksekGider.tutar.toLocaleString('tr-TR') + " TL)" : "-";
+        
+        document.getElementById('pdfOlusturmaTarihi').innerText = new Date().toLocaleDateString('tr-TR');
+
+        document.getElementById('pdfMazot').innerText = tMazot.toLocaleString('tr-TR') + " TL";
+        document.getElementById('pdfSiviBakim').innerText = tSivi.toLocaleString('tr-TR') + " TL";
+        document.getElementById('pdfTamir').innerText = tTamir.toLocaleString('tr-TR') + " TL";
+        document.getElementById('pdfParca').innerText = tParca.toLocaleString('tr-TR') + " TL";
+        document.getElementById('pdfDiger').innerText = tDiger.toLocaleString('tr-TR') + " TL";
+        document.getElementById('pdfSofor').innerText = tSofor.toLocaleString('tr-TR') + " TL";
+        document.getElementById('pdfSabit').innerText = tSabit.toLocaleString('tr-TR') + " TL";
+
+        // Güzergah Tablosunu Doldur
+        const pdfGuzergahTbody = document.getElementById('pdfGuzergahTablo');
+        pdfGuzergahTbody.innerHTML = '';
+        
+        const analiz = {};
+        filtrelenmisKayitlar.forEach(k => {
+            const g = k.guzergah || 'Belirtilmedi';
+            if(!analiz[g]) analiz[g] = { sefer: 0, toplamKar: 0 };
+            analiz[g].sefer += 1;
+            analiz[g].toplamKar += (k.hasilat - k.toplamGider);
+        });
+
+        Object.keys(analiz).sort((a,b) => analiz[b].toplamKar - analiz[a].toplamKar).forEach(g => {
+            const veri = analiz[g];
+            const ort = veri.sefer > 0 ? veri.toplamKar / veri.sefer : 0;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${g}</td>
+                <td>${veri.sefer}</td>
+                <td style="color:${veri.toplamKar >= 0 ? '#27ae60' : '#e74c3c'}; font-weight:bold;">${veri.toplamKar.toLocaleString('tr-TR')} TL</td>
+                <td>${ort.toLocaleString('tr-TR')} TL</td>
+            `;
+            pdfGuzergahTbody.appendChild(tr);
+        });
+
+        // 3. PDF'i Oluştur ve İndir
+        const element = document.getElementById('pdfRaporAlani');
+        
+        // Tarayıcıda anlık görünür yap (html2pdf render edebilsin diye)
+        element.style.display = 'block'; 
+
+        const opt = {
+            margin:       0.5,
+            filename:     `Dolmus_Raporu_${baslangicStr}_${bitisStr}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+
+        // PDF oluştur ve indir
+        html2pdf().set(opt).from(element).save().then(() => {
+            // İşlem bitince tekrar gizle
+            element.style.display = 'none';
+        });
     }
 
     window.onload = function() {
