@@ -136,96 +136,48 @@
         .btn-pdf:hover { background-color: #e67e22; }
         
         /* =========================================
-           YENİ NESİL, ÇOK DAHA ŞIK PDF RAPOR TASARIMI 
+           PDF RAPOR TASARIMI (MOBİL UYUMLU HALE GETİRİLDİ)
            ========================================= */
         #pdfRaporAlani { 
             display: none; 
-            width: 800px; /* Sabit genişlik PDF için daha iyi sonuç verir */
+            width: 100%; /* Mobilde taşmaması için 100% yapıldı */
+            max-width: 750px; 
             margin: 0 auto;
             background: white; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             color: #2c3e50;
-            padding: 40px;
+            padding: 30px; /* Boşluklar daraltıldı */
             box-sizing: border-box;
         }
 
-        /* PDF Başlık */
-        .pdf-header { 
-            text-align: center; 
-            margin-bottom: 30px; 
-            padding-bottom: 20px;
-            border-bottom: 2px solid #2c3e50;
-        }
-        .pdf-header h1 { margin: 0 0 5px 0; font-size: 26px; color: #2c3e50; letter-spacing: 1px; }
-        .pdf-header p { margin: 0; font-size: 14px; color: #7f8c8d; font-weight: bold; }
-        .pdf-header .logo { font-size: 40px; margin-bottom: 10px; }
+        .pdf-header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #2c3e50; }
+        .pdf-header h1 { margin: 0 0 5px 0; font-size: 22px; color: #2c3e50; letter-spacing: 1px; }
+        .pdf-header p { margin: 0; font-size: 13px; color: #7f8c8d; font-weight: bold; }
+        .pdf-header .logo { font-size: 32px; margin-bottom: 5px; }
 
-        /* Özet Kartları (Grid) */
-        .pdf-stats-grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 15px; 
-            margin-bottom: 30px; 
-        }
-        .pdf-stat-box { 
-            border: 1px solid #ecf0f1; 
-            border-top: 4px solid #2c3e50;
-            padding: 15px; 
-            border-radius: 6px; 
-            text-align: center;
-            background: #fdfdfd;
-        }
-        .pdf-stat-box h4 { margin: 0 0 10px 0; font-size: 11px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.5px; }
-        .pdf-stat-box p { margin: 0; font-size: 20px; font-weight: bold; color: #2c3e50; }
-        
-        /* Renkli Etiketler */
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 5px; color: white; }
-        .badge-success { background-color: #27ae60; }
-        .badge-danger { background-color: #e74c3c; }
+        .pdf-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .pdf-stat-box { border: 1px solid #ecf0f1; border-top: 3px solid #2c3e50; padding: 10px; border-radius: 6px; text-align: center; background: #fdfdfd; }
+        .pdf-stat-box h4 { margin: 0 0 5px 0; font-size: 10px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.5px; }
+        .pdf-stat-box p { margin: 0; font-size: 16px; font-weight: bold; color: #2c3e50; }
 
-        /* Detay Bölümleri */
-        .pdf-section { margin-bottom: 30px; }
-        .pdf-section-title { 
-            font-size: 16px; 
-            color: #2c3e50; 
-            margin-bottom: 15px; 
-            padding-bottom: 8px;
-            border-bottom: 1px solid #ddd;
-            font-weight: bold;
-        }
+        .pdf-section { margin-bottom: 20px; }
+        .pdf-section-title { font-size: 14px; color: #2c3e50; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #ddd; font-weight: bold; }
 
-        /* 2 Sütunlu Bilgi Alanı */
-        .pdf-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .pdf-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         
         .pdf-list { list-style: none; padding: 0; margin: 0; }
-        .pdf-list li { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 8px 0; 
-            border-bottom: 1px dashed #eee; 
-            font-size: 14px;
-            color: #34495e;
-        }
+        .pdf-list li { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #eee; font-size: 12px; color: #34495e; }
         .pdf-list li:last-child { border-bottom: none; }
         .pdf-list li strong { color: #2c3e50; font-weight: 600; }
 
-        /* Tablo */
-        .pdf-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .pdf-table th, .pdf-table td { padding: 12px 10px; text-align: left; font-size: 13px; }
+        .pdf-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        .pdf-table th, .pdf-table td { padding: 8px; text-align: left; font-size: 12px; }
         .pdf-table thead { background-color: #2c3e50; color: white; }
-        .pdf-table th { font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        .pdf-table th { font-weight: 600; text-transform: uppercase; font-size: 10px; }
         .pdf-table tbody tr { border-bottom: 1px solid #ecf0f1; }
         .pdf-table tbody tr:nth-child(even) { background-color: #f9f9f9; }
-        .pdf-table td:last-child { text-align: right; }
 
-        .pdf-footer { 
-            text-align: center; 
-            margin-top: 40px; 
-            padding-top: 15px;
-            border-top: 1px solid #ddd;
-            font-size: 11px; 
-            color: #95a5a6; 
-        }
+        .pdf-footer { text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 10px; color: #95a5a6; }
 
         /* Mobil */
         @media (max-width: 1024px) {
@@ -258,6 +210,12 @@
             .toplam-sabit { flex-direction: column; align-items: flex-start; gap: 5px; }
             .toplam-sabit strong { font-size: 18px; }
             .rapor-filtre-alani { flex-direction: column; align-items: stretch; }
+            /* Mobilde PDF tasarımını daralt */
+            #pdfRaporAlani { padding: 15px; }
+            .pdf-stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .pdf-2col { grid-template-columns: 1fr; gap: 10px; }
+            .pdf-header h1 { font-size: 18px; }
+            .pdf-table th, .pdf-table td { padding: 5px; font-size: 10px; }
         }
     </style>
 </head>
@@ -588,7 +546,7 @@
 </div>
 
 <!-- ========================================= -->
-<!-- YENİ NESİL, ÇOK DAHA ŞIK PDF RAPOR ŞABLONU -->
+<!-- PDF RAPOR ŞABLONU (TAMAMIYLA GİZLİDİR) -->
 <!-- ========================================= -->
 <div id="pdfRaporAlani">
     <div class="pdf-header">
@@ -618,7 +576,6 @@
 
     <div class="pdf-section">
         <div class="pdf-2col">
-            <!-- Sol Sütun: Öne Çıkanlar -->
             <div>
                 <div class="pdf-section-title">⭐ Öne Çıkanlar</div>
                 <ul class="pdf-list">
@@ -628,7 +585,6 @@
                     <li><span>Rapor Tarihi:</span> <strong id="pdfOlusturmaTarihi">-</strong></li>
                 </ul>
             </div>
-            <!-- Sağ Sütun: Gider Detayı -->
             <div>
                 <div class="pdf-section-title">⛽ Gider Kalemleri</div>
                 <ul class="pdf-list">
@@ -650,7 +606,7 @@
                     <th>Güzergah</th>
                     <th>Sefer</th>
                     <th>Toplam Kâr</th>
-                    <th>Ortalama Kâr/Sefer</th>
+                    <th>Ortalama Kâr</th>
                 </tr>
             </thead>
             <tbody id="pdfGuzergahTablo">
@@ -1421,12 +1377,13 @@
         // Tarayıcıda anlık görünür yap (html2pdf render edebilsin diye)
         element.style.display = 'block'; 
 
+        // PDF AYARLARI (Daha iyi sığması için güncellendi)
         const opt = {
-            margin:       0.5,
+            margin:       [0.2, 0.2, 0.2, 0.2], // Kenar boşluklarını daralttık
             filename:     `Dolmus_Raporu_${baslangicStr}_${bitisStr}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            html2canvas:  { scale: 2, useCORS: true, scrollY: 0 }, 
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' } // A4 formatına zorladık
         };
 
         // PDF oluştur ve indir
