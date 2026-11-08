@@ -432,52 +432,55 @@
         <div class="card">
             <h2>🧾 Muhasebe / Sabit Gider Fişi Girişi</h2>
             <div class="form-grid">
+                <input type="hidden" id="sabitGiderDocId" value="">
                 <div class="input-grup">
-                    <input type="date" id="sabitGiderTarih">
+                    <input type="date" id="sabitGiderTarih" onchange="sabitGiderFisiKontrolEt()">
                     <label for="sabitGiderTarih">Fişin Ait Olduğu Tarih</label>
                 </div>
                 <div class="input-grup">
-                    <input type="text" inputmode="numeric" id="pesinVergi" class="para" placeholder="" onchange="guncelleRapor()">
+                    <input type="text" inputmode="numeric" id="pesinVergi" class="para" placeholder="" onchange="guncelleToplamSabit()">
                     <label for="pesinVergi">Peşin Vergi (TL)</label>
                 </div>
                 <div class="input-grup">
-                    <input type="text" inputmode="numeric" id="stopaj" class="para" placeholder="" onchange="guncelleRapor()">
+                    <input type="text" inputmode="numeric" id="stopaj" class="para" placeholder="" onchange="guncelleToplamSabit()">
                     <label for="stopaj">Stopaj (TL)</label>
                 </div>
                 <div class="input-grup">
-                    <input type="text" inputmode="numeric" id="kdv" class="para" placeholder="" onchange="guncelleRapor()">
+                    <input type="text" inputmode="numeric" id="kdv" class="para" placeholder="" onchange="guncelleToplamSabit()">
                     <label for="kdv">K.D.V. (TL)</label>
                 </div>
                 <div class="input-grup">
-                    <input type="text" inputmode="numeric" id="gelirVergisi" class="para" placeholder="" onchange="guncelleRapor()">
+                    <input type="text" inputmode="numeric" id="gelirVergisi" class="para" placeholder="" onchange="guncelleToplamSabit()">
                     <label for="gelirVergisi">Gelir Vergisi (TL)</label>
                 </div>
                 <div class="input-grup">
-                    <input type="text" inputmode="numeric" id="bagKur" class="para" placeholder="" onchange="guncelleRapor()">
+                    <input type="text" inputmode="numeric" id="bagKur" class="para" placeholder="" onchange="guncelleToplamSabit()">
                     <label for="bagKur">Bağ-Kur (TL)</label>
                 </div>
                 <div class="input-grup">
-                    <input type="text" inputmode="numeric" id="sigorta" class="para" placeholder="" onchange="guncelleRapor()">
+                    <input type="text" inputmode="numeric" id="sigorta" class="para" placeholder="" onchange="guncelleToplamSabit()">
                     <label for="sigorta">Sigorta (TL)</label>
                 </div>
                 <div class="input-grup">
-                    <input type="text" inputmode="numeric" id="matbaaNoter" class="para" placeholder="" onchange="guncelleRapor()">
+                    <input type="text" inputmode="numeric" id="matbaaNoter" class="para" placeholder="" onchange="guncelleToplamSabit()">
                     <label for="matbaaNoter">Matbaa / Noter (TL)</label>
                 </div>
                 <div class="input-grup">
-                    <input type="text" inputmode="numeric" id="muhasebe" class="para" placeholder="" onchange="guncelleRapor()">
+                    <input type="text" inputmode="numeric" id="muhasebe" class="para" placeholder="" onchange="guncelleToplamSabit()">
                     <label for="muhasebe">Muhasebe (TL)</label>
                 </div>
                 <div class="input-grup">
-                    <input type="text" inputmode="numeric" id="sabitDigerGider" class="para" placeholder="" onchange="guncelleRapor()">
+                    <input type="text" inputmode="numeric" id="sabitDigerGider" class="para" placeholder="" onchange="guncelleToplamSabit()">
                     <label for="sabitDigerGider">Diğer Giderler (Trafik Cezası vs.) TL</label>
                 </div>
                 <div class="toplam-sabit">
                     <span>Toplam Aylık Sabit Gider:</span>
                     <strong id="toplamAylikSabit">0 TL</strong>
                 </div>
-                <button class="btn-dagit" onclick="sabitGiderleriDagit()">Sabit Giderleri O Ayın Günlerine Dağıt</button>
+                <button class="btn-dagit" id="sabitGiderKaydetBtn" onclick="sabitGiderleriDagit()">Sabit Giderleri O Ayın Günlerine Dağıt</button>
             </div>
+            <div id="sabitGiderMesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
+            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Aynı aya ait bir fiş varsa sistem otomatik olarak güncelleme moduna geçer ve mevcut tutarları yükler.</p>
         </div>
     </div>
 </div>
@@ -809,6 +812,114 @@
         });
     }
 
+    // ========== SABİT GİDER FİŞİ FONKSİYONLARI ==========
+
+    function guncelleToplamSabit() {
+        const toplam = 
+            formatiCoz(document.getElementById('pesinVergi').value) +
+            formatiCoz(document.getElementById('stopaj').value) +
+            formatiCoz(document.getElementById('kdv').value) +
+            formatiCoz(document.getElementById('gelirVergisi').value) +
+            formatiCoz(document.getElementById('bagKur').value) +
+            formatiCoz(document.getElementById('sigorta').value) +
+            formatiCoz(document.getElementById('matbaaNoter').value) +
+            formatiCoz(document.getElementById('muhasebe').value) +
+            formatiCoz(document.getElementById('sabitDigerGider').value);
+        document.getElementById('toplamAylikSabit').innerText = toplam.toLocaleString('tr-TR') + " TL";
+    }
+
+    async function sabitGiderFisiKontrolEt() {
+        if(!window.firebaseHazir) return;
+        const secilenTarihStr = document.getElementById('sabitGiderTarih').value;
+        if(!secilenTarihStr) return;
+
+        const secilenTarihObj = new Date(secilenTarihStr);
+        const secilenYil = secilenTarihObj.getFullYear();
+        const secilenAy = secilenTarihObj.getMonth();
+
+        const docId = `${secilenYil}_${secilenAy}`;
+        document.getElementById('sabitGiderDocId').value = "";
+
+        try {
+            const docRef = window.doc(window.db, "muhasebeFisleri", docId);
+            const docSnap = await window.getDoc(docRef);
+
+            const btn = document.getElementById('sabitGiderKaydetBtn');
+
+            if (docSnap.exists()) {
+                const fis = docSnap.data();
+                document.getElementById('sabitGiderDocId').value = docId;
+                document.getElementById('pesinVergi').value = sayiyiFormatla(fis.pesinVergi) || "";
+                document.getElementById('stopaj').value = sayiyiFormatla(fis.stopaj) || "";
+                document.getElementById('kdv').value = sayiyiFormatla(fis.kdv) || "";
+                document.getElementById('gelirVergisi').value = sayiyiFormatla(fis.gelirVergisi) || "";
+                document.getElementById('bagKur').value = sayiyiFormatla(fis.bagKur) || "";
+                document.getElementById('sigorta').value = sayiyiFormatla(fis.sigorta) || "";
+                document.getElementById('matbaaNoter').value = sayiyiFormatla(fis.matbaaNoter) || "";
+                document.getElementById('muhasebe').value = sayiyiFormatla(fis.muhasebe) || "";
+                document.getElementById('sabitDigerGider').value = sayiyiFormatla(fis.sabitDigerGider) || "";
+
+                btn.innerText = "Fişi Güncelle ve Dağıt";
+                guncelleToplamSabit();
+            } else {
+                document.getElementById('pesinVergi').value = "";
+                document.getElementById('stopaj').value = "";
+                document.getElementById('kdv').value = "";
+                document.getElementById('gelirVergisi').value = "";
+                document.getElementById('bagKur').value = "";
+                document.getElementById('sigorta').value = "";
+                document.getElementById('matbaaNoter').value = "";
+                document.getElementById('muhasebe').value = "";
+                document.getElementById('sabitDigerGider').value = "";
+                btn.innerText = "Sabit Giderleri O Ayın Günlerine Dağıt";
+                guncelleToplamSabit();
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function sabitGiderFisiKaydet() {
+        if(!window.firebaseHazir) return;
+        const secilenTarihStr = document.getElementById('sabitGiderTarih').value;
+        if(!secilenTarihStr) { alert("Lütfen fişin ait olduğu tarihi seçin!"); return; }
+
+        const secilenTarihObj = new Date(secilenTarihStr);
+        const secilenYil = secilenTarihObj.getFullYear();
+        const secilenAy = secilenTarihObj.getMonth();
+
+        const fisVerisi = {
+            yil: secilenYil,
+            ay: secilenAy,
+            tarihStr: secilenTarihStr,
+            pesinVergi: formatiCoz(document.getElementById('pesinVergi').value),
+            stopaj: formatiCoz(document.getElementById('stopaj').value),
+            kdv: formatiCoz(document.getElementById('kdv').value),
+            gelirVergisi: formatiCoz(document.getElementById('gelirVergisi').value),
+            bagKur: formatiCoz(document.getElementById('bagKur').value),
+            sigorta: formatiCoz(document.getElementById('sigorta').value),
+            matbaaNoter: formatiCoz(document.getElementById('matbaaNoter').value),
+            muhasebe: formatiCoz(document.getElementById('muhasebe').value),
+            sabitDigerGider: formatiCoz(document.getElementById('sabitDigerGider').value),
+            toplam: formatiCoz(document.getElementById('pesinVergi').value) + 
+                    formatiCoz(document.getElementById('stopaj').value) + 
+                    formatiCoz(document.getElementById('kdv').value) + 
+                    formatiCoz(document.getElementById('gelirVergisi').value) + 
+                    formatiCoz(document.getElementById('bagKur').value) + 
+                    formatiCoz(document.getElementById('sigorta').value) + 
+                    formatiCoz(document.getElementById('matbaaNoter').value) + 
+                    formatiCoz(document.getElementById('muhasebe').value) + 
+                    formatiCoz(document.getElementById('sabitDigerGider').value),
+            kayitSaati: Date.now()
+        };
+
+        try {
+            const docRef = window.doc(window.db, "muhasebeFisleri", `${secilenYil}_${secilenAy}`);
+            await window.setDoc(docRef, fisVerisi);
+        } catch(e) {
+            console.error(e);
+            throw e;
+        }
+    }
+
     async function sabitGiderleriDagit() {
         if(!window.firebaseHazir) return;
         const secilenTarihStr = document.getElementById('sabitGiderTarih').value;
@@ -841,20 +952,39 @@
         const gunSayisi = oAyinKayitlari.length;
         const gunlukPay = toplamDagitilacakTutar / gunSayisi;
 
-        if(!confirm(`Toplam ${toplamDagitilacakTutar.toLocaleString('tr-TR')} TL gider, ${gunSayisi} güne bölünecek.\nGünlük pay: ${gunlukPay.toLocaleString('tr-TR')} TL\n\nOnaylıyor musunuz?`)) return;
+        const docId = document.getElementById('sabitGiderDocId').value;
+        const isUpdate = !!docId;
+        const mesaj = `Toplam ${toplamDagitilacakTutar.toLocaleString('tr-TR')} TL gider, ${gunSayisi} güne bölünecek.\nGünlük pay: ${gunlukPay.toLocaleString('tr-TR')} TL\n\n` + 
+                      (isUpdate ? "Bu aya ait fiş GÜNCELLENECEK." : "Yeni fiş oluşturulacak.") + 
+                      `\n\nOnaylıyor musunuz?`;
+        
+        if(!confirm(mesaj)) return;
 
-        const batch = window.writeBatch(window.db);
-        oAyinKayitlari.forEach(kayit => {
-            const eskiSabitPay = kayit.sabitGiderPayi || 0;
-            const yeniToplamGider = (kayit.toplamGider - eskiSabitPay) + gunlukPay;
-            batch.update(window.doc(window.db, "kayitlar", kayit.id), { sabitGiderPayi: gunlukPay, toplamGider: yeniToplamGider });
-        });
         try {
+            await sabitGiderFisiKaydet();
+
+            const batch = window.writeBatch(window.db);
+            oAyinKayitlari.forEach(kayit => {
+                const eskiSabitPay = kayit.sabitGiderPayi || 0;
+                const yeniToplamGider = (kayit.toplamGider - eskiSabitPay) + gunlukPay;
+                batch.update(window.doc(window.db, "kayitlar", kayit.id), { sabitGiderPayi: gunlukPay, toplamGider: yeniToplamGider });
+            });
             await batch.commit();
-            alert(`✅ Başarılı! Her güne ${gunlukPay.toLocaleString('tr-TR')} TL eklendi.\nRaporları görmek için Raporlar sekmesine geçebilirsiniz.`);
+
+            const mesajEl = document.getElementById('sabitGiderMesaj');
+            mesajEl.style.color = "green";
+            mesajEl.innerText = isUpdate ? "✅ Fiş güncellendi ve dağıtıldı!" : "✅ Fiş kaydedildi ve dağıtıldı!";
+            setTimeout(() => { mesajEl.innerText = ""; }, 4000);
+
+            alert(`✅ Başarılı! ${isUpdate ? "Fiş güncellendi ve " : ""}Her güne ${gunlukPay.toLocaleString('tr-TR')} TL eklendi.\nRaporları görmek için Raporlar sekmesine geçebilirsiniz.`);
             switchTab('rapor', document.getElementById('raporTabBtn'));
-        } catch(e) { alert("Hata!"); }
+        } catch(e) { 
+            console.error(e);
+            alert("Hata!"); 
+        }
     }
+
+    // ========== RAPOR FONKSİYONLARI ==========
 
     function filtreleRapor() {
         const baslangicStr = document.getElementById('filtreBaslangic').value;
@@ -1160,6 +1290,13 @@
 
     window.onload = function() {
         setTimeout(() => { aracAyarlariniBuluttanYukle(); }, 1000); 
+        
+        // Sabit gider fişi tarihini bugüne ayarla ve kontrol et
+        const sabitTarihEl = document.getElementById('sabitGiderTarih');
+        if (sabitTarihEl && !sabitTarihEl.value) {
+            sabitTarihEl.value = formatTarih(new Date());
+        }
+        setTimeout(() => { sabitGiderFisiKontrolEt(); }, 1500);
     };
 </script>
 </body>
