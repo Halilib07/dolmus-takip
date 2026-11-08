@@ -301,6 +301,7 @@
                 <div class="input-grup">
                     <label for="guzergah" class="select-label">Güzergah Seçimi</label>
                     <select id="guzergah">
+                        <option value="">Seçiniz...</option>
                         <option value="Kumluca">Kumluca</option>
                         <option value="Turunçova">Turunçova</option>
                         <option value="Dağdibi">Dağdibi</option>
@@ -892,6 +893,15 @@
         }
 
         const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
+
+        // GÜZERGAH KONTROLÜ: Yeni kayıtta boş bırakılamaz, düzenlemede eski değer korunur
+        const secilenGuzergah = document.getElementById('guzergah').value;
+        if (!secilenGuzergah && !ayniTarihliKayit) {
+            alert("⚠️ Lütfen güzergah seçin!");
+            document.getElementById('guzergah').focus();
+            return;
+        }
+
         if (ayniTarihliKayit) {
             const onay = confirm("⚠️ DİKKAT: " + secilenTarih.split('-').reverse().join('.') + " tarihinde zaten bir kayıt var!\n\nSadece DOLDURDUĞUNUZ kutular güncellenecek, BOŞ bıraktığınız kutular eski haliyle kalacaktır. Onaylıyor musunuz?");
             if (!onay) return; 
@@ -902,10 +912,8 @@
         btn.innerText = "Buluta Kaydediliyor...";
         btn.disabled = true;
 
-        const secilenGuzergah = document.getElementById('guzergah').value;
-
         const yeniDegerler = {
-            guzergah: secilenGuzergah,
+            guzergah: secilenGuzergah || null,
             hasilat: document.getElementById('hasilat').value !== "" ? formatiCoz(document.getElementById('hasilat').value) : null,
             km: document.getElementById('km').value !== "" ? formatiCoz(document.getElementById('km').value) : null,
             mazotTL: document.getElementById('mazotTL').value !== "" ? formatiCoz(document.getElementById('mazotTL').value) : null,
@@ -955,6 +963,7 @@
             document.getElementById('mazotTL').value = ''; document.getElementById('siviBakim').value = '';
             document.getElementById('tamir').value = ''; document.getElementById('parca').value = '';
             document.getElementById('diger').value = ''; document.getElementById('gunlukSoforUcret').value = '';
+            document.getElementById('guzergah').value = ''; // Seçimi sıfırla
             
             setTimeout(() => { mesajEl.innerText = ""; }, 3000);
         } catch (e) {
