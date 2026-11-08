@@ -972,13 +972,21 @@
 
         // Flatpickr minDate/maxDate kısıtlaması olduğu için buradaki manuel tarih doğrulamasına gerek kalmadı,
         // Ancak yine de güvenlik amaçlı (örneğin konsoldan manipüle edilirse) şoför için kontrol edelim.
+        // YENİ KOD (Düzeltilmiş Kısım)
         if (!isYonetici) {
+            // Bugünün tarihini al ve saatini sıfırla (gün başı)
             const bugunD = new Date();
             bugunD.setHours(0, 0, 0, 0);
+        
+            // İzin verilen en eski tarihi hesapla (bugünden 2 gün öncesi)
             const enEskiIzinli = new Date(bugunD);
             enEskiIzinli.setDate(enEskiIzinli.getDate() - 2);
+        
+            // Seçilen tarihi al ve saatini sıfırla (gün başı)
             const secilenTarihObj = new Date(secilenTarih);
-
+            secilenTarihObj.setHours(0, 0, 0, 0);
+        
+            // Gün bazında karşılaştırma yap
             if (secilenTarihObj > bugunD || secilenTarihObj < enEskiIzinli) {
                 alert("⚠️ Şoför olarak sadece bugün ve geriye dönük 2 gün için veri girebilirsiniz.");
                 return;
