@@ -102,6 +102,7 @@
         .input-grup { position: relative; margin-top: 10px; }
         .input-grup input, .input-grup select { width: 100%; padding: 22px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
         .input-grup input:focus, .input-grup select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
+        .input-grup input:disabled { background: #ecf0f1; color: #7f8c8d; cursor: not-allowed; }
         .input-grup label { position: absolute; left: 15px; top: 16px; color: #7f8c8d; font-size: 14px; font-weight: normal; pointer-events: none; transition: all 0.2s ease; margin: 0; }
         .input-grup input:focus + label, .input-grup input:not(:placeholder-shown) + label { top: 5px; font-size: 11px; font-weight: bold; color: var(--primary); }
         
@@ -148,7 +149,6 @@
         .mali-tablo .toplam-row td { font-weight: bold; background: #ecf0f1; border-top: 2px solid var(--primary); font-size: 15px; color: var(--primary); }
         .mali-tablo .kar-row td { font-weight: bold; background: #e8f8f5; color: var(--success); font-size: 16px; border-top: 2px solid var(--success); }
         
-        /* YENİ EKLENEN CSS: A ve B grubu toplamları için */
         .mali-tablo .grup-toplam td { 
             font-weight: bold; 
             color: var(--primary); 
@@ -638,6 +638,7 @@
     let filtrelenmisKayitlar = [];
     let secilenHedefAy = ""; 
     let secilenUkomeAyId = "";
+    let isYonetici = false; // <-- YENİ: rol takibi
     
     let chartTrend = null;
     let chartGider = null;
@@ -655,6 +656,44 @@
         if (day.length < 2) day = '0' + day;
 
         return [year, month, day].join('-');
+    }
+
+    // ========== YENİ: ŞOFÖR İÇİN TARİH SINIRLAMA ==========
+    // Şoför: bugün dahil geriye doğru en fazla 3 gün, gelecek yasak.
+    // Yönetici: kısıtlama yok.
+    function tarihSinirlariniAyarla() {
+        const tarihInput = document.getElementById('tarih');
+        if (!tarihInput) return;
+
+        if (isYonetici) {
+            // Yönetici için kısıtlama yok
+            tarihInput.removeAttribute('min');
+            tarihInput.removeAttribute('max');
+            tarihInput.disabled = false;
+            if (!tarihInput.value) {
+                tarihInput.value = formatTarih(new Date());
+            }
+            return;
+        }
+
+        const bugun = new Date();
+        bugun.setHours(0, 0, 0, 0);
+
+        const enEski = new Date(bugun);
+        enEski.setDate(enEski.getDate() - 2); // Bugün + dün + evvelsi gün = 3 gün
+
+        tarihInput.disabled = false;
+        tarihInput.min = formatTarih(enEski);
+        tarihInput.max = formatTarih(bugun);
+
+        if (!tarihInput.value) {
+            tarihInput.value = formatTarih(bugun);
+        }
+
+        const secili = new Date(tarihInput.value);
+        if (isNaN(secili) || secili < enEski || secili > bugun) {
+            tarihInput.value = formatTarih(bugun);
+        }
     }
 
     document.getElementById('tarih').value = formatTarih(new Date());
@@ -706,6 +745,7 @@
         const hataEl = document.getElementById('loginHata');
 
         if (girilenSifre === YONETICI_SIFRESI) {
+            isYonetici = true;
             document.getElementById('loginEkrani').style.display = 'none';
             document.getElementById('uygulamaEkrani').style.display = 'block';
             document.getElementById('raporTabBtn').style.display = 'block'; 
@@ -714,7 +754,9 @@
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
             yilSecenekleriniDoldur(); 
+            tarihSinirlariniAyarla(); // Yöneticide kısıtlamayı kaldır
         } else if (girilenSifre === SOFOR_SIFRESI) {
+            isYonetici = false;
             document.getElementById('loginEkrani').style.display = 'none';
             document.getElementById('uygulamaEkrani').style.display = 'block';
             document.getElementById('raporTabBtn').style.display = 'none'; 
@@ -722,6 +764,7 @@
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
+            tarihSinirlariniAyarla(); // Şoför için 3 gün sınırı uygula
         } else {
             hataEl.style.display = 'block';
         }
@@ -736,7 +779,10 @@
         if(btnElement) btnElement.classList.add('active');
         
         if(tabId === 'rapor') { filtreleRapor(); }
-        if(tabId === 'giris') { aracUyarilariniGuncelle(); }
+        if(tabId === 'giris') { 
+            tarihSinirlariniAyarla(); // Tab değişiminde de sınırları tazele
+            aracUyarilariniGuncelle(); 
+        }
         if(tabId === 'ayarlar') { aracAyarlariniBuluttanYukle(); }
     }
 
@@ -926,6 +972,27 @@
         if(!window.firebaseHazir) { alert("Bulut sistemi henüz yüklenmedi..."); return; }
         const secilenTarih = document.getElementById('tarih').value;
         if(!secilenTarih) { alert("Lütfen bir tarih seçin!"); return; }
+
+        // --- YENİ: Tarih aralığı doğrulaması (yalnızca ŞOFÖR için) ---
+        if (!isYonetici) {
+            const bugunD = new Date();
+            bugunD.setHours(0, 0, 0, 0);
+            const enEskiIzinli = new Date(bugunD);
+            enEskiIzinli.setDate(enEskiIzinli.getDate() - 2);
+            const secilenTarihObj = new Date(secilenTarih);
+
+            if (secilenTarihObj > bugunD) {
+                alert("⚠️ Gelecek bir tarihe veri giremezsiniz!\n\nEn geç bugünün tarihini seçebilirsiniz.");
+                document.getElementById('tarih').focus();
+                return;
+            }
+            if (secilenTarihObj < enEskiIzinli) {
+                alert("⚠️ En fazla 3 gün geriye kadar veri girebilirsiniz.\n\nSeçebileceğiniz en eski tarih: " + formatTarih(enEskiIzinli).split('-').reverse().join('.'));
+                document.getElementById('tarih').focus();
+                return;
+            }
+        }
+        // --- /YENİ ---
 
         const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
 
@@ -1147,6 +1214,11 @@
             document.getElementById('tamir').value = ''; document.getElementById('parca').value = '';
             document.getElementById('diger').value = ''; document.getElementById('gunlukSoforUcret').value = '';
             document.getElementById('guzergah').value = '';
+
+            // Kayıt sonrası tarih input'unu sıfırla (şoför için kilit açılır, sınırlar tazelenir)
+            const tarihEl = document.getElementById('tarih');
+            tarihEl.disabled = false;
+            tarihSinirlariniAyarla();
             
             setTimeout(() => { mesajEl.innerText = ""; }, 3000);
         } catch (e) {
@@ -1189,7 +1261,6 @@
                 const ayId = `${yil}_${ay}`;
 
                 if (!fisler[ayId]) {
-                    // Eğer muhasebe fişi silinmişse günlük kayıttaki kalemleri temizle
                     if (kayit.muhasebeKalemleri && Object.keys(kayit.muhasebeKalemleri).length > 0) {
                         let eskiSabitPay = kayit.sabitGiderPayi || 0;
                         let geciciVergi = kayit.muhasebeKalemleri.geciciVergi || 0;
@@ -1207,7 +1278,6 @@
                         dagitimGerekiyor = true;
                     }
                 } else {
-                    // Fiş varsa ve eksikse dağıtım yap (Eski mantık korundu)
                     if (kayit.sabitGiderPayi === 0 || !kayit.sabitGiderPayi) {
                         const fis = fisler[ayId];
                         const oAyinKayitlari = kayitlar.filter(k => {
@@ -1249,13 +1319,11 @@
                 const ayId = `${yil}_${ay}`;
 
                 if (!ukomeler[ayId]) {
-                    // UKOME silinmişse günlük kayıttaki geliri sıfırla
                     if (kayit.ukomeGeliri && kayit.ukomeGeliri > 0) {
                         batch.update(window.doc(window.db, "kayitlar", kayit.id), { ukomeGeliri: 0 });
                         dagitimGerekiyor = true;
                     }
                 } else {
-                    // UKOME varsa ve eksikse dağıt
                     if (!kayit.ukomeGeliri || kayit.ukomeGeliri === 0) {
                         const ukome = ukomeler[ayId];
                         const oAyinKayitlari = kayitlar.filter(k => {
@@ -1280,7 +1348,6 @@
                 const gvId = `${yil}_D${donem}`;
 
                 if (!geciciVergiler[gvId]) {
-                    // Geçici vergi silinmişse günlük kayıttaki kalemi temizle
                     if (kayit.muhasebeKalemleri && kayit.muhasebeKalemleri.geciciVergi) {
                         let eskiVergi = kayit.muhasebeKalemleri.geciciVergi;
                         let temizKalemler = { ...kayit.muhasebeKalemleri };
@@ -1297,7 +1364,6 @@
                         dagitimGerekiyor = true;
                     }
                 } else {
-                    // Geçici vergi varsa ve eksikse dağıt
                     if (!kayit.muhasebeKalemleri || !kayit.muhasebeKalemleri.geciciVergi) {
                         const gv = geciciVergiler[gvId];
                         let aylar = [];
@@ -1420,7 +1486,6 @@
                 batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
                     ukomeGeliri: gunlukDestek
                 });
-                // Yerel veriyi anında güncelle
                 kayit.ukomeGeliri = gunlukDestek;
             });
             await batch.commit();
@@ -1464,9 +1529,9 @@
             const batch = window.writeBatch(window.db);
             oAyinKayitlari.forEach(kayit => {
                 batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
-                    ukomeGeliri: 0 // Günlük kayıtlardaki desteği sıfırla
+                    ukomeGeliri: 0
                 });
-                kayit.ukomeGeliri = 0; // Yerel veriyi güncelle
+                kayit.ukomeGeliri = 0;
             });
             await batch.commit();
 
@@ -1475,7 +1540,7 @@
             document.getElementById('ukomeDagitBtn').innerText = "Devlet Desteğini Bu Aya Dağıt";
             document.getElementById('ukomeMesaj').innerText = "";
 
-            filtreleRapor(); // Raporu anında güncelle
+            filtreleRapor();
 
             alert("✅ Devlet desteği ve o aya ait tüm dağıtımlar başarıyla silindi. Raporlar güncellendi.");
             switchTab('rapor', document.getElementById('raporTabBtn'));
@@ -1586,7 +1651,6 @@
                     toplamGider: yeniToplamGider
                 });
 
-                // Yerel veriyi anında güncelle
                 kayit.muhasebeKalemleri = mevcutKalemler;
                 kayit.sabitGiderPayi = yeniSabitPay;
                 kayit.toplamGider = yeniToplamGider;
@@ -1654,7 +1718,6 @@
                     toplamGider: yeniToplamGider
                 });
                 
-                // Yerel veriyi güncelle
                 kayit.muhasebeKalemleri = mevcutKalemler;
                 kayit.sabitGiderPayi = yeniSabitPay;
                 kayit.toplamGider = yeniToplamGider;
@@ -1666,7 +1729,7 @@
             document.getElementById('geciciVergiDagitBtn').innerText = "Geçici Vergiyi Döneme Dağıt";
             document.getElementById('geciciVergiMesaj').innerText = "";
 
-            filtreleRapor(); // Raporu anında güncelle
+            filtreleRapor();
 
             alert("✅ Geçici Vergi ve o döneme ait tüm dağıtımlar başarıyla silindi. Raporlar güncellendi.");
             switchTab('rapor', document.getElementById('raporTabBtn'));
@@ -1888,7 +1951,6 @@
                     toplamGider: yeniToplamGider 
                 });
 
-                // Yerel veriyi anında güncelle
                 kayit.sabitGiderPayi = hesaplananToplam;
                 kayit.muhasebeKalemleri = kalemler;
                 kayit.toplamGider = yeniToplamGider;
@@ -1933,7 +1995,6 @@
                 
                 let yeniKalemler = {};
                 let yeniSabitPay = 0;
-                // Eğer geçici vergi varsa onu koru
                 if (kayit.muhasebeKalemleri && kayit.muhasebeKalemleri.geciciVergi) {
                     yeniKalemler.geciciVergi = kayit.muhasebeKalemleri.geciciVergi;
                     yeniSabitPay = kayit.muhasebeKalemleri.geciciVergi;
@@ -1947,7 +2008,6 @@
                     toplamGider: yeniToplamGider 
                 });
 
-                // Yerel veriyi güncelle
                 kayit.sabitGiderPayi = yeniSabitPay;
                 kayit.muhasebeKalemleri = yeniKalemler;
                 kayit.toplamGider = yeniToplamGider;
@@ -1968,7 +2028,7 @@
             document.getElementById('sabitGiderKaydetBtn').innerText = "Sabit Giderleri Seçilen Aya Dağıt";
             document.getElementById('sabitGiderSilBtn').style.display = 'none';
             
-            filtreleRapor(); // Raporu anında güncelle
+            filtreleRapor();
 
             alert("✅ Fiş ve o aya ait tüm gider dağıtımları başarıyla silindi. Raporlar güncellendi.");
             switchTab('rapor', document.getElementById('raporTabBtn'));
@@ -2045,7 +2105,7 @@
         tabloyuDoldur(filtrelenmisKayitlar);
     }
 
-        function maliTabloDoldur(toplamGelir, tKazanc, tUkome, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, muhasebe, tSabit) {
+    function maliTabloDoldur(toplamGelir, tKazanc, tUkome, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, muhasebe, tSabit) {
         const tbody = document.querySelector('#maliTablo tbody');
         tbody.innerHTML = '';
 
@@ -2058,7 +2118,6 @@
             if (isToplam) tr.className = 'toplam-row';
             if (isKar) tr.className = 'kar-row';
             
-            // Eğer bu bir ana başlık satırıysa tutar ve oran kısımlarını boş bırak
             const tutarYazisi = isGrup ? "" : Math.round(tutar).toLocaleString('tr-TR') + " TL";
             const oranYazisi = isGrup ? "" : oran(tutar);
 
@@ -2070,22 +2129,20 @@
             tbody.appendChild(tr);
         };
 
-        // --- A. GELİRLER BÖLÜMÜ ---
-        trEkle("A. GELİRLER", 0, true); // Sadece başlık (0 TL yazmayacak)
+        trEkle("A. GELİRLER", 0, true);
         trEkle("Günlük Hasılat (Seferler)", tKazanc);
         if (tUkome > 0) trEkle("Devlet Destekleri / Teşvikler", tUkome);
         
         trEkle("A. GELİRLER TOPLAMI", toplamGelir, false, true);
         
-        // --- B. GİDERLER BÖLÜMÜ ---
-        trEkle("B. GİDERLER", 0, true); // Sadece başlık (0 TL yazmayacak)
+        trEkle("B. GİDERLER", 0, true);
         trEkle("Mazot Gideri", tMazot);
         trEkle("Şoför Ücreti", tSofor);
         trEkle("Sıvı Bakım", tSivi);
         trEkle("Tamir & Parça (Toplam)", tTamir + tParca);
         trEkle("Diğer Günlük Giderler", tDiger);
         
-        trEkle("MUHASEBE / SABİT GİDERLER", 0, true); // Sadece başlık (0 TL yazmayacak)
+        trEkle("MUHASEBE / SABİT GİDERLER", 0, true);
         if (muhasebe.pesinVergi > 0) trEkle("Peşin Vergi", muhasebe.pesinVergi);
         if (muhasebe.stopaj > 0) trEkle("Stopaj", muhasebe.stopaj);
         if (muhasebe.kdv > 0) trEkle("K.D.V.", muhasebe.kdv);
@@ -2097,10 +2154,8 @@
         if (muhasebe.sabitDigerGider > 0) trEkle("Diğer Sabit Giderler", muhasebe.sabitDigerGider);
         if (muhasebe.geciciVergi > 0) trEkle("Geçici Vergi", muhasebe.geciciVergi);
         
-        // B. Giderlerin Toplamı
         trEkle("B. GİDERLER TOPLAMI", tGider, false, true);
 
-        // --- GENEL TOPLAMLAR ---
         trEkle("C. TOPLAM GİDER", tGider, false, false, true);
         trEkle("D. NET KÂR (A - C)", netKar, false, false, false, true);
     }
@@ -2351,7 +2406,34 @@
         const kayit = kayitlar.find(k => k.id === id);
         if(!kayit) return;
 
-        document.getElementById('tarih').value = kayit.tarih;
+        const tarihInput = document.getElementById('tarih');
+        const eskiTarih = kayit.tarih;
+
+        if (isYonetici) {
+            // Yönetici her tarihi düzenleyebilir
+            tarihInput.removeAttribute('min');
+            tarihInput.removeAttribute('max');
+            tarihInput.disabled = false;
+            tarihInput.value = eskiTarih;
+        } else {
+            // Şoför: önce sınırları tazele
+            tarihSinirlariniAyarla();
+            const minTarih = tarihInput.min;
+            const maxTarih = tarihInput.max;
+
+            if (eskiTarih < minTarih || eskiTarih > maxTarih) {
+                // 3 günden eski kayıt: tarih kilitlenir, diğer alanlar düzenlenebilir
+                tarihInput.min = eskiTarih;
+                tarihInput.max = eskiTarih;
+                tarihInput.value = eskiTarih;
+                tarihInput.disabled = true;
+                alert("ℹ️ Bu kayıt 3 günden daha eski bir tarihe ait olduğu için tarih değiştirilemez.\n\nDiğer alanları (hasılat, gider vb.) düzenleyebilirsiniz.\n\nKayıt Tarihi: " + eskiTarih.split('-').reverse().join('.'));
+            } else {
+                tarihInput.disabled = false;
+                tarihInput.value = eskiTarih;
+            }
+        }
+
         if(kayit.guzergah) document.getElementById('guzergah').value = kayit.guzergah;
         document.getElementById('hasilat').value = sayiyiFormatla(kayit.hasilat);
         document.getElementById('km').value = sayiyiFormatla(kayit.km);
@@ -2373,6 +2455,8 @@
     }
 
     window.onload = function() {
+        tarihSinirlariniAyarla(); // Sayfa açılışında input sınırlarını hazırla
+        
         setTimeout(() => { aracAyarlariniBuluttanYukle(); }, 1000); 
         yilSecenekleriniDoldur(); 
         
