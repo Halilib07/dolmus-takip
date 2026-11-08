@@ -2045,7 +2045,7 @@
         tabloyuDoldur(filtrelenmisKayitlar);
     }
 
-    function maliTabloDoldur(toplamGelir, tKazanc, tUkome, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, muhasebe, tSabit) {
+        function maliTabloDoldur(toplamGelir, tKazanc, tUkome, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, muhasebe, tSabit) {
         const tbody = document.querySelector('#maliTablo tbody');
         tbody.innerHTML = '';
 
@@ -2054,34 +2054,38 @@
         const trEkle = (baslik, tutar, isGrup = false, isGrupToplam = false, isToplam = false, isKar = false) => {
             const tr = document.createElement('tr');
             if (isGrup) tr.className = 'grup-baslik';
-            if (isGrupToplam) tr.className = 'grup-toplam'; // Yeni eklenen sınıf
+            if (isGrupToplam) tr.className = 'grup-toplam'; 
             if (isToplam) tr.className = 'toplam-row';
             if (isKar) tr.className = 'kar-row';
             
+            // Eğer bu bir ana başlık satırıysa tutar ve oran kısımlarını boş bırak
+            const tutarYazisi = isGrup ? "" : Math.round(tutar).toLocaleString('tr-TR') + " TL";
+            const oranYazisi = isGrup ? "" : oran(tutar);
+
             tr.innerHTML = `
                 <td>${baslik}</td>
-                <td>${Math.round(tutar).toLocaleString('tr-TR')} TL</td>
-                <td>${isGrup ? '-' : (isGrupToplam ? oran(tutar) : oran(tutar))}</td>
+                <td>${tutarYazisi}</td>
+                <td>${oranYazisi}</td>
             `;
             tbody.appendChild(tr);
         };
 
         // --- A. GELİRLER BÖLÜMÜ ---
-        trEkle("A. GELİRLER", 0, true); // Ana başlık
+        trEkle("A. GELİRLER", 0, true); // Sadece başlık (0 TL yazmayacak)
         trEkle("Günlük Hasılat (Seferler)", tKazanc);
         if (tUkome > 0) trEkle("Devlet Destekleri / Teşvikler", tUkome);
-        // A. Gelirlerin Toplamını yazdırıyoruz (Koyu renkli)
+        
         trEkle("A. GELİRLER TOPLAMI", toplamGelir, false, true);
         
         // --- B. GİDERLER BÖLÜMÜ ---
-        trEkle("B. GİDERLER", 0, true); // Ana başlık
+        trEkle("B. GİDERLER", 0, true); // Sadece başlık (0 TL yazmayacak)
         trEkle("Mazot Gideri", tMazot);
         trEkle("Şoför Ücreti", tSofor);
         trEkle("Sıvı Bakım", tSivi);
         trEkle("Tamir & Parça (Toplam)", tTamir + tParca);
         trEkle("Diğer Günlük Giderler", tDiger);
         
-        trEkle("Muhasebe / Sabit Giderler", 0, true); // Alt başlık
+        trEkle("MUHASEBE / SABİT GİDERLER", 0, true); // Sadece başlık (0 TL yazmayacak)
         if (muhasebe.pesinVergi > 0) trEkle("Peşin Vergi", muhasebe.pesinVergi);
         if (muhasebe.stopaj > 0) trEkle("Stopaj", muhasebe.stopaj);
         if (muhasebe.kdv > 0) trEkle("K.D.V.", muhasebe.kdv);
@@ -2093,7 +2097,7 @@
         if (muhasebe.sabitDigerGider > 0) trEkle("Diğer Sabit Giderler", muhasebe.sabitDigerGider);
         if (muhasebe.geciciVergi > 0) trEkle("Geçici Vergi", muhasebe.geciciVergi);
         
-        // B. Giderlerin Toplamını yazdırıyoruz (Koyu renkli)
+        // B. Giderlerin Toplamı
         trEkle("B. GİDERLER TOPLAMI", tGider, false, true);
 
         // --- GENEL TOPLAMLAR ---
