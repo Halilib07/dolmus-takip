@@ -194,13 +194,24 @@
             margin-bottom: 20px;
         }
 
-        /* PDF Güzergah Tablosu Özel Tasarımı (Resimdeki Tasarım) */
+        /* PDF Güzergah Tablosu Özel Tasarımı */
+        .analiz-tablo { 
+            display: table !important; 
+            width: 100% !important; 
+            table-layout: fixed;
+        }
+        .analiz-tablo thead { display: table-header-group; }
+        .analiz-tablo tbody { display: table-row-group; }
+        .analiz-tablo tr { display: table-row; }
+        
         .analiz-tablo th, .analiz-tablo td { 
-            padding: 10px 8px !important; 
+            display: table-cell !important;
+            padding: 12px 10px !important; 
             font-size: 12px !important; 
             text-align: left !important; 
-            white-space: nowrap; 
             border-bottom: 1px solid #eee;
+            white-space: normal !important;
+            vertical-align: middle;
         }
         .analiz-tablo thead { 
             background-color: #ecf0f1 !important; 
@@ -210,9 +221,10 @@
             font-weight: bold !important; 
             text-transform: none !important; 
         }
-        .analiz-tablo td:nth-child(2), .analiz-tablo td:nth-child(3), .analiz-tablo td:nth-child(4) { 
-            text-align: left !important; 
-        }
+        .analiz-tablo th:nth-child(1), .analiz-tablo td:nth-child(1) { width: 30%; }
+        .analiz-tablo th:nth-child(2), .analiz-tablo td:nth-child(2) { width: 15%; text-align: center !important; }
+        .analiz-tablo th:nth-child(3), .analiz-tablo td:nth-child(3) { width: 30%; text-align: left !important; }
+        .analiz-tablo th:nth-child(4), .analiz-tablo td:nth-child(4) { width: 25%; text-align: left !important; }
 
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
@@ -249,6 +261,7 @@
             .pdf-2col { grid-template-columns: 1fr; gap: 10px; }
             .pdf-header h1 { font-size: 18px; }
             .pdf-table th, .pdf-table td { padding: 5px; font-size: 9px; }
+            .analiz-tablo th, .analiz-tablo td { font-size: 10px !important; padding: 8px 5px !important; }
         }
     </style>
 </head>
@@ -637,7 +650,7 @@
         </div>
     </div>
 
-    <div class="pdf-section">
+    <div class="pdf-section" style="page-break-inside: avoid;">
         <div class="pdf-section-title">🛣️ Güzergah Verimlilik Analizi</div>
         <table class="pdf-table analiz-tablo">
             <thead>
