@@ -136,11 +136,11 @@
         .btn-pdf:hover { background-color: #e67e22; }
         
         /* =========================================
-           PDF RAPOR ALANI (YENİ - SAYFALI YAPI)
+           PDF RAPOR ALANI - YATAY A4 (297mm x 210mm)
            ========================================= */
         #pdfRaporAlani {
             display: none;
-            width: 190mm;
+            width: 277mm;          /* 297 - 20mm margin */
             margin: 0 auto;
             padding: 0;
             background: #fff;
@@ -151,9 +151,9 @@
         }
 
         .pdf-page {
-            width: 190mm;
-            min-height: 277mm;
-            padding: 8mm;
+            width: 277mm;
+            min-height: 190mm;     /* 210 - 20mm margin */
+            padding: 6mm;
             box-sizing: border-box;
             background: #fff;
             position: relative;
@@ -169,18 +169,18 @@
         .pdf-header {
             text-align: center;
             border-bottom: 2px solid #263445;
-            padding-bottom: 12px;
-            margin-bottom: 18px;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .pdf-header .logo {
-            font-size: 32px;
-            margin-bottom: 5px;
+            font-size: 28px;
+            margin-bottom: 2px;
         }
 
         .pdf-header h1 {
-            font-size: 23px;
-            margin: 8px 0;
+            font-size: 22px;
+            margin: 4px 0;
             color: #263445;
             letter-spacing: 1px;
         }
@@ -193,31 +193,32 @@
         }
 
         .pdf-section {
-            margin-bottom: 18px;
+            margin-bottom: 12px;
             break-inside: avoid;
             page-break-inside: avoid;
         }
 
         .pdf-section-title {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
-            padding: 10px;
+            padding: 8px 10px;
             background: #edf2f7;
             border-left: 4px solid #27ae60;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #263445;
         }
 
+        /* Yatayda 4 sütun istatistik kutusu */
         .pdf-stats-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px;
         }
 
         .pdf-stat-box {
             border: 1px solid #ddd;
             border-radius: 7px;
-            padding: 15px;
+            padding: 12px;
             text-align: center;
             break-inside: avoid;
             page-break-inside: avoid;
@@ -225,17 +226,17 @@
         }
 
         .pdf-stat-box h4 {
-            font-size: 12px;
+            font-size: 11px;
             color: #64748b;
-            margin: 0 0 8px 0;
+            margin: 0 0 6px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .pdf-stat-box p {
-            font-size: 21px;
+            font-size: 18px;
             font-weight: bold;
-            margin: 8px 0 0 0;
+            margin: 6px 0 0 0;
             color: #263445;
         }
 
@@ -256,7 +257,7 @@
         .pdf-list li {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
+            padding: 6px 0;
             border-bottom: 1px dashed #eee;
             font-size: 13px;
             color: #34495e;
@@ -273,8 +274,8 @@
 
         .pdf-footer {
             border-top: 1px solid #ddd;
-            margin-top: 20px;
-            padding-top: 10px;
+            margin-top: 15px;
+            padding-top: 8px;
             text-align: center;
             color: #888;
             font-size: 10px;
@@ -282,8 +283,8 @@
 
         #pdfGrafikResim {
             width: 100%;
-            height: 65mm;
-            max-height: 65mm;
+            height: 55mm;
+            max-height: 55mm;
             object-fit: contain;
             display: block;
             margin: 0 auto;
@@ -321,6 +322,14 @@
         .pdf-c-2 { flex: 1; width: 15%; text-align: center; }
         .pdf-c-3 { flex: 1; width: 30%; font-weight: bold; }
         .pdf-c-4 { flex: 1; width: 25%; }
+
+        /* Yatay düzen: grafik + istatistik yan yana */
+        .pdf-ust-alan {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
 
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
@@ -682,11 +691,11 @@
 </div>
 
 <!-- ========================================= -->
-<!-- PDF RAPOR ŞABLONU (SAYFALI YAPI) -->
+<!-- PDF RAPOR ŞABLONU (YATAY A4 - 2 SAYFA) -->
 <!-- ========================================= -->
 <div id="pdfRaporAlani">
 
-    <!-- 1. SAYFA: Başlık + Grafik + İstatistikler -->
+    <!-- 1. SAYFA (YATAY) -->
     <div class="pdf-page">
         <div class="pdf-header">
             <div class="logo">🚐</div>
@@ -694,42 +703,38 @@
             <p id="pdfTarihAraligi">01.11.2026 - 07.11.2026</p>
         </div>
 
+        <!-- Üst Alan: Grafik (Sol) + 4 İstatistik Kutusu (Sağ 2x2) -->
+        <div class="pdf-ust-alan">
+            <div class="pdf-section" style="margin-bottom:0;">
+                <div class="pdf-section-title">📈 Kazanç - Gider Trendi (Günlük)</div>
+                <img id="pdfGrafikResim" src="" alt="Grafik Yükleniyor...">
+            </div>
+
+            <div class="pdf-stats-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="pdf-stat-box" style="border-top: 3px solid #27ae60;">
+                    <h4>Toplam Kazanç</h4>
+                    <p id="pdfKazanc">0 TL</p>
+                </div>
+                <div class="pdf-stat-box" style="border-top: 3px solid #e74c3c;">
+                    <h4>Toplam Gider</h4>
+                    <p id="pdfGider">0 TL</p>
+                </div>
+                <div class="pdf-stat-box" style="border-top: 3px solid #2980b9;">
+                    <h4>Net Kâr</h4>
+                    <p id="pdfNetKar">0 TL</p>
+                </div>
+                <div class="pdf-stat-box" style="border-top: 3px solid #8e44ad;">
+                    <h4>Günlük Ort. Kâr</h4>
+                    <p id="pdfOrtKar">0 TL</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alt Alan: Öne Çıkanlar (Sol) + Gider Kalemleri (Sağ) -->
         <div class="pdf-section">
-            <div class="pdf-section-title">📈 Kazanç - Gider Trendi (Günlük)</div>
-            <img id="pdfGrafikResim" src="" alt="Grafik Yükleniyor...">
-        </div>
-
-        <div class="pdf-stats-grid">
-            <div class="pdf-stat-box" style="border-top: 3px solid #27ae60;">
-                <h4>Toplam Kazanç</h4>
-                <p id="pdfKazanc">0 TL</p>
-            </div>
-            <div class="pdf-stat-box" style="border-top: 3px solid #e74c3c;">
-                <h4>Toplam Gider</h4>
-                <p id="pdfGider">0 TL</p>
-            </div>
-            <div class="pdf-stat-box" style="border-top: 3px solid #2980b9;">
-                <h4>Net Kâr</h4>
-                <p id="pdfNetKar">0 TL</p>
-            </div>
-            <div class="pdf-stat-box" style="border-top: 3px solid #8e44ad;">
-                <h4>Günlük Ort. Kâr</h4>
-                <p id="pdfOrtKar">0 TL</p>
-            </div>
-        </div>
-
-        <div class="pdf-footer">
-            Bu rapor Dolmuş İşletme Yönetim Paneli tarafından otomatik olarak oluşturulmuştur.
-        </div>
-    </div>
-
-    <!-- 2. SAYFA: Öne Çıkanlar + Gider Kalemleri -->
-    <div class="pdf-page">
-        <div class="pdf-section">
-            <div class="pdf-section-title">⭐ Öne Çıkanlar & Gider Kalemleri</div>
             <div class="pdf-2col">
                 <div>
-                    <h4 style="margin-top:0; color:#263445; font-size:13px;">⭐ Öne Çıkanlar</h4>
+                    <div class="pdf-section-title">⭐ Öne Çıkanlar</div>
                     <ul class="pdf-list">
                         <li><span>En İyi Gün:</span> <strong id="pdfEnIyiGun">-</strong></li>
                         <li><span>En Yüksek Gider:</span> <strong id="pdfEnYuksekGider">-</strong></li>
@@ -738,7 +743,7 @@
                     </ul>
                 </div>
                 <div>
-                    <h4 style="margin-top:0; color:#263445; font-size:13px;">⛽ Gider Kalemleri</h4>
+                    <div class="pdf-section-title">⛽ Gider Kalemleri</div>
                     <ul class="pdf-list">
                         <li><span>Mazot:</span> <strong id="pdfMazot">0 TL</strong></li>
                         <li><span>Şoför Ücretleri:</span> <strong id="pdfSofor">0 TL</strong></li>
@@ -755,7 +760,7 @@
         </div>
     </div>
 
-    <!-- 3. SAYFA: Güzergah Analizi -->
+    <!-- 2. SAYFA (YATAY) -->
     <div class="pdf-page">
         <div class="pdf-section">
             <div class="pdf-section-title">🛣️ Güzergah Verimlilik Analizi</div>
@@ -1455,7 +1460,7 @@
     }
 
     // =============================================
-    // PDF OLUŞTURMA VE İNDİRME
+    // PDF OLUŞTURMA VE İNDİRME (YATAY A4)
     // =============================================
     async function pdfOlusturVeIndir(element, baslangicStr, bitisStr) {
         if (!element) {
@@ -1485,7 +1490,7 @@
             }
 
             // Layout'un oturmasını bekle
-            await new Promise(r => setTimeout(r, 200));
+            await new Promise(r => setTimeout(r, 250));
             void element.offsetHeight;
 
             const ayarlar = {
@@ -1499,13 +1504,13 @@
                     logging: false,
                     scrollX: 0,
                     scrollY: 0,
-                    windowWidth: element.scrollWidth,
-                    windowHeight: element.scrollHeight
+                    windowWidth: 1200,
+                    windowHeight: 800
                 },
                 jsPDF: {
                     unit: "mm",
                     format: "a4",
-                    orientation: "portrait"
+                    orientation: "landscape"    // ← YATAY
                 },
                 pagebreak: { mode: ["css"] }
             };
