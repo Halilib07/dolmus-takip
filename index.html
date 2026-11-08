@@ -494,17 +494,18 @@
             <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Girdiğiniz tarihlerin üzerine sistem otomatik olarak <b>+1 Yıl</b> ekler. Yağ ve Triger ömrü için belirlediğiniz KM, şoförün girdiği <b>en güncel tarihli</b> KM'den düşülerek hesaplanır.</p>
         </div>
 
+        <!-- ========== UKOME ========== -->
         <div class="card" style="border-left: 5px solid var(--success);">
             <h2>🏛️ Devlet Destekleri / UKOME Engelli Desteği</h2>
-            <p style="font-size: 13px; color: #555; margin-bottom: 15px;">UKOME tarafından engelli taşımacılığı için verilen aylık desteği buradan ilgili aya dağıtabilirsiniz. Dağıtılan tutar, o aya ait günlük kazançların üzerine "Devlet Desteği" olarak eklenir.</p>
+            <p style="font-size: 13px; color: #555; margin-bottom: 15px;">UKOME tarafından engelli taşımacılığı için verilen aylık desteği buradan ilgili aya dağıtabilirsiniz. Daha önce girilmiş bir destek varsa <b>güncelleyebilir</b> veya <b>silebilirsiniz</b>. Silme işleminde o aya ait tüm günlük dağıtımlar da temizlenir.</p>
             <div class="form-grid">
                 <div class="input-grup">
                     <label for="ukomeYil" class="select-label">Yıl Seçin</label>
-                    <select id="ukomeYil"></select>
+                    <select id="ukomeYil" onchange="guncelleUkomeBilgi()"></select>
                 </div>
                 <div class="input-grup">
                     <label for="ukomeAy" class="select-label">Ay Seçin</label>
-                    <select id="ukomeAy">
+                    <select id="ukomeAy" onchange="guncelleUkomeBilgi()">
                         <option value="1">Ocak</option>
                         <option value="2">Şubat</option>
                         <option value="3">Mart</option>
@@ -524,21 +525,23 @@
                     <label for="ukomeTutar">Aylık Destek Tutarı (TL)</label>
                 </div>
                 <button class="btn-ukome" id="ukomeDagitBtn" onclick="ukomeDagit()">Devlet Desteğini Bu Aya Dağıt</button>
+                <button class="btn-sil-fis" id="ukomeSilBtn" onclick="ukomeSil()">Bu Aya Ait Devlet Desteğini ve Dağıtımını İptal Et (Sil)</button>
             </div>
             <div id="ukomeMesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
         </div>
 
+        <!-- ========== GEÇİCİ VERGİ ========== -->
         <div class="card" style="border-left: 5px solid var(--warning);">
             <h2>📅 Geçici Vergi (3 Aylık Dönem)</h2>
-            <p style="font-size: 13px; color: #555; margin-bottom: 15px;">Muhaseecinizin istediği 3 aylık Geçici Vergi tutarını buradan ilgili döneme dağıtabilirsiniz. Seçilen dönemin 3 ayına eşit olarak yansıtılır.</p>
+            <p style="font-size: 13px; color: #555; margin-bottom: 15px;">Muhaseecinizin istediği 3 aylık Geçici Vergi tutarını buradan ilgili döneme dağıtabilirsiniz. Daha önce girilmiş bir vergi varsa <b>güncelleyebilir</b> veya <b>silebilirsiniz</b>. Silme işleminde o döneme ait tüm günlük dağıtımlar da temizlenir.</p>
             <div class="form-grid">
                 <div class="input-grup">
                     <label for="geciciVergiYil" class="select-label">Yıl Seçin</label>
-                    <select id="geciciVergiYil"></select>
+                    <select id="geciciVergiYil" onchange="guncelleGeciciVergiBilgi()"></select>
                 </div>
                 <div class="input-grup">
                     <label for="geciciVergiDonem" class="select-label">Dönem Seçin</label>
-                    <select id="geciciVergiDonem">
+                    <select id="geciciVergiDonem" onchange="guncelleGeciciVergiBilgi()">
                         <option value="1">1. Dönem (Ocak - Şubat - Mart)</option>
                         <option value="2">2. Dönem (Nisan - Mayıs - Haziran)</option>
                         <option value="3">3. Dönem (Temmuz - Ağustos - Eylül)</option>
@@ -550,10 +553,12 @@
                     <label for="geciciVergiTutar">Geçici Vergi Tutarı (TL)</label>
                 </div>
                 <button class="btn-ukome" style="background: var(--warning);" id="geciciVergiDagitBtn" onclick="geciciVergiDagit()">Geçici Vergiyi Döneme Dağıt</button>
+                <button class="btn-sil-fis" id="geciciVergiSilBtn" onclick="geciciVergiSil()">Bu Döneme Ait Geçici Vergiyi ve Dağıtımını İptal Et (Sil)</button>
             </div>
             <div id="geciciVergiMesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
         </div>
 
+        <!-- ========== SABİT GİDER FİŞİ ========== -->
         <div class="card">
             <h2>🧾 Muhasebe / Sabit Gider Fişi Girişi</h2>
             <div class="form-grid">
@@ -743,7 +748,6 @@
         let seceneklerTumsuz = '';
 
         siraliYillar.forEach(y => {
-            // Seçili yılı şu anki yıl yapalım
             let seciliMi = (y === simdikiYil) ? "selected" : "";
             secenekler += `<option value="${y}" ${seciliMi}>${y}</option>`;
             seceneklerTumsuz += `<option value="${y}" ${seciliMi}>${y}</option>`;
@@ -764,7 +768,7 @@
 
         if (secilenYil) {
             if (secilenAy !== "") {
-                const ayInt = parseInt(secilenAy) - 1; // 1-12 -> 0-11 JS çevrimi
+                const ayInt = parseInt(secilenAy) - 1;
                 const ilkGun = new Date(secilenYil, ayInt, 1);
                 const sonGun = new Date(secilenYil, ayInt + 1, 0);
                 baslangicInput.value = formatTarih(ilkGun);
@@ -1034,7 +1038,6 @@
             else { kayit[alan] = (alan === 'guzergah') ? "Belirtilmedi" : 0; }
         });
 
-        // YENİ AY SİSTEMİ (1-12)
         const [yilStr, ayStr] = secilenTarih.split('-');
         const ayId = `${yilStr}_${parseInt(ayStr)}`;
         
@@ -1275,24 +1278,39 @@
         });
     }
 
-    // ========== Destek FONKSİYONLARI ==========
+    // ========== UKOME FONKSİYONLARI ==========
     
-    function guncelleUkomeBilgi() {
+    async function guncelleUkomeBilgi() {
         const yil = document.getElementById('ukomeYil').value;
         const ay = document.getElementById('ukomeAy').value;
-        if(!yil) return;
-        
-        secilenUkomeAyId = `${yil}_${ay}`;
-        const tutar = formatiCoz(document.getElementById('ukomeTutar').value);
+        const silBtn = document.getElementById('ukomeSilBtn');
+        const dagitBtn = document.getElementById('ukomeDagitBtn');
         const mesajEl = document.getElementById('ukomeMesaj');
         
-        window.getDoc(window.doc(window.db, "ukomeDestekleri", secilenUkomeAyId)).then(docSnap => {
+        if(!yil) { 
+            silBtn.style.display = 'none'; 
+            document.getElementById('ukomeTutar').value = '';
+            mesajEl.innerText = '';
+            return; 
+        }
+        
+        secilenUkomeAyId = `${yil}_${ay}`;
+        
+        try {
+            const docSnap = await window.getDoc(window.doc(window.db, "ukomeDestekleri", secilenUkomeAyId));
             if(docSnap.exists()) {
                 document.getElementById('ukomeTutar').value = sayiyiFormatla(docSnap.data().toplam);
                 mesajEl.style.color = "var(--info)";
-                mesajEl.innerText = "Bu aya ait daha önce bir destek girilmiş. Güncelleyebilirsiniz.";
+                mesajEl.innerText = "ℹ️ Bu aya ait daha önce bir destek girilmiş. Güncelleyebilir veya silebilirsiniz.";
+                silBtn.style.display = 'block';
+                dagitBtn.innerText = "Devlet Desteğini Güncelle";
+            } else {
+                document.getElementById('ukomeTutar').value = "";
+                mesajEl.innerText = "";
+                silBtn.style.display = 'none';
+                dagitBtn.innerText = "Devlet Desteğini Bu Aya Dağıt";
             }
-        });
+        } catch(e) { console.error(e); }
     }
 
     async function ukomeDagit() {
@@ -1317,11 +1335,17 @@
             return;
         }
 
+        const mevcutDoc = await window.getDoc(window.doc(window.db, "ukomeDestekleri", secilenUkomeAyId));
+        const mevcutVeri = mevcutDoc.exists() ? mevcutDoc.data() : null;
+        const isUpdate = !!mevcutVeri;
+
         const gunSayisi = oAyinKayitlari.length;
         const gunlukDestek = tutar / gunSayisi;
         const ayIsimleri = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 
-        const mesaj = `Toplam ${tutar.toLocaleString('tr-TR')} TL Destek, ${ayIsimleri[ay]} ${yil} ayındaki ${gunSayisi} güne bölünecek.\nGünlük Gelir: ${gunlukDestek.toLocaleString('tr-TR')} TL\n\nOnaylıyor musunuz?`;
+        const mesaj = `Toplam ${tutar.toLocaleString('tr-TR')} TL Destek, ${ayIsimleri[ay]} ${yil} ayındaki ${gunSayisi} güne bölünecek.\nGünlük Gelir: ${gunlukDestek.toLocaleString('tr-TR')} TL\n\n` +
+                      (isUpdate ? "⚠️ Bu aya ait destek GÜNCELLENECEK. Eski dağıtım silinip yeniden hesaplanacak." : "Yeni destek kaydı oluşturulacak.") +
+                      `\n\nOnaylıyor musunuz?`;
         if(!confirm(mesaj)) return;
 
         try {
@@ -1341,10 +1365,12 @@
             await batch.commit();
 
             mesajEl.style.color = "green";
-            mesajEl.innerText = "✅ Destek başarıyla o aya ait günlere dağıtıldı!";
+            mesajEl.innerText = isUpdate ? "✅ Destek güncellendi ve yeniden dağıtıldı!" : "✅ Destek başarıyla o aya ait günlere dağıtıldı!";
             setTimeout(() => { mesajEl.innerText = ""; }, 4000);
 
             alert(`✅ Başarılı! Her güne ${gunlukDestek.toLocaleString('tr-TR')} TL Destek eklendi.`);
+            document.getElementById('ukomeSilBtn').style.display = 'block';
+            document.getElementById('ukomeDagitBtn').innerText = "Devlet Desteğini Güncelle";
             switchTab('rapor', document.getElementById('raporTabBtn'));
         } catch(e) {
             console.error(e);
@@ -1352,26 +1378,81 @@
         }
     }
 
+    async function ukomeSil() {
+        if(!secilenUkomeAyId) {
+            alert("Lütfen önce bir yıl ve ay seçin!");
+            return;
+        }
+
+        const [yilStr, ayStr] = secilenUkomeAyId.split('_');
+        const ayIsimleri = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+        
+        const onay = confirm(`⚠️ DİKKAT: ${ayIsimleri[ayStr]} ${yilStr} ayına ait Devlet Desteği kaydını ve o aya ait tüm günlük dağıtımları SİLMEK üzeresiniz.\n\nBu işlem geri alınamaz! Onaylıyor musunuz?`);
+        if (!onay) return;
+
+        const oAyinKayitlari = kayitlar.filter(k => {
+            if(!k.tarih) return false;
+            const kTarihObj = new Date(k.tarih);
+            return kTarihObj.getFullYear() === parseInt(yilStr) && (kTarihObj.getMonth() + 1) === parseInt(ayStr);
+        });
+
+        try {
+            await window.deleteDoc(window.doc(window.db, "ukomeDestekleri", secilenUkomeAyId));
+
+            const batch = window.writeBatch(window.db);
+            oAyinKayitlari.forEach(kayit => {
+                batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
+                    ukomeGeliri: 0
+                });
+            });
+            await batch.commit();
+
+            document.getElementById('ukomeTutar').value = '';
+            document.getElementById('ukomeSilBtn').style.display = 'none';
+            document.getElementById('ukomeDagitBtn').innerText = "Devlet Desteğini Bu Aya Dağıt";
+            document.getElementById('ukomeMesaj').innerText = "";
+
+            alert("✅ Devlet desteği ve o aya ait tüm dağıtımlar başarıyla silindi. Raporlar güncellendi.");
+            switchTab('rapor', document.getElementById('raporTabBtn'));
+        } catch(e) {
+            console.error(e);
+            alert("Silme işlemi sırasında hata oluştu!");
+        }
+    }
+
     // ========== GEÇİCİ VERGİ FONKSİYONLARI ==========
     
-    function guncelleGeciciVergiBilgi() {
+    async function guncelleGeciciVergiBilgi() {
         const yil = document.getElementById('geciciVergiYil').value;
         const donem = document.getElementById('geciciVergiDonem').value;
-        if(!yil || !donem) return;
-        
-        const docId = `${yil}_D${donem}`;
-        const tutar = formatiCoz(document.getElementById('geciciVergiTutar').value);
+        const silBtn = document.getElementById('geciciVergiSilBtn');
+        const dagitBtn = document.getElementById('geciciVergiDagitBtn');
         const mesajEl = document.getElementById('geciciVergiMesaj');
         
-        window.getDoc(window.doc(window.db, "geciciVergiler", docId)).then(docSnap => {
+        if(!yil || !donem) { 
+            silBtn.style.display = 'none'; 
+            document.getElementById('geciciVergiTutar').value = '';
+            mesajEl.innerText = '';
+            return; 
+        }
+        
+        const docId = `${yil}_D${donem}`;
+        
+        try {
+            const docSnap = await window.getDoc(window.doc(window.db, "geciciVergiler", docId));
             if(docSnap.exists()) {
                 document.getElementById('geciciVergiTutar').value = sayiyiFormatla(docSnap.data().toplam);
                 mesajEl.style.color = "var(--info)";
-                mesajEl.innerText = "Bu döneme ait daha önce bir vergi girilmiş. Güncelleyebilirsiniz.";
+                mesajEl.innerText = "ℹ️ Bu döneme ait daha önce bir vergi girilmiş. Güncelleyebilir veya silebilirsiniz.";
+                silBtn.style.display = 'block';
+                dagitBtn.innerText = "Geçici Vergiyi Güncelle";
             } else {
+                document.getElementById('geciciVergiTutar').value = "";
                 mesajEl.innerText = "";
+                silBtn.style.display = 'none';
+                dagitBtn.innerText = "Geçici Vergiyi Döneme Dağıt";
             }
-        });
+        } catch(e) { console.error(e); }
     }
 
     async function geciciVergiDagit() {
@@ -1402,11 +1483,17 @@
             return;
         }
 
+        const mevcutDoc = await window.getDoc(window.doc(window.db, "geciciVergiler", docId));
+        const mevcutVeri = mevcutDoc.exists() ? mevcutDoc.data() : null;
+        const isUpdate = !!mevcutVeri;
+
         const gunSayisi = donemKayitlari.length;
         const gunlukVergi = tutar / gunSayisi;
         const donemIsimleri = { "1": "Ocak - Şubat - Mart", "2": "Nisan - Mayıs - Haziran", "3": "Temmuz - Ağustos - Eylül", "4": "Ekim - Kasım - Aralık" };
 
-        const mesaj = `Toplam ${tutar.toLocaleString('tr-TR')} TL Geçici Vergi, ${yil} yılı ${donem}. Dönemine (${donemIsimleri[donem]}) ait ${gunSayisi} güne bölünecek.\nGünlük Vergi: ${gunlukVergi.toLocaleString('tr-TR')} TL\n\nOnaylıyor musunuz?`;
+        const mesaj = `Toplam ${tutar.toLocaleString('tr-TR')} TL Geçici Vergi, ${yil} yılı ${donem}. Dönemine (${donemIsimleri[donem]}) ait ${gunSayisi} güne bölünecek.\nGünlük Vergi: ${gunlukVergi.toLocaleString('tr-TR')} TL\n\n` +
+                      (isUpdate ? "⚠️ Bu döneme ait vergi GÜNCELLENECEK. Eski dağıtım silinip yeniden hesaplanacak." : "Yeni vergi kaydı oluşturulacak.") +
+                      `\n\nOnaylıyor musunuz?`;
         if(!confirm(mesaj)) return;
 
         try {
@@ -1420,11 +1507,11 @@
             const batch = window.writeBatch(window.db);
             donemKayitlari.forEach(kayit => {
                 let mevcutKalemler = kayit.muhasebeKalemleri || {};
+                const eskiGeciciVergi = mevcutKalemler.geciciVergi || 0;
+                
                 mevcutKalemler.geciciVergi = gunlukVergi;
                 
                 const eskiSabitPay = kayit.sabitGiderPayi || 0;
-                const eskiGeciciVergi = (kayit.muhasebeKalemleri && kayit.muhasebeKalemleri.geciciVergi) ? kayit.muhasebeKalemleri.geciciVergi : 0;
-                
                 const yeniSabitPay = (eskiSabitPay - eskiGeciciVergi) + gunlukVergi;
                 const yeniToplamGider = (kayit.toplamGider - eskiSabitPay) + yeniSabitPay;
 
@@ -1437,14 +1524,77 @@
             await batch.commit();
 
             mesajEl.style.color = "green";
-            mesajEl.innerText = "✅ Geçici Vergi başarıyla dönem günlerine dağıtıldı!";
+            mesajEl.innerText = isUpdate ? "✅ Geçici Vergi güncellendi ve yeniden dağıtıldı!" : "✅ Geçici Vergi başarıyla dönem günlerine dağıtıldı!";
             setTimeout(() => { mesajEl.innerText = ""; }, 4000);
 
             alert(`✅ Başarılı! Dönemdeki her güne ${gunlukVergi.toLocaleString('tr-TR')} TL Geçici Vergi eklendi.`);
+            document.getElementById('geciciVergiSilBtn').style.display = 'block';
+            document.getElementById('geciciVergiDagitBtn').innerText = "Geçici Vergiyi Güncelle";
             switchTab('rapor', document.getElementById('raporTabBtn'));
         } catch(e) {
             console.error(e);
             alert("Dağıtım sırasında hata oluştu!");
+        }
+    }
+
+    async function geciciVergiSil() {
+        const yil = document.getElementById('geciciVergiYil').value;
+        const donem = document.getElementById('geciciVergiDonem').value;
+
+        if(!yil || !donem) {
+            alert("Lütfen önce bir yıl ve dönem seçin!");
+            return;
+        }
+
+        const docId = `${yil}_D${donem}`;
+        const donemIsimleri = { "1": "Ocak - Şubat - Mart", "2": "Nisan - Mayıs - Haziran", "3": "Temmuz - Ağustos - Eylül", "4": "Ekim - Kasım - Aralık" };
+
+        const onay = confirm(`⚠️ DİKKAT: ${yil} yılı ${donem}. Dönemine (${donemIsimleri[donem]}) ait Geçici Vergi kaydını ve o döneme ait tüm günlük dağıtımları SİLMEK üzeresiniz.\n\nBu işlem geri alınamaz! Onaylıyor musunuz?`);
+        if (!onay) return;
+
+        let aylar = [];
+        if (donem == "1") aylar = [1, 2, 3];
+        else if (donem == "2") aylar = [4, 5, 6];
+        else if (donem == "3") aylar = [7, 8, 9];
+        else if (donem == "4") aylar = [10, 11, 12];
+
+        const donemKayitlari = kayitlar.filter(k => {
+            if(!k.tarih) return false;
+            const kTarihObj = new Date(k.tarih);
+            return kTarihObj.getFullYear() === parseInt(yil) && aylar.includes(kTarihObj.getMonth() + 1);
+        });
+
+        try {
+            await window.deleteDoc(window.doc(window.db, "geciciVergiler", docId));
+
+            const batch = window.writeBatch(window.db);
+            donemKayitlari.forEach(kayit => {
+                let mevcutKalemler = kayit.muhasebeKalemleri || {};
+                const eskiGeciciVergi = mevcutKalemler.geciciVergi || 0;
+                delete mevcutKalemler.geciciVergi;
+
+                const eskiSabitPay = kayit.sabitGiderPayi || 0;
+                const yeniSabitPay = eskiSabitPay - eskiGeciciVergi;
+                const yeniToplamGider = (kayit.toplamGider || 0) - eskiGeciciVergi;
+
+                batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
+                    muhasebeKalemleri: mevcutKalemler,
+                    sabitGiderPayi: yeniSabitPay,
+                    toplamGider: yeniToplamGider
+                });
+            });
+            await batch.commit();
+
+            document.getElementById('geciciVergiTutar').value = '';
+            document.getElementById('geciciVergiSilBtn').style.display = 'none';
+            document.getElementById('geciciVergiDagitBtn').innerText = "Geçici Vergiyi Döneme Dağıt";
+            document.getElementById('geciciVergiMesaj').innerText = "";
+
+            alert("✅ Geçici Vergi ve o döneme ait tüm dağıtımlar başarıyla silindi. Raporlar güncellendi.");
+            switchTab('rapor', document.getElementById('raporTabBtn'));
+        } catch(e) {
+            console.error(e);
+            alert("Silme işlemi sırasında hata oluştu!");
         }
     }
 
@@ -1479,7 +1629,7 @@
         fisTarihi.setMonth(fisTarihi.getMonth() - 1);
         
         const hedefYil = fisTarihi.getFullYear();
-        const hedefAy = fisTarihi.getMonth() + 1; // 1-12 formatı
+        const hedefAy = fisTarihi.getMonth() + 1;
         
         secilenHedefAy = `${hedefYil}_${hedefAy}`;
         
