@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dolmuş İşletme Yönetim Paneli</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- YENİ: Flatpickr Kütüphanesi (Mobil uyumlu, günleri kilitleyebilen takvim) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, where, getDocs, writeBatch, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -157,6 +163,9 @@
             border-bottom: 2px solid #bdc3c7;
         }
 
+        /* Flatpickr için özel düzeltmeler (Mobilde daha iyi görünmesi için) */
+        .flatpickr-input[readonly] { background: white !important; cursor: pointer; }
+
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
             .chart-grid { grid-template-columns: 1fr; } 
@@ -240,7 +249,8 @@
             <h2 id="formBaslik" style="margin-top:0; margin-bottom: 20px;">Günlük Sefer ve Gider Ekle</h2>
             <div class="form-grid">
                 <div class="input-grup">
-                    <input type="date" id="tarih">
+                    <!-- DİKKAT: type="text" yapıldı, flatpickr ile kontrol edilecek -->
+                    <input type="text" id="tarih" placeholder=" ">
                     <label for="tarih">Tarih (Seferin Yapıldığı Gün)</label>
                 </div>
                 <div class="input-grup">
@@ -638,13 +648,16 @@
     let filtrelenmisKayitlar = [];
     let secilenHedefAy = ""; 
     let secilenUkomeAyId = "";
-    let isYonetici = false; // <-- YENİ: rol takibi
+    let isYonetici = false; 
     
     let chartTrend = null;
     let chartGider = null;
     let chartHaftalik = null;
     let chartAylik = null;
     let chartGunlukSutun = null;
+
+    // YENİ: Flatpickr örneğini tutacağımız değişken
+    let fpInstance = null;
 
     function formatTarih(dateObj) {
         let d = new Date(dateObj),
@@ -658,51 +671,38 @@
         return [year, month, day].join('-');
     }
 
-    // ========== YENİ: ŞOFÖR İÇİN TARİH SINIRLAMA ==========
-    // Şoför: bugün dahil geriye doğru en fazla 3 gün, gelecek yasak.
-    // Yönetici: kısıtlama yok.
-    function tarihSinirlariniAyarla() {
-        const tarihInput = document.getElementById('tarih');
-        if (!tarihInput) return;
-
-        if (isYonetici) {
-            // Yönetici için kısıtlama yok
-            tarihInput.removeAttribute('min');
-            tarihInput.removeAttribute('max');
-            tarihInput.disabled = false;
-            if (!tarihInput.value) {
-                tarihInput.value = formatTarih(new Date());
-            }
-            return;
-        }
-
+    // YENİ: Flatpickr Başlatma ve Tarih Sınırlandırma
+    function tarihSeciciyiBaslat() {
         const bugun = new Date();
         bugun.setHours(0, 0, 0, 0);
 
         const enEski = new Date(bugun);
-        enEski.setDate(enEski.getDate() - 2); // Bugün + dün + evvelsi gün = 3 gün
+        enEski.setDate(enEski.getDate() - 2); // Bugün + dün + evvelsi gün
 
-        tarihInput.disabled = false;
-        tarihInput.min = formatTarih(enEski);
-        tarihInput.max = formatTarih(bugun);
-
-        if (!tarihInput.value) {
-            tarihInput.value = formatTarih(bugun);
+        const inputEl = document.getElementById('tarih');
+        
+        // Eğer önceden oluşturulmuşsa temizle
+        if (fpInstance) {
+            fpInstance.destroy();
         }
 
-        const secili = new Date(tarihInput.value);
-        if (isNaN(secili) || secili < enEski || secili > bugun) {
-            tarihInput.value = formatTarih(bugun);
-        }
+        fpInstance = flatpickr(inputEl, {
+            locale: "tr",
+            dateFormat: "Y-m-d",
+            altInput: true, // Ekranda kullanıcı dostu format göster (örn: 09.11.2026)
+            altFormat: "d.m.Y",
+            defaultDate: bugun,
+            minDate: isYonetici ? null : enEski, // Yönetici değilse bugünden 2 gün öncesine kadar izin ver
+            maxDate: isYonetici ? null : bugun,  // Yönetici değilse bugünden ileriye izin verme
+            disableMobile: true, // Telefonların kendi takvimini engelle, kendi takvimimizi göster
+            onChange: function(selectedDates, dateStr, instance) {
+                // Tarih değiştiğinde bir şey yapmak isterseniz buraya eklenebilir
+            }
+        });
     }
 
-    document.getElementById('tarih').value = formatTarih(new Date());
-    
-    const bugun = new Date();
-    const ayBasi = new Date(bugun.getFullYear(), bugun.getMonth(), 1);
-    
-    document.getElementById('filtreBaslangic').value = formatTarih(ayBasi);
-    document.getElementById('filtreBitis').value = formatTarih(bugun);
+    document.getElementById('filtreBaslangic').value = formatTarih(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+    document.getElementById('filtreBitis').value = formatTarih(new Date());
 
     const YONETICI_SIFRESI = "Hb.123-"; 
     const SOFOR_SIFRESI = "";    
@@ -754,7 +754,7 @@
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
             yilSecenekleriniDoldur(); 
-            tarihSinirlariniAyarla(); // Yöneticide kısıtlamayı kaldır
+            tarihSeciciyiBaslat(); // Yönetici girişinde takvimi kısıtlamasız başlat
         } else if (girilenSifre === SOFOR_SIFRESI) {
             isYonetici = false;
             document.getElementById('loginEkrani').style.display = 'none';
@@ -764,7 +764,7 @@
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
-            tarihSinirlariniAyarla(); // Şoför için 3 gün sınırı uygula
+            tarihSeciciyiBaslat(); // Şoför girişinde takvimi 3 gün ile sınırla
         } else {
             hataEl.style.display = 'block';
         }
@@ -779,10 +779,7 @@
         if(btnElement) btnElement.classList.add('active');
         
         if(tabId === 'rapor') { filtreleRapor(); }
-        if(tabId === 'giris') { 
-            tarihSinirlariniAyarla(); // Tab değişiminde de sınırları tazele
-            aracUyarilariniGuncelle(); 
-        }
+        if(tabId === 'giris') { aracUyarilariniGuncelle(); }
         if(tabId === 'ayarlar') { aracAyarlariniBuluttanYukle(); }
     }
 
@@ -973,7 +970,8 @@
         const secilenTarih = document.getElementById('tarih').value;
         if(!secilenTarih) { alert("Lütfen bir tarih seçin!"); return; }
 
-        // --- YENİ: Tarih aralığı doğrulaması (yalnızca ŞOFÖR için) ---
+        // Flatpickr minDate/maxDate kısıtlaması olduğu için buradaki manuel tarih doğrulamasına gerek kalmadı,
+        // Ancak yine de güvenlik amaçlı (örneğin konsoldan manipüle edilirse) şoför için kontrol edelim.
         if (!isYonetici) {
             const bugunD = new Date();
             bugunD.setHours(0, 0, 0, 0);
@@ -981,18 +979,11 @@
             enEskiIzinli.setDate(enEskiIzinli.getDate() - 2);
             const secilenTarihObj = new Date(secilenTarih);
 
-            if (secilenTarihObj > bugunD) {
-                alert("⚠️ Gelecek bir tarihe veri giremezsiniz!\n\nEn geç bugünün tarihini seçebilirsiniz.");
-                document.getElementById('tarih').focus();
-                return;
-            }
-            if (secilenTarihObj < enEskiIzinli) {
-                alert("⚠️ En fazla 3 gün geriye kadar veri girebilirsiniz.\n\nSeçebileceğiniz en eski tarih: " + formatTarih(enEskiIzinli).split('-').reverse().join('.'));
-                document.getElementById('tarih').focus();
+            if (secilenTarihObj > bugunD || secilenTarihObj < enEskiIzinli) {
+                alert("⚠️ Şoför olarak sadece bugün ve geriye dönük 2 gün için veri girebilirsiniz.");
                 return;
             }
         }
-        // --- /YENİ ---
 
         const ayniTarihliKayit = kayitlar.find(k => k.tarih === secilenTarih);
 
@@ -1215,10 +1206,10 @@
             document.getElementById('diger').value = ''; document.getElementById('gunlukSoforUcret').value = '';
             document.getElementById('guzergah').value = '';
 
-            // Kayıt sonrası tarih input'unu sıfırla (şoför için kilit açılır, sınırlar tazelenir)
-            const tarihEl = document.getElementById('tarih');
-            tarihEl.disabled = false;
-            tarihSinirlariniAyarla();
+            // Tarihi bugüne sıfırla
+            if (fpInstance) {
+                fpInstance.setDate(new Date());
+            }
             
             setTimeout(() => { mesajEl.innerText = ""; }, 3000);
         } catch (e) {
@@ -2406,31 +2397,39 @@
         const kayit = kayitlar.find(k => k.id === id);
         if(!kayit) return;
 
-        const tarihInput = document.getElementById('tarih');
         const eskiTarih = kayit.tarih;
 
         if (isYonetici) {
             // Yönetici her tarihi düzenleyebilir
-            tarihInput.removeAttribute('min');
-            tarihInput.removeAttribute('max');
-            tarihInput.disabled = false;
-            tarihInput.value = eskiTarih;
+            if (fpInstance) {
+                fpInstance.set('minDate', null);
+                fpInstance.set('maxDate', null);
+                fpInstance.setDate(eskiTarih, false);
+            }
         } else {
             // Şoför: önce sınırları tazele
-            tarihSinirlariniAyarla();
-            const minTarih = tarihInput.min;
-            const maxTarih = tarihInput.max;
+            const bugun = new Date();
+            bugun.setHours(0, 0, 0, 0);
+            const enEski = new Date(bugun);
+            enEski.setDate(enEski.getDate() - 2);
 
-            if (eskiTarih < minTarih || eskiTarih > maxTarih) {
-                // 3 günden eski kayıt: tarih kilitlenir, diğer alanlar düzenlenebilir
-                tarihInput.min = eskiTarih;
-                tarihInput.max = eskiTarih;
-                tarihInput.value = eskiTarih;
-                tarihInput.disabled = true;
+            const eskiTarihObj = new Date(eskiTarih);
+            if (eskiTarihObj < enEski || eskiTarihObj > bugun) {
+                // 3 günden eski kayıt: input kilitlenir
+                if (fpInstance) {
+                    fpInstance.set('minDate', eskiTarih);
+                    fpInstance.set('maxDate', eskiTarih);
+                    fpInstance.setDate(eskiTarih, false);
+                }
+                document.getElementById('tarih').disabled = true;
                 alert("ℹ️ Bu kayıt 3 günden daha eski bir tarihe ait olduğu için tarih değiştirilemez.\n\nDiğer alanları (hasılat, gider vb.) düzenleyebilirsiniz.\n\nKayıt Tarihi: " + eskiTarih.split('-').reverse().join('.'));
             } else {
-                tarihInput.disabled = false;
-                tarihInput.value = eskiTarih;
+                document.getElementById('tarih').disabled = false;
+                if (fpInstance) {
+                    fpInstance.set('minDate', enEski);
+                    fpInstance.set('maxDate', bugun);
+                    fpInstance.setDate(eskiTarih, false);
+                }
             }
         }
 
@@ -2455,8 +2454,6 @@
     }
 
     window.onload = function() {
-        tarihSinirlariniAyarla(); // Sayfa açılışında input sınırlarını hazırla
-        
         setTimeout(() => { aracAyarlariniBuluttanYukle(); }, 1000); 
         yilSecenekleriniDoldur(); 
         
