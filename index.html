@@ -742,6 +742,47 @@
             return;
         }
 
+        // 1.5) KM tutarlılık kontrolü (geriye ve ileriye dönük)
+        if (kmDeger > 0) {
+            // --- GERİYE DÖNÜK: seçilen tarihten önceki en yakın kayıt ---
+            const oncekiKayitlar = kayitlar.filter(k => {
+                if (!k.tarih || !k.km || k.km <= 0) return false;
+                if (ayniTarihliKayit && k.id === ayniTarihliKayit.id) return false;
+                return new Date(k.tarih) < new Date(secilenTarih);
+            });
+
+            if (oncekiKayitlar.length > 0) {
+                oncekiKayitlar.sort((a, b) => new Date(b.tarih) - new Date(a.tarih));
+                const oncekiKm = oncekiKayitlar[0].km;
+                const oncekiTarih = oncekiKayitlar[0].tarih;
+
+                if (kmDeger < oncekiKm) {
+                    alert(`⚠️ HATA: Girdiğiniz KM (${kmDeger.toLocaleString('tr-TR')}) önceki kayıttan küçük olamaz!\n\nÖnceki Kayıt: ${oncekiTarih.split('-').reverse().join('.')} → ${oncekiKm.toLocaleString('tr-TR')} KM\nGirdiğiniz: ${kmDeger.toLocaleString('tr-TR')} KM\n\nAraç kilometresi geriye gidemez.`);
+                    document.getElementById('km').focus();
+                    return;
+                }
+            }
+
+            // --- İLERİYE DÖNÜK: seçilen tarihten sonraki en yakın kayıt ---
+            const sonrakiKayitlar = kayitlar.filter(k => {
+                if (!k.tarih || !k.km || k.km <= 0) return false;
+                if (ayniTarihliKayit && k.id === ayniTarihliKayit.id) return false;
+                return new Date(k.tarih) > new Date(secilenTarih);
+            });
+
+            if (sonrakiKayitlar.length > 0) {
+                sonrakiKayitlar.sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
+                const sonrakiKm = sonrakiKayitlar[0].km;
+                const sonrakiTarih = sonrakiKayitlar[0].tarih;
+
+                if (kmDeger > sonrakiKm) {
+                    alert(`⚠️ HATA: Girdiğiniz KM (${kmDeger.toLocaleString('tr-TR')}) sonraki kayıttan büyük olamaz!\n\nSonraki Kayıt: ${sonrakiTarih.split('-').reverse().join('.')} → ${sonrakiKm.toLocaleString('tr-TR')} KM\nGirdiğiniz: ${kmDeger.toLocaleString('tr-TR')} KM\n\nAraç kilometresi sonraki kayıttan büyük olamaz.`);
+                    document.getElementById('km').focus();
+                    return;
+                }
+            }
+        }
+
         // 1) Sıvı bakım girildiyse KM zorunlu
         if (siviBakimDeger > 0 && kmDeger === 0) {
             alert("⚠️ DİKKAT: Sıvı Bakım tutarı girdiniz. Lütfen Güncel KM'yi de giriniz!");
