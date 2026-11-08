@@ -1171,109 +1171,159 @@
             let dagitimGerekiyor = false;
             const batch = window.writeBatch(window.db);
 
-            // Fişler
-            for (const fisId in fisler) {
-                const fis = fisler[fisId];
-                const [yil, ay] = fisId.split('_').map(Number);
-                
-                const oAyinKayitlari = kayitlar.filter(k => {
-                    if(!k.tarih) return false;
-                    const kTarihObj = new Date(k.tarih);
-                    return kTarihObj.getFullYear() === yil && (kTarihObj.getMonth() + 1) === ay;
-                });
+            // Fişler (Muhasebe/Sabit Gider)
+            for (const kayit of kayitlar) {
+                if (!kayit.tarih) continue;
+                const kTarihObj = new Date(kayit.tarih);
+                const yil = kTarihObj.getFullYear();
+                const ay = kTarihObj.getMonth() + 1;
+                const ayId = `${yil}_${ay}`;
 
-                if (oAyinKayitlari.length > 0) {
-                    for (const kayit of oAyinKayitlari) {
-                        if (kayit.sabitGiderPayi === 0 || !kayit.sabitGiderPayi) {
-                            let kalemler = {};
-                            let hesaplananToplam = 0;
-                            const muhasebeKalemListesi = ['pesinVergi', 'stopaj', 'kdv', 'gelirVergisi', 'bagKur', 'sigorta', 'matbaaNoter', 'muhasebe', 'sabitDigerGider'];
-                            
-                            muhasebeKalemListesi.forEach(k => {
-                                const tutar = fis[k] || 0;
-                                const gunlukTutar = tutar / oAyinKayitlari.length;
-                                if (gunlukTutar > 0) {
-                                    kalemler[k] = gunlukTutar;
-                                    hesaplananToplam += gunlukTutar;
-                                }
-                            });
+                if (!fisler[ayId]) {
+                    // Eğer muhasebe fişi silinmişse günlük kayıttaki kalemleri temizle
+                    if (kayit.muhasebeKalemleri && Object.keys(kayit.muhasebeKalemleri).length > 0) {
+                        let eskiSabitPay = kayit.sabitGiderPayi || 0;
+                        let geciciVergi = kayit.muhasebeKalemleri.geciciVergi || 0;
+                        let temizKalemler = {};
+                        if(geciciVergi > 0) temizKalemler.geciciVergi = geciciVergi;
 
-                            const yeniToplam = (kayit.toplamGider || 0) + hesaplananToplam;
-                            batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
-                                sabitGiderPayi: hesaplananToplam, 
-                                muhasebeKalemleri: kalemler,
-                                toplamGider: yeniToplam 
-                            });
-                            dagitimGerekiyor = true;
-                        }
+                        let yeniSabitPay = geciciVergi;
+                        let yeniToplam = (kayit.toplamGider || 0) - eskiSabitPay + yeniSabitPay;
+
+                        batch.update(window.doc(window.db, "kayitlar", kayit.id), {
+                            sabitGiderPayi: yeniSabitPay,
+                            muhasebeKalemleri: temizKalemler,
+                            toplamGider: yeniToplam
+                        });
+                        dagitimGerekiyor = true;
+                    }
+                } else {
+                    // Fiş varsa ve eksikse dağıtım yap (Eski mantık korundu)
+                    if (kayit.sabitGiderPayi === 0 || !kayit.sabitGiderPayi) {
+                        const fis = fisler[ayId];
+                        const oAyinKayitlari = kayitlar.filter(k => {
+                            if(!k.tarih) return false;
+                            const kT = new Date(k.tarih);
+                            return kT.getFullYear() === yil && (kT.getMonth() + 1) === ay;
+                        });
+
+                        let kalemler = {};
+                        let hesaplananToplam = 0;
+                        const muhasebeKalemListesi = ['pesinVergi', 'stopaj', 'kdv', 'gelirVergisi', 'bagKur', 'sigorta', 'matbaaNoter', 'muhasebe', 'sabitDigerGider'];
+                        
+                        muhasebeKalemListesi.forEach(k => {
+                            const tutar = fis[k] || 0;
+                            const gunlukTutar = tutar / oAyinKayitlari.length;
+                            if (gunlukTutar > 0) {
+                                kalemler[k] = gunlukTutar;
+                                hesaplananToplam += gunlukTutar;
+                            }
+                        });
+
+                        const yeniToplam = (kayit.toplamGider || 0) + hesaplananToplam;
+                        batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
+                            sabitGiderPayi: hesaplananToplam, 
+                            muhasebeKalemleri: kalemler,
+                            toplamGider: yeniToplam 
+                        });
+                        dagitimGerekiyor = true;
                     }
                 }
             }
 
-            // UKOME
-            for (const ukomeId in ukomeler) {
-                const ukome = ukomeler[ukomeId];
-                const [yil, ay] = ukomeId.split('_').map(Number);
-                
-                const oAyinKayitlari = kayitlar.filter(k => {
-                    if(!k.tarih) return false;
-                    const kTarihObj = new Date(k.tarih);
-                    return kTarihObj.getFullYear() === yil && (kTarihObj.getMonth() + 1) === ay;
-                });
+            // UKOME (Devlet Destekleri)
+            for (const kayit of kayitlar) {
+                if (!kayit.tarih) continue;
+                const kTarihObj = new Date(kayit.tarih);
+                const yil = kTarihObj.getFullYear();
+                const ay = kTarihObj.getMonth() + 1;
+                const ayId = `${yil}_${ay}`;
 
-                if (oAyinKayitlari.length > 0) {
-                    for (const kayit of oAyinKayitlari) {
-                        if (!kayit.ukomeGeliri || kayit.ukomeGeliri === 0) {
-                            const gunlukTutar = ukome.toplam / oAyinKayitlari.length;
-                            batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
-                                ukomeGeliri: gunlukTutar
-                            });
-                            dagitimGerekiyor = true;
-                        }
+                if (!ukomeler[ayId]) {
+                    // UKOME silinmişse günlük kayıttaki geliri sıfırla
+                    if (kayit.ukomeGeliri && kayit.ukomeGeliri > 0) {
+                        batch.update(window.doc(window.db, "kayitlar", kayit.id), { ukomeGeliri: 0 });
+                        dagitimGerekiyor = true;
+                    }
+                } else {
+                    // UKOME varsa ve eksikse dağıt
+                    if (!kayit.ukomeGeliri || kayit.ukomeGeliri === 0) {
+                        const ukome = ukomeler[ayId];
+                        const oAyinKayitlari = kayitlar.filter(k => {
+                            if(!k.tarih) return false;
+                            const kT = new Date(k.tarih);
+                            return kT.getFullYear() === yil && (kT.getMonth() + 1) === ay;
+                        });
+                        const gunlukTutar = ukome.toplam / oAyinKayitlari.length;
+                        batch.update(window.doc(window.db, "kayitlar", kayit.id), { ukomeGeliri: gunlukTutar });
+                        dagitimGerekiyor = true;
                     }
                 }
             }
 
             // Geçici Vergi
-            for (const gvId in geciciVergiler) {
-                const gv = geciciVergiler[gvId];
-                let aylar = [];
-                if (gv.donem === 1) aylar = [1, 2, 3];
-                else if (gv.donem === 2) aylar = [4, 5, 6];
-                else if (gv.donem === 3) aylar = [7, 8, 9];
-                else if (gv.donem === 4) aylar = [10, 11, 12];
+            for (const kayit of kayitlar) {
+                if (!kayit.tarih) continue;
+                const kTarihObj = new Date(kayit.tarih);
+                const yil = kTarihObj.getFullYear();
+                const ay = kTarihObj.getMonth() + 1;
+                const donem = ay <= 3 ? 1 : (ay <= 6 ? 2 : (ay <= 9 ? 3 : 4));
+                const gvId = `${yil}_D${donem}`;
 
-                const donemKayitlari = kayitlar.filter(k => {
-                    if(!k.tarih) return false;
-                    const kTarihObj = new Date(k.tarih);
-                    return kTarihObj.getFullYear() === gv.yil && aylar.includes(kTarihObj.getMonth() + 1);
-                });
+                if (!geciciVergiler[gvId]) {
+                    // Geçici vergi silinmişse günlük kayıttaki kalemi temizle
+                    if (kayit.muhasebeKalemleri && kayit.muhasebeKalemleri.geciciVergi) {
+                        let eskiVergi = kayit.muhasebeKalemleri.geciciVergi;
+                        let temizKalemler = { ...kayit.muhasebeKalemleri };
+                        delete temizKalemler.geciciVergi;
 
-                if (donemKayitlari.length > 0) {
-                    for (const kayit of donemKayitlari) {
-                        if (!kayit.muhasebeKalemleri || !kayit.muhasebeKalemleri.geciciVergi) {
-                            const gunlukVergi = gv.toplam / donemKayitlari.length;
-                            let kalemler = kayit.muhasebeKalemleri || {};
-                            kalemler.geciciVergi = gunlukVergi;
-                            
-                            const eskiSabitPay = kayit.sabitGiderPayi || 0;
-                            const yeniSabitPay = eskiSabitPay + gunlukVergi;
-                            const yeniToplam = (kayit.toplamGider || 0) + gunlukVergi;
+                        let yeniSabitPay = (kayit.sabitGiderPayi || 0) - eskiVergi;
+                        let yeniToplam = (kayit.toplamGider || 0) - eskiVergi;
 
-                            batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
-                                muhasebeKalemleri: kalemler,
-                                sabitGiderPayi: yeniSabitPay,
-                                toplamGider: yeniToplam 
-                            });
-                            dagitimGerekiyor = true;
-                        }
+                        batch.update(window.doc(window.db, "kayitlar", kayit.id), {
+                            muhasebeKalemleri: temizKalemler,
+                            sabitGiderPayi: yeniSabitPay,
+                            toplamGider: yeniToplam
+                        });
+                        dagitimGerekiyor = true;
+                    }
+                } else {
+                    // Geçici vergi varsa ve eksikse dağıt
+                    if (!kayit.muhasebeKalemleri || !kayit.muhasebeKalemleri.geciciVergi) {
+                        const gv = geciciVergiler[gvId];
+                        let aylar = [];
+                        if (gv.donem === 1) aylar = [1, 2, 3];
+                        else if (gv.donem === 2) aylar = [4, 5, 6];
+                        else if (gv.donem === 3) aylar = [7, 8, 9];
+                        else if (gv.donem === 4) aylar = [10, 11, 12];
+
+                        const donemKayitlari = kayitlar.filter(k => {
+                            if(!k.tarih) return false;
+                            const kT = new Date(k.tarih);
+                            return kT.getFullYear() === gv.yil && aylar.includes(kT.getMonth() + 1);
+                        });
+
+                        const gunlukVergi = gv.toplam / donemKayitlari.length;
+                        let kalemler = kayit.muhasebeKalemleri || {};
+                        kalemler.geciciVergi = gunlukVergi;
+                        
+                        const eskiSabitPay = kayit.sabitGiderPayi || 0;
+                        const yeniSabitPay = eskiSabitPay + gunlukVergi;
+                        const yeniToplam = (kayit.toplamGider || 0) + gunlukVergi;
+
+                        batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
+                            muhasebeKalemleri: kalemler,
+                            sabitGiderPayi: yeniSabitPay,
+                            toplamGider: yeniToplam 
+                        });
+                        dagitimGerekiyor = true;
                     }
                 }
             }
 
             if (dagitimGerekiyor) {
                 await batch.commit();
-                console.log("Otomatik dağıtım yapıldı.");
+                console.log("Otomatik dağıtım ve temizlik yapıldı.");
             }
         });
     }
@@ -1361,6 +1411,8 @@
                 batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
                     ukomeGeliri: gunlukDestek
                 });
+                // Yerel veriyi anında güncelle
+                kayit.ukomeGeliri = gunlukDestek;
             });
             await batch.commit();
 
@@ -1371,6 +1423,7 @@
             alert(`✅ Başarılı! Her güne ${gunlukDestek.toLocaleString('tr-TR')} TL Destek eklendi.`);
             document.getElementById('ukomeSilBtn').style.display = 'block';
             document.getElementById('ukomeDagitBtn').innerText = "Devlet Desteğini Güncelle";
+            filtreleRapor();
             switchTab('rapor', document.getElementById('raporTabBtn'));
         } catch(e) {
             console.error(e);
@@ -1378,7 +1431,7 @@
         }
     }
 
-        async function ukomeSil() {
+    async function ukomeSil() {
         if(!secilenUkomeAyId) {
             alert("Lütfen önce bir yıl ve ay seçin!");
             return;
@@ -1404,6 +1457,7 @@
                 batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
                     ukomeGeliri: 0 // Günlük kayıtlardaki desteği sıfırla
                 });
+                kayit.ukomeGeliri = 0; // Yerel veriyi güncelle
             });
             await batch.commit();
 
@@ -1412,8 +1466,6 @@
             document.getElementById('ukomeDagitBtn').innerText = "Devlet Desteğini Bu Aya Dağıt";
             document.getElementById('ukomeMesaj').innerText = "";
 
-            // YENİ EKLENEN KISIM: Yerel dizideki veriyi de güncelle ve raporu yenile
-            oAyinKayitlari.forEach(k => { k.ukomeGeliri = 0; });
             filtreleRapor(); // Raporu anında güncelle
 
             alert("✅ Devlet desteği ve o aya ait tüm dağıtımlar başarıyla silindi. Raporlar güncellendi.");
@@ -1524,6 +1576,11 @@
                     sabitGiderPayi: yeniSabitPay,
                     toplamGider: yeniToplamGider
                 });
+
+                // Yerel veriyi anında güncelle
+                kayit.muhasebeKalemleri = mevcutKalemler;
+                kayit.sabitGiderPayi = yeniSabitPay;
+                kayit.toplamGider = yeniToplamGider;
             });
             await batch.commit();
 
@@ -1534,6 +1591,7 @@
             alert(`✅ Başarılı! Dönemdeki her güne ${gunlukVergi.toLocaleString('tr-TR')} TL Geçici Vergi eklendi.`);
             document.getElementById('geciciVergiSilBtn').style.display = 'block';
             document.getElementById('geciciVergiDagitBtn').innerText = "Geçici Vergiyi Güncelle";
+            filtreleRapor();
             switchTab('rapor', document.getElementById('raporTabBtn'));
         } catch(e) {
             console.error(e);
@@ -1541,7 +1599,7 @@
         }
     }
 
-        async function geciciVergiSil() {
+    async function geciciVergiSil() {
         const yil = document.getElementById('geciciVergiYil').value;
         const donem = document.getElementById('geciciVergiDonem').value;
 
@@ -1599,8 +1657,7 @@
             document.getElementById('geciciVergiDagitBtn').innerText = "Geçici Vergiyi Döneme Dağıt";
             document.getElementById('geciciVergiMesaj').innerText = "";
 
-            // YENİ EKLENEN KISIM: Raporu anında güncelle
-            filtreleRapor();
+            filtreleRapor(); // Raporu anında güncelle
 
             alert("✅ Geçici Vergi ve o döneme ait tüm dağıtımlar başarıyla silindi. Raporlar güncellendi.");
             switchTab('rapor', document.getElementById('raporTabBtn'));
@@ -1821,6 +1878,11 @@
                     muhasebeKalemleri: kalemler,
                     toplamGider: yeniToplamGider 
                 });
+
+                // Yerel veriyi anında güncelle
+                kayit.sabitGiderPayi = hesaplananToplam;
+                kayit.muhasebeKalemleri = kalemler;
+                kayit.toplamGider = yeniToplamGider;
             });
             await batch.commit();
 
@@ -1830,7 +1892,7 @@
             setTimeout(() => { mesajEl.innerText = ""; }, 4000);
             
             document.getElementById('sabitGiderSilBtn').style.display = 'block';
-
+            filtreleRapor();
             alert(`✅ Başarılı! ${isUpdate ? "Fiş güncellendi ve " : ""}Her güne ${gunlukPay.toLocaleString('tr-TR')} TL eklendi.`);
             switchTab('rapor', document.getElementById('raporTabBtn'));
         } catch(e) { 
@@ -1862,6 +1924,7 @@
                 
                 let yeniKalemler = {};
                 let yeniSabitPay = 0;
+                // Eğer geçici vergi varsa onu koru
                 if (kayit.muhasebeKalemleri && kayit.muhasebeKalemleri.geciciVergi) {
                     yeniKalemler.geciciVergi = kayit.muhasebeKalemleri.geciciVergi;
                     yeniSabitPay = kayit.muhasebeKalemleri.geciciVergi;
@@ -1874,6 +1937,11 @@
                     muhasebeKalemleri: yeniKalemler,
                     toplamGider: yeniToplamGider 
                 });
+
+                // Yerel veriyi güncelle
+                kayit.sabitGiderPayi = yeniSabitPay;
+                kayit.muhasebeKalemleri = yeniKalemler;
+                kayit.toplamGider = yeniToplamGider;
             });
             await batch.commit();
 
@@ -1890,6 +1958,8 @@
             
             document.getElementById('sabitGiderKaydetBtn').innerText = "Sabit Giderleri Seçilen Aya Dağıt";
             document.getElementById('sabitGiderSilBtn').style.display = 'none';
+            
+            filtreleRapor(); // Raporu anında güncelle
 
             alert("✅ Fiş ve o aya ait tüm gider dağıtımları başarıyla silindi. Raporlar güncellendi.");
             switchTab('rapor', document.getElementById('raporTabBtn'));
