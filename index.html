@@ -132,6 +132,14 @@
 
         .chart-full-width { grid-column: span 2; }
 
+        /* MUHASEBE RAPOR TABLOSU STİLLERİ */
+        .mali-tablo { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        .mali-tablo th { background: var(--primary); color: white; padding: 12px; text-align: left; }
+        .mali-tablo td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+        .mali-tablo .grup-baslik { font-weight: bold; background: #f8f9fa; color: var(--primary); }
+        .mali-tablo .toplam-row { font-weight: bold; background: #ecf0f1; border-top: 2px solid var(--primary); }
+        .mali-tablo .kar-row { font-weight: bold; background: #e8f8f5; color: var(--success); font-size: 16px; border-top: 2px solid var(--success); }
+
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
             .chart-grid { grid-template-columns: 1fr; } 
@@ -309,6 +317,25 @@
             </div>
         </div>
 
+        <!-- YENİ EKLENEN: MALİYET VE KAR/ZARAR TABLOSU -->
+        <div class="card">
+            <h2>📊 Maliyet Kalemleri ve Kar/Zarar Tablosu</h2>
+            <div class="analiz-tablo-wrapper">
+                <table class="mali-tablo" id="maliTablo">
+                    <thead>
+                        <tr>
+                            <th>KALEMLER</th>
+                            <th style="text-align:right;">TUTAR (TL)</th>
+                            <th style="text-align:right;">ORAN (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- JS ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="chart-grid">
             <div class="chart-card">
                 <h3>📈 Kazanç - Gider Trendi (Günlük)</h3>
@@ -317,7 +344,7 @@
                 </div>
             </div>
             <div class="chart-card">
-                <h3>🍕 Gider Dağılımı (Genel)</h3>
+                <h3>🍕 Gider Dağılımı (Kalem Kalem)</h3>
                 <div class="chart-container-wrapper">
                     <canvas id="giderGrafik"></canvas>
                 </div>
@@ -386,7 +413,7 @@
                             <th>Parça</th>
                             <th>Diğer</th>
                             <th>Şoför</th>
-                            <th>Sabit Gid.</th>
+                            <th>Muhasebe/Sabit</th>
                             <th>Toplam Gider</th>
                             <th>Net</th>
                             <th>İşlem</th>
@@ -438,7 +465,6 @@
             <div class="form-grid">
                 <input type="hidden" id="sabitGiderDocId" value="">
                 
-                <!-- FİŞ TARİHİ VE OTOMATİK HEDEF AY GÖSTERGESİ -->
                 <div class="input-grup">
                     <input type="date" id="sabitGiderTarih" onchange="sabitGiderTarihiDegisti()">
                     <label for="sabitGiderTarih">Fişin Kesim Tarihi (Arşiv)</label>
@@ -493,7 +519,7 @@
                 <button class="btn-dagit" id="sabitGiderKaydetBtn" onclick="sabitGiderleriDagit()">Sabit Giderleri Seçilen Aya Dağıt</button>
             </div>
             <div id="sabitGiderMesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
-            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Fiş tarihini seçtiğinizde sistem, giderleri <b>otomatik olarak bir önceki aya</b> dağıtır. Eğer o ayda günlük sefer kaydı yoksa, sadece fiş arşive kaydedilir. O aya ait günlük seferler eklendiğinde, gider otomatik olarak günlere yayılır.</p>
+            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Fiş tarihini seçtiğinizde sistem, giderleri <b>otomatik olarak bir önceki aya</b> dağıtır. Kalemler (KDV, Stopaj vb.) günlere ayrı ayrı oranlanarak işlenir.</p>
         </div>
     </div>
 </div>
@@ -836,6 +862,8 @@
             tarih: secilenTarih,
             zaman: ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now(),
             kayitSaati: Date.now(),
+            // Kalem kalem muhasebe dağıtımları varsa korunacak
+            muhasebeKalemleri: ayniTarihliKayit ? (ayniTarihliKayit.muhasebeKalemleri || {}) : {},
             sabitGiderPayi: ayniTarihliKayit ? (ayniTarihliKayit.sabitGiderPayi || 0) : 0
         };
 
@@ -846,7 +874,7 @@
             else { kayit[alan] = (alan === 'guzergah') ? "Belirtilmedi" : 0; }
         });
 
-        // Otomatik sabit gider payı hesaplama (Eğer bu ay için bir fiş kesilmişse)
+        // OTOMATİK FİŞ DAĞITIMI (Eğer o aya ait fiş varsa ve güne henüz dağıtılmamışsa)
         const [yilStr, ayStr] = secilenTarih.split('-');
         const ayId = `${yilStr}_${parseInt(ayStr) - 1}`;
         
@@ -854,16 +882,32 @@
             const fisDoc = await window.getDoc(window.doc(window.db, "muhasebeFisleri", ayId));
             if (fisDoc.exists()) {
                 const fis = fisDoc.data();
-                // O ayda kaç gün varsa hesapla (kendisi dahil)
+                
+                // O aydaki toplam gün sayısını bul (kendisi dahil)
                 const oAyinKayitlari = kayitlar.filter(k => {
                     if(!k.tarih) return false;
                     const kTarihObj = new Date(k.tarih);
                     return kTarihObj.getFullYear() === parseInt(yilStr) && kTarihObj.getMonth() === (parseInt(ayStr) - 1) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : '');
                 });
                 
-                // Kendisini de sayıya ekle
                 const gunSayisi = oAyinKayitlari.length + 1;
-                kayit.sabitGiderPayi = fis.toplam / gunSayisi;
+
+                // Eğer güncelleme yapılıyorsa ve zaten kalemler atanmışsa tekrar bölme
+                if (!ayniTarihliKayit || !ayniTarihliKayit.muhasebeKalemleri || Object.keys(ayniTarihliKayit.muhasebeKalemleri).length === 0) {
+                    let toplamPay = 0;
+                    kayit.muhasebeKalemleri = {};
+                    
+                    const kalemler = ['pesinVergi', 'stopaj', 'kdv', 'gelirVergisi', 'bagKur', 'sigorta', 'matbaaNoter', 'muhasebe', 'sabitDigerGider'];
+                    kalemler.forEach(kalem => {
+                        const tutar = fis[kalem] || 0;
+                        const gunlukTutar = tutar / gunSayisi;
+                        if (gunlukTutar > 0) {
+                            kayit.muhasebeKalemleri[kalem] = gunlukTutar;
+                            toplamPay += gunlukTutar;
+                        }
+                    });
+                    kayit.sabitGiderPayi = toplamPay;
+                }
             }
         } catch(e) { console.log("Fiş kontrol hatası:", e); }
 
@@ -913,20 +957,17 @@
             if(document.getElementById('giris').classList.contains('active')){ aracUyarilariniGuncelle(); }
 
             // OTOMATİK DAĞITIM KONTROLÜ
-            // Veritabanındaki tüm fişleri çek
             const fisSnapshot = await window.getDocs(window.collection(window.db, "muhasebeFisleri"));
             const fisler = {};
             fisSnapshot.forEach(d => { fisler[d.id] = d.data(); });
 
             let dagitimGerekiyor = false;
             const batch = window.writeBatch(window.db);
-            const guncellenecekler = new Set();
 
             for (const fisId in fisler) {
                 const fis = fisler[fisId];
                 const [yil, ay] = fisId.split('_').map(Number);
                 
-                // O aya ait tüm kayıtları bul
                 const oAyinKayitlari = kayitlar.filter(k => {
                     if(!k.tarih) return false;
                     const kTarihObj = new Date(k.tarih);
@@ -937,14 +978,27 @@
                     const gunlukPay = fis.toplam / oAyinKayitlari.length;
                     
                     for (const kayit of oAyinKayitlari) {
-                        // Eğer sabitGiderPayi atanmamışsa veya farklıysa (ve daha önce güncellenmemişse)
                         if (kayit.sabitGiderPayi === 0 || !kayit.sabitGiderPayi) {
-                            const yeniToplam = (kayit.toplamGider || 0) + gunlukPay;
+                            
+                            let kalemler = {};
+                            let hesaplananToplam = 0;
+                            const muhasebeKalemListesi = ['pesinVergi', 'stopaj', 'kdv', 'gelirVergisi', 'bagKur', 'sigorta', 'matbaaNoter', 'muhasebe', 'sabitDigerGider'];
+                            
+                            muhasebeKalemListesi.forEach(k => {
+                                const tutar = fis[k] || 0;
+                                const gunlukTutar = tutar / oAyinKayitlari.length;
+                                if (gunlukTutar > 0) {
+                                    kalemler[k] = gunlukTutar;
+                                    hesaplananToplam += gunlukTutar;
+                                }
+                            });
+
+                            const yeniToplam = (kayit.toplamGider || 0) + hesaplananToplam;
                             batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
-                                sabitGiderPayi: gunlukPay, 
+                                sabitGiderPayi: hesaplananToplam, 
+                                muhasebeKalemleri: kalemler,
                                 toplamGider: yeniToplam 
                             });
-                            guncellenecekler.add(kayit.id);
                             dagitimGerekiyor = true;
                         }
                     }
@@ -1103,7 +1157,6 @@
         });
 
         if(oAyinKayitlari.length === 0) { 
-            // KAYIT YOKSA ARŞİVE KAYDETME MANTIĞI
             const onay = confirm(`Seçilen ${ayIsimleri[secilenAy]} ${secilenYil} ayına ait henüz günlük sefer/kazanç kaydı yok!\n\nGideri arşive (fiş olarak) kaydetmek istiyor musunuz? \n\nOnaylarsanız; ileride o aya günlük kayıt eklendiğinde sistem bu gideri otomatik olarak günlere bölecektir.`);
             if(!onay) return;
 
@@ -1136,8 +1189,27 @@
             const batch = window.writeBatch(window.db);
             oAyinKayitlari.forEach(kayit => {
                 const eskiSabitPay = kayit.sabitGiderPayi || 0;
-                const yeniToplamGider = (kayit.toplamGider - eskiSabitPay) + gunlukPay;
-                batch.update(window.doc(window.db, "kayitlar", kayit.id), { sabitGiderPayi: gunlukPay, toplamGider: yeniToplamGider });
+                
+                let kalemler = {};
+                let hesaplananToplam = 0;
+                const muhasebeKalemListesi = ['pesinVergi', 'stopaj', 'kdv', 'gelirVergisi', 'bagKur', 'sigorta', 'matbaaNoter', 'muhasebe', 'sabitDigerGider'];
+                
+                muhasebeKalemListesi.forEach(k => {
+                    const tutar = formatiCoz(document.getElementById(k).value);
+                    const gunlukTutar = tutar / gunSayisi;
+                    if (gunlukTutar > 0) {
+                        kalemler[k] = gunlukTutar;
+                        hesaplananToplam += gunlukTutar;
+                    }
+                });
+
+                const yeniToplamGider = (kayit.toplamGider - eskiSabitPay) + hesaplananToplam;
+                
+                batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
+                    sabitGiderPayi: hesaplananToplam, 
+                    muhasebeKalemleri: kalemler,
+                    toplamGider: yeniToplamGider 
+                });
             });
             await batch.commit();
 
@@ -1174,7 +1246,9 @@
             return tarihUygun && guzergahUygun;
         });
 
-        let tKazanc = 0, tGider = 0, tSofor = 0, tMazot = 0, tSivi = 0, tTamir = 0, tParca = 0, tDiger = 0, tSabit = 0;
+        let tKazanc = 0, tGider = 0, tSofor = 0, tMazot = 0, tSivi = 0, tTamir = 0, tParca = 0, tDiger = 0;
+        let tMuhasebeKalemleri = { pesinVergi: 0, stopaj: 0, kdv: 0, gelirVergisi: 0, bagKur: 0, sigorta: 0, matbaaNoter: 0, muhasebe: 0, sabitDigerGider: 0 };
+        let tSabit = 0;
         
         filtrelenmisKayitlar.forEach(k => {
             tKazanc += k.hasilat || 0;
@@ -1186,6 +1260,14 @@
             tParca += k.parca || 0;
             tDiger += k.diger || 0;
             tSabit += k.sabitGiderPayi || 0;
+
+            if (k.muhasebeKalemleri) {
+                for (const key in tMuhasebeKalemleri) {
+                    if (k.muhasebeKalemleri[key]) {
+                        tMuhasebeKalemleri[key] += k.muhasebeKalemleri[key];
+                    }
+                }
+            }
         });
 
         const netKar = tKazanc - tGider;
@@ -1199,13 +1281,60 @@
         document.getElementById('rOrtKar').innerText = ortKar.toLocaleString('tr-TR', {maximumFractionDigits: 2}) + " TL";
         document.getElementById('rSeferSayisi').innerText = gunSayisi + " Gün";
 
+        // YENİ: MALİ TABLOYU DOLDUR
+        maliTabloDoldur(tKazanc, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
+
         cizTrendGrafigi(filtrelenmisKayitlar);
-        cizGiderGrafigi(tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tSabit);
+        cizGiderGrafigi(tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
         cizHaftalikGrafigi(filtrelenmisKayitlar);
         cizGunlukSutunGrafigi(filtrelenmisKayitlar);
         cizAylikGrafigi();
         guzergahAnaliziYap(filtrelenmisKayitlar);
         tabloyuDoldur(filtrelenmisKayitlar);
+    }
+
+    function maliTabloDoldur(tKazanc, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, muhasebe, tSabit) {
+        const tbody = document.querySelector('#maliTablo tbody');
+        tbody.innerHTML = '';
+
+        const oran = (tutar) => tKazanc > 0 ? ((tutar / tKazanc) * 100).toFixed(2) + "%" : "0%";
+        const trEkle = (baslik, tutar, isGrup = false, isToplam = false, isKar = false) => {
+            const tr = document.createElement('tr');
+            if (isGrup) tr.className = 'grup-baslik';
+            if (isToplam) tr.className = 'toplam-row';
+            if (isKar) tr.className = 'kar-row';
+            
+            tr.innerHTML = `
+                <td>${baslik}</td>
+                <td style="text-align:right;">${tutar.toLocaleString('tr-TR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} TL</td>
+                <td style="text-align:right;">${isGrup ? '-' : oran(tutar)}</td>
+            `;
+            tbody.appendChild(tr);
+        };
+
+        trEkle("A. GELİRLER", 0, true);
+        trEkle("Günlük Hasılat (Seferler)", tKazanc);
+        
+        trEkle("B. GİDERLER", 0, true);
+        trEkle("Mazot Gideri", tMazot);
+        trEkle("Şoför Ücreti", tSofor);
+        trEkle("Sıvı Bakım", tSivi);
+        trEkle("Tamir & Parça (Toplam)", tTamir + tParca);
+        trEkle("Diğer Günlük Giderler", tDiger);
+        
+        trEkle("Muhasebe / Sabit Giderler", 0, true);
+        if (muhasebe.pesinVergi > 0) trEkle("Peşin Vergi", muhasebe.pesinVergi);
+        if (muhasebe.stopaj > 0) trEkle("Stopaj", muhasebe.stopaj);
+        if (muhasebe.kdv > 0) trEkle("K.D.V.", muhasebe.kdv);
+        if (muhasebe.gelirVergisi > 0) trEkle("Gelir Vergisi", muhasebe.gelirVergisi);
+        if (muhasebe.bagKur > 0) trEkle("Bağ-Kur", muhasebe.bagKur);
+        if (muhasebe.sigorta > 0) trEkle("Sigorta", muhasebe.sigorta);
+        if (muhasebe.matbaaNoter > 0) trEkle("Matbaa / Noter", muhasebe.matbaaNoter);
+        if (muhasebe.muhasebe > 0) trEkle("Muhasebe Ücreti", muhasebe.muhasebe);
+        if (muhasebe.sabitDigerGider > 0) trEkle("Diğer Sabit Giderler", muhasebe.sabitDigerGider);
+
+        trEkle("C. TOPLAM GİDER", tGider, false, true);
+        trEkle("D. NET KÂR (A - C)", netKar, false, false, true);
     }
 
     function tabloyuDoldur(liste) {
@@ -1262,17 +1391,30 @@
         });
     }
 
-    function cizGiderGrafigi(mazot, sivi, tamir, parca, diger, sofor, sabit) {
+    function cizGiderGrafigi(mazot, sivi, tamir, parca, diger, sofor, muhasebe, tSabit) {
         const ctx = document.getElementById('giderGrafik').getContext('2d');
         if(chartGider) chartGider.destroy();
+
+        const labels = ['Mazot', 'Sıvı Bakım', 'Tamir', 'Parça', 'Diğer', 'Şoför'];
+        const data = [mazot, sivi, tamir, parca, diger, sofor];
+        const colors = ['#e74c3c', '#3498db', '#f1c40f', '#9b59b6', '#95a5a6', '#2ecc71'];
+
+        // Muhasebe kalemlerini tek tek ekle
+        if(muhasebe.stopaj > 0) { labels.push('Stopaj'); data.push(muhasebe.stopaj); colors.push('#34495e'); }
+        if(muhasebe.kdv > 0) { labels.push('KDV'); data.push(muhasebe.kdv); colors.push('#1abc9c'); }
+        if(muhasebe.sigorta > 0) { labels.push('Sigorta'); data.push(muhasebe.sigorta); colors.push('#d35400'); }
+        if(muhasebe.bagKur > 0) { labels.push('Bağ-Kur'); data.push(muhasebe.bagKur); colors.push('#c0392b'); }
+        // Diğerleri
+        const digerMuhasebe = (muhasebe.pesinVergi||0) + (muhasebe.gelirVergisi||0) + (muhasebe.matbaaNoter||0) + (muhasebe.muhasebe||0) + (muhasebe.sabitDigerGider||0);
+        if(digerMuhasebe > 0) { labels.push('Diğer Sabit'); data.push(digerMuhasebe); colors.push('#7f8c8d'); }
 
         chartGider = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Mazot', 'Sıvı Bakım', 'Tamir', 'Parça', 'Diğer', 'Şoför', 'Vergi/Sabit'],
+                labels: labels,
                 datasets: [{
-                    data: [mazot, sivi, tamir, parca, diger, sofor, sabit],
-                    backgroundColor: ['#e74c3c', '#3498db', '#f1c40f', '#9b59b6', '#95a5a6', '#2ecc71', '#34495e']
+                    data: data,
+                    backgroundColor: colors
                 }]
             },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
