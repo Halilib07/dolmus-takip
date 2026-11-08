@@ -119,6 +119,7 @@
         
         .btn-dagit { background: var(--purple); width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
         .btn-sil-fis { background: var(--danger); width: 100%; padding: 10px; margin-top: 5px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; grid-column: span 2; display: none;}
+        .btn-ukome { background: var(--success); width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
 
         .uyari-panosu { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 100px; }
@@ -284,12 +285,10 @@
     <div id="rapor" class="tab-content">
         
         <div class="rapor-filtre-alani">
-            <!-- YENİ EKLENEN YIL VE AY SEÇENEKLERİ -->
             <div class="input-grup">
                 <label for="filtreYil" class="select-label">Yıl Seçimi</label>
                 <select id="filtreYil" onchange="yilAyDegisti()">
                     <option value="">Tümü</option>
-                    <!-- JS ile doldurulacak -->
                 </select>
             </div>
             <div class="input-grup">
@@ -310,7 +309,6 @@
                     <option value="11">Aralık</option>
                 </select>
             </div>
-            <!-- MEVCUT TARİH SEÇİCİLERİ KORUNDU -->
             <div class="input-grup">
                 <input type="date" id="filtreBaslangic">
                 <label for="filtreBaslangic">Başlangıç Tarihi</label>
@@ -354,7 +352,6 @@
             </div>
         </div>
 
-        <!-- MALİYET VE KAR/ZARAR TABLOSU -->
         <div class="card">
             <h2>📊 Maliyet Kalemleri ve Kar/Zarar Tablosu</h2>
             <div class="mali-tablo-wrapper">
@@ -367,7 +364,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- JS ile doldurulacak -->
                     </tbody>
                 </table>
             </div>
@@ -451,13 +447,14 @@
                             <th>Diğer</th>
                             <th>Şoför</th>
                             <th>Muhasebe/Sabit</th>
+                            <th>UKOME Desteği</th> <!-- YENİ SÜTUN -->
                             <th>Toplam Gider</th>
                             <th>Net</th>
                             <th>İşlem</th>
                         </tr>
                     </thead>
                     <tbody id="tabloListesi">
-                        <tr><td colspan="16" class="loading">Veriler buluttan yükleniyor...</td></tr>
+                        <tr><td colspan="17" class="loading">Veriler buluttan yükleniyor...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -495,6 +492,41 @@
                 </div>
             </div>
             <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Girdiğiniz tarihlerin üzerine sistem otomatik olarak <b>+1 Yıl</b> ekler. Yağ ve Triger ömrü için belirlediğiniz KM, şoförün girdiği <b>en güncel tarihli</b> KM'den düşülerek hesaplanır.</p>
+        </div>
+
+        <!-- YENİ EKLENEN: DEVLet DESTEĞİ / UKOME KARTI -->
+        <div class="card" style="border-left: 5px solid var(--success);">
+            <h2>🏛️ Devlet Destekleri / UKOME Engelli Desteği</h2>
+            <p style="font-size: 13px; color: #555; margin-bottom: 15px;">UKOME tarafından engelli taşımacılığı için verilen aylık desteği buradan ilgili aya dağıtabilirsiniz. Dağıtılan tutar, o aya ait günlük kazançların üzerine "Devlet Desteği" olarak eklenir.</p>
+            <div class="form-grid">
+                <div class="input-grup">
+                    <label for="ukomeYil" class="select-label">Yıl Seçin</label>
+                    <select id="ukomeYil"></select>
+                </div>
+                <div class="input-grup">
+                    <label for="ukomeAy" class="select-label">Ay Seçin</label>
+                    <select id="ukomeAy">
+                        <option value="0">Ocak</option>
+                        <option value="1">Şubat</option>
+                        <option value="2">Mart</option>
+                        <option value="3">Nisan</option>
+                        <option value="4">Mayıs</option>
+                        <option value="5">Haziran</option>
+                        <option value="6">Temmuz</option>
+                        <option value="7">Ağustos</option>
+                        <option value="8">Eylül</option>
+                        <option value="9">Ekim</option>
+                        <option value="10">Kasım</option>
+                        <option value="11">Aralık</option>
+                    </select>
+                </div>
+                <div class="input-grup full">
+                    <input type="text" inputmode="numeric" id="ukomeTutar" class="para" placeholder="" onchange="guncelleUkomeBilgi()">
+                    <label for="ukomeTutar">Aylık Destek Tutarı (TL)</label>
+                </div>
+                <button class="btn-ukome" id="ukomeDagitBtn" onclick="ukomeDagit()">Devlet Desteğini Bu Aya Dağıt</button>
+            </div>
+            <div id="ukomeMesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
         </div>
 
         <div class="card">
@@ -566,6 +598,7 @@
     let kayitlar = [];
     let filtrelenmisKayitlar = [];
     let secilenHedefAy = ""; 
+    let secilenUkomeAyId = "";
     
     let chartTrend = null;
     let chartGider = null;
@@ -641,7 +674,7 @@
             hataEl.style.display = 'none';
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
             aracAyarlariniBuluttanYukle(); 
-            yilSecenekleriniDoldur(); // Yılları doldur
+            yilSecenekleriniDoldur(); 
         } else if (girilenSifre === SOFOR_SIFRESI) {
             document.getElementById('loginEkrani').style.display = 'none';
             document.getElementById('uygulamaEkrani').style.display = 'block';
@@ -668,18 +701,16 @@
         if(tabId === 'ayarlar') { aracAyarlariniBuluttanYukle(); }
     }
 
-    // YENİ: Yıl seçeneklerini doldurma
     function yilSecenekleriniDoldur() {
-        const yilSelect = document.getElementById('filtreYil');
         const simdikiYil = new Date().getFullYear();
         let secenekler = '<option value="">Tümü</option>';
         for (let y = simdikiYil - 2; y <= simdikiYil + 1; y++) {
             secenekler += `<option value="${y}">${y}</option>`;
         }
-        yilSelect.innerHTML = secenekler;
+        document.getElementById('filtreYil').innerHTML = secenekler;
+        document.getElementById('ukomeYil').innerHTML = secenekler.replace('<option value="">Tümü</option>', '');
     }
 
-    // YENİ: Yıl veya Ay seçildiğinde çalışacak fonksiyon
     function yilAyDegisti() {
         const secilenYil = document.getElementById('filtreYil').value;
         const secilenAy = document.getElementById('filtreAy').value;
@@ -688,23 +719,19 @@
 
         if (secilenYil) {
             if (secilenAy !== "") {
-                // Hem Yıl hem Ay seçildi (Örn: 2026 Ekim)
                 const ayInt = parseInt(secilenAy);
                 const ilkGun = new Date(secilenYil, ayInt, 1);
-                const sonGun = new Date(secilenYil, ayInt + 1, 0); // Bir sonraki ayın 0. günü = bu ayın son günü
+                const sonGun = new Date(secilenYil, ayInt + 1, 0);
                 baslangicInput.value = formatTarih(ilkGun);
                 bitisInput.value = formatTarih(sonGun);
             } else {
-                // Sadece Yıl seçildi (Örn: 2026 Tüm Yıl)
                 const ilkGun = new Date(secilenYil, 0, 1);
                 const sonGun = new Date(secilenYil, 11, 31);
                 baslangicInput.value = formatTarih(ilkGun);
                 bitisInput.value = formatTarih(sonGun);
             }
         } else if (secilenAy !== "") {
-            // Sadece Ay seçildi (Örn: Tüm yılların Ekim ayı - pek kullanılmaz ama mantık)
             const ayInt = parseInt(secilenAy);
-            // İçinde bulunulan yılı baz alalım
             const simdikiYil = new Date().getFullYear();
             const ilkGun = new Date(simdikiYil, ayInt, 1);
             const sonGun = new Date(simdikiYil, ayInt + 1, 0);
@@ -712,7 +739,6 @@
             bitisInput.value = formatTarih(sonGun);
         }
         
-        // Seçim yapıldıysa otomatik filtrele
         if (secilenYil || secilenAy !== "") {
             filtreleRapor();
         }
@@ -952,7 +978,8 @@
             zaman: ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now(),
             kayitSaati: Date.now(),
             muhasebeKalemleri: ayniTarihliKayit ? (ayniTarihliKayit.muhasebeKalemleri || {}) : {},
-            sabitGiderPayi: ayniTarihliKayit ? (ayniTarihliKayit.sabitGiderPayi || 0) : 0
+            sabitGiderPayi: ayniTarihliKayit ? (ayniTarihliKayit.sabitGiderPayi || 0) : 0,
+            ukomeGeliri: ayniTarihliKayit ? (ayniTarihliKayit.ukomeGeliri || 0) : 0 // YENİ
         };
 
         const alanlar = ['guzergah', 'hasilat', 'km', 'mazotTL', 'siviBakim', 'tamir', 'parca', 'diger', 'gunlukSoforUcret'];
@@ -966,22 +993,20 @@
         const ayId = `${yilStr}_${parseInt(ayStr) - 1}`;
         
         try {
+            // Fiş ve UKOME dağıtımı kontrolü (Eğer daha önce dağıtılmamışsa otomatik hesapla)
             const fisDoc = await window.getDoc(window.doc(window.db, "muhasebeFisleri", ayId));
             if (fisDoc.exists()) {
                 const fis = fisDoc.data();
-                
                 const oAyinKayitlari = kayitlar.filter(k => {
                     if(!k.tarih) return false;
                     const kTarihObj = new Date(k.tarih);
                     return kTarihObj.getFullYear() === parseInt(yilStr) && kTarihObj.getMonth() === (parseInt(ayStr) - 1) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : '');
                 });
-                
                 const gunSayisi = oAyinKayitlari.length + 1;
 
                 if (!ayniTarihliKayit || !ayniTarihliKayit.muhasebeKalemleri || Object.keys(ayniTarihliKayit.muhasebeKalemleri).length === 0) {
                     let toplamPay = 0;
                     kayit.muhasebeKalemleri = {};
-                    
                     const kalemler = ['pesinVergi', 'stopaj', 'kdv', 'gelirVergisi', 'bagKur', 'sigorta', 'matbaaNoter', 'muhasebe', 'sabitDigerGider'];
                     kalemler.forEach(kalem => {
                         const tutar = fis[kalem] || 0;
@@ -994,7 +1019,24 @@
                     kayit.sabitGiderPayi = toplamPay;
                 }
             }
-        } catch(e) { console.log("Fiş kontrol hatası:", e); }
+
+            // UKOME Kontrolü
+            const ukomeDoc = await window.getDoc(window.doc(window.db, "ukomeDestekleri", ayId));
+            if (ukomeDoc.exists()) {
+                const ukome = ukomeDoc.data();
+                const oAyinKayitlari = kayitlar.filter(k => {
+                    if(!k.tarih) return false;
+                    const kTarihObj = new Date(k.tarih);
+                    return kTarihObj.getFullYear() === parseInt(yilStr) && kTarihObj.getMonth() === (parseInt(ayStr) - 1) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : '');
+                });
+                const gunSayisi = oAyinKayitlari.length + 1;
+                
+                if (!ayniTarihliKayit || !ayniTarihliKayit.ukomeGeliri || ayniTarihliKayit.ukomeGeliri === 0) {
+                    kayit.ukomeGeliri = ukome.toplam / gunSayisi;
+                }
+            }
+
+        } catch(e) { console.log("Kontrol hatası:", e); }
 
         kayit.toplamGider = kayit.mazotTL + kayit.siviBakim + kayit.tamir + kayit.parca + kayit.diger + kayit.gunlukSoforUcret + kayit.sabitGiderPayi;
 
@@ -1044,6 +1086,10 @@
             const fisler = {};
             fisSnapshot.forEach(d => { fisler[d.id] = d.data(); });
 
+            const ukomeSnapshot = await window.getDocs(window.collection(window.db, "ukomeDestekleri"));
+            const ukomeler = {};
+            ukomeSnapshot.forEach(d => { ukomeler[d.id] = d.data(); });
+
             let dagitimGerekiyor = false;
             const batch = window.writeBatch(window.db);
 
@@ -1058,11 +1104,8 @@
                 });
 
                 if (oAyinKayitlari.length > 0) {
-                    const gunlukPay = fis.toplam / oAyinKayitlari.length;
-                    
                     for (const kayit of oAyinKayitlari) {
                         if (kayit.sabitGiderPayi === 0 || !kayit.sabitGiderPayi) {
-                            
                             let kalemler = {};
                             let hesaplananToplam = 0;
                             const muhasebeKalemListesi = ['pesinVergi', 'stopaj', 'kdv', 'gelirVergisi', 'bagKur', 'sigorta', 'matbaaNoter', 'muhasebe', 'sabitDigerGider'];
@@ -1088,12 +1131,116 @@
                 }
             }
 
+            for (const ukomeId in ukomeler) {
+                const ukome = ukomeler[ukomeId];
+                const [yil, ay] = ukomeId.split('_').map(Number);
+                
+                const oAyinKayitlari = kayitlar.filter(k => {
+                    if(!k.tarih) return false;
+                    const kTarihObj = new Date(k.tarih);
+                    return kTarihObj.getFullYear() === yil && kTarihObj.getMonth() === ay;
+                });
+
+                if (oAyinKayitlari.length > 0) {
+                    for (const kayit of oAyinKayitlari) {
+                        if (!kayit.ukomeGeliri || kayit.ukomeGeliri === 0) {
+                            const gunlukTutar = ukome.toplam / oAyinKayitlari.length;
+                            batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
+                                ukomeGeliri: gunlukTutar
+                            });
+                            dagitimGerekiyor = true;
+                        }
+                    }
+                }
+            }
+
             if (dagitimGerekiyor) {
                 await batch.commit();
                 console.log("Otomatik dağıtım yapıldı.");
             }
         });
     }
+
+    // ========== UKOME DESTEĞİ FONKSİYONLARI ==========
+    
+    function guncelleUkomeBilgi() {
+        const yil = document.getElementById('ukomeYil').value;
+        const ay = document.getElementById('ukomeAy').value;
+        if(!yil) return;
+        
+        secilenUkomeAyId = `${yil}_${ay}`;
+        const tutar = formatiCoz(document.getElementById('ukomeTutar').value);
+        const mesajEl = document.getElementById('ukomeMesaj');
+        
+        window.getDoc(window.doc(window.db, "ukomeDestekleri", secilenUkomeAyId)).then(docSnap => {
+            if(docSnap.exists()) {
+                document.getElementById('ukomeTutar').value = sayiyiFormatla(docSnap.data().toplam);
+                mesajEl.style.color = "var(--info)";
+                mesajEl.innerText = "Bu aya ait daha önce bir destek girilmiş. Güncelleyebilirsiniz.";
+            }
+        });
+    }
+
+    async function ukomeDagit() {
+        const yil = document.getElementById('ukomeYil').value;
+        const ay = document.getElementById('ukomeAy').value;
+        const tutar = formatiCoz(document.getElementById('ukomeTutar').value);
+        const mesajEl = document.getElementById('ukomeMesaj');
+
+        if (!yil) { alert("Lütfen bir yıl seçin!"); return; }
+        if (tutar <= 0) { alert("Lütfen dağıtılacak tutarı girin!"); return; }
+
+        secilenUkomeAyId = `${yil}_${ay}`;
+
+        const oAyinKayitlari = kayitlar.filter(k => {
+            if(!k.tarih) return false;
+            const kTarihObj = new Date(k.tarih);
+            return kTarihObj.getFullYear() === parseInt(yil) && kTarihObj.getMonth() === parseInt(ay);
+        });
+
+        if(oAyinKayitlari.length === 0) {
+            alert("Seçilen ayda henüz günlük sefer kaydı yok! Lütfen önce o aya ait günlük girişleri yapın.");
+            return;
+        }
+
+        const gunSayisi = oAyinKayitlari.length;
+        const gunlukDestek = tutar / gunSayisi;
+        const ayIsimleri = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+        const mesaj = `Toplam ${tutar.toLocaleString('tr-TR')} TL UKOME Desteği, ${ayIsimleri[ay]} ${yil} ayındaki ${gunSayisi} güne bölünecek.\nGünlük Gelir: ${gunlukDestek.toLocaleString('tr-TR')} TL\n\nOnaylıyor musunuz?`;
+        if(!confirm(mesaj)) return;
+
+        try {
+            // 1. Firestore'a UKOME kaydını at
+            await window.setDoc(window.doc(window.db, "ukomeDestekleri", secilenUkomeAyId), {
+                toplam: tutar,
+                yil: parseInt(yil),
+                ay: parseInt(ay),
+                kayitSaati: Date.now()
+            });
+
+            // 2. Günlere dağıt
+            const batch = window.writeBatch(window.db);
+            oAyinKayitlari.forEach(kayit => {
+                batch.update(window.doc(window.db, "kayitlar", kayit.id), { 
+                    ukomeGeliri: gunlukDestek
+                });
+            });
+            await batch.commit();
+
+            mesajEl.style.color = "green";
+            mesajEl.innerText = "✅ Destek başarıyla o aya ait günlere dağıtıldı!";
+            setTimeout(() => { mesajEl.innerText = ""; }, 4000);
+
+            alert(`✅ Başarılı! Her güne ${gunlukDestek.toLocaleString('tr-TR')} TL UKOME desteği eklendi.`);
+            switchTab('rapor', document.getElementById('raporTabBtn'));
+        } catch(e) {
+            console.error(e);
+            alert("Dağıtım sırasında hata oluştu!");
+        }
+    }
+
+    // ========== SABİT GİDER FİŞİ FONKSİYONLARI ==========
 
     function guncelleToplamSabit() {
         const toplam = 
@@ -1387,12 +1534,13 @@
             return tarihUygun && guzergahUygun;
         });
 
-        let tKazanc = 0, tGider = 0, tSofor = 0, tMazot = 0, tSivi = 0, tTamir = 0, tParca = 0, tDiger = 0;
+        let tKazanc = 0, tGider = 0, tSofor = 0, tMazot = 0, tSivi = 0, tTamir = 0, tParca = 0, tDiger = 0, tUkome = 0;
         let tMuhasebeKalemleri = { pesinVergi: 0, stopaj: 0, kdv: 0, gelirVergisi: 0, bagKur: 0, sigorta: 0, matbaaNoter: 0, muhasebe: 0, sabitDigerGider: 0 };
         let tSabit = 0;
         
         filtrelenmisKayitlar.forEach(k => {
             tKazanc += k.hasilat || 0;
+            tUkome += k.ukomeGeliri || 0;
             tGider += k.toplamGider || 0;
             tSofor += k.gunlukSoforUcret || 0;
             tMazot += k.mazotTL || 0;
@@ -1411,18 +1559,19 @@
             }
         });
 
-        const netKar = tKazanc - tGider;
+        const toplamGelir = tKazanc + tUkome;
+        const netKar = toplamGelir - tGider;
         const gunSayisi = filtrelenmisKayitlar.length;
         const ortKar = gunSayisi > 0 ? netKar / gunSayisi : 0;
 
-        document.getElementById('rKazanc').innerText = tKazanc.toLocaleString('tr-TR') + " TL";
+        document.getElementById('rKazanc').innerText = toplamGelir.toLocaleString('tr-TR') + " TL";
         document.getElementById('rGider').innerText = tGider.toLocaleString('tr-TR') + " TL";
         document.getElementById('rKar').innerText = netKar.toLocaleString('tr-TR') + " TL";
         document.getElementById('rKar').className = netKar >= 0 ? 'text-success' : 'text-danger';
         document.getElementById('rOrtKar').innerText = ortKar.toLocaleString('tr-TR', {maximumFractionDigits: 2}) + " TL";
         document.getElementById('rSeferSayisi').innerText = gunSayisi + " Gün";
 
-        maliTabloDoldur(tKazanc, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
+        maliTabloDoldur(toplamGelir, tKazanc, tUkome, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
 
         cizTrendGrafigi(filtrelenmisKayitlar);
         cizGiderGrafigi(tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
@@ -1433,11 +1582,11 @@
         tabloyuDoldur(filtrelenmisKayitlar);
     }
 
-    function maliTabloDoldur(tKazanc, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, muhasebe, tSabit) {
+    function maliTabloDoldur(toplamGelir, tKazanc, tUkome, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, muhasebe, tSabit) {
         const tbody = document.querySelector('#maliTablo tbody');
         tbody.innerHTML = '';
 
-        const oran = (tutar) => tKazanc > 0 ? ((tutar / tKazanc) * 100).toFixed(2) + "%" : "0%";
+        const oran = (tutar) => toplamGelir > 0 ? ((tutar / toplamGelir) * 100).toFixed(2) + "%" : "0%";
         
         const trEkle = (baslik, tutar, isGrup = false, isToplam = false, isKar = false) => {
             const tr = document.createElement('tr');
@@ -1455,6 +1604,7 @@
 
         trEkle("A. GELİRLER", 0, true);
         trEkle("Günlük Hasılat (Seferler)", tKazanc);
+        if (tUkome > 0) trEkle("Devlet Destekleri (UKOME)", tUkome);
         
         trEkle("B. GİDERLER", 0, true);
         trEkle("Mazot Gideri", tMazot);
@@ -1483,6 +1633,7 @@
         tbody.innerHTML = '';
         liste.forEach(k => {
             const tr = document.createElement('tr');
+            const net = ((k.hasilat||0) + (k.ukomeGeliri||0)) - (k.toplamGider||0);
             tr.innerHTML = `
                 <td>${(k.tarih || '').split('-').reverse().join('.')}</td>
                 <td>${tarihSaatFormatla(k.zaman)}</td>
@@ -1497,9 +1648,10 @@
                 <td>${(k.diger||0).toLocaleString('tr-TR')}</td>
                 <td>${(k.gunlukSoforUcret||0).toLocaleString('tr-TR')}</td>
                 <td style="color:var(--purple); font-weight:bold;">${(k.sabitGiderPayi||0).toLocaleString('tr-TR')}</td>
+                <td style="color:var(--success); font-weight:bold;">${(k.ukomeGeliri||0).toLocaleString('tr-TR')}</td>
                 <td class="text-danger">${(k.toplamGider||0).toLocaleString('tr-TR')} TL</td>
-                <td class="${(k.hasilat - k.toplamGider) >= 0 ? 'text-success' : 'text-danger'}" style="font-weight:bold;">
-                    ${((k.hasilat||0) - (k.toplamGider||0)).toLocaleString('tr-TR')} TL
+                <td class="${net >= 0 ? 'text-success' : 'text-danger'}" style="font-weight:bold;">
+                    ${net.toLocaleString('tr-TR')} TL
                 </td>
                 <td>
                     <button onclick="duzenle('${k.id}')" class="islem-btn btn-duzenle">Düzenle</button>
@@ -1516,7 +1668,7 @@
 
         const siraliListe = [...liste].sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
         const etiketler = siraliListe.map(k => k.tarih.split('-').reverse().join('.'));
-        const kazancData = siraliListe.map(k => k.hasilat || 0);
+        const kazancData = siraliListe.map(k => (k.hasilat || 0) + (k.ukomeGeliri || 0));
         const giderData = siraliListe.map(k => k.toplamGider || 0);
 
         chartTrend = new Chart(ctx, {
@@ -1524,7 +1676,7 @@
             data: {
                 labels: etiketler,
                 datasets: [
-                    { label: 'Kazanç (TL)', data: kazancData, borderColor: '#27ae60', backgroundColor: 'rgba(39, 174, 96, 0.1)', tension: 0.3, fill: true },
+                    { label: 'Toplam Gelir (TL)', data: kazancData, borderColor: '#27ae60', backgroundColor: 'rgba(39, 174, 96, 0.1)', tension: 0.3, fill: true },
                     { label: 'Gider (TL)', data: giderData, borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.1)', tension: 0.3, fill: true }
                 ]
             },
@@ -1574,7 +1726,8 @@
             const d = new Date(k.tarih);
             const jsGun = d.getDay(); 
             const yeniIdx = gunMap[jsGun]; 
-            gunlukToplamKar[yeniIdx] += (k.hasilat - k.toplamGider);
+            const net = ((k.hasilat || 0) + (k.ukomeGeliri || 0)) - (k.toplamGider || 0);
+            gunlukToplamKar[yeniIdx] += net;
             gunlukSayi[yeniIdx] += 1;
         });
 
@@ -1608,7 +1761,8 @@
         siraliListe.forEach((k, index) => {
             const d = new Date(k.tarih);
             etiketler.push(d.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }));
-            netKarData.push((k.hasilat || 0) - (k.toplamGider || 0));
+            const net = ((k.hasilat || 0) + (k.ukomeGeliri || 0)) - (k.toplamGider || 0);
+            netKarData.push(net);
         });
 
         const arkaPlanRenkleri = netKarData.map(deger => deger < 0 ? '#e74c3c' : '#3498db');
@@ -1646,7 +1800,7 @@
             const ay = d.getMonth();
             const anahtar = `${yil}-${ay.toString().padStart(2, '0')}`;
             if(!aylikVeri[anahtar]) aylikVeri[anahtar] = { kazanc: 0, gider: 0 };
-            aylikVeri[anahtar].kazanc += k.hasilat || 0;
+            aylikVeri[anahtar].kazanc += (k.hasilat || 0) + (k.ukomeGeliri || 0);
             aylikVeri[anahtar].gider += k.toplamGider || 0;
         });
 
@@ -1695,7 +1849,8 @@
             const g = k.guzergah || 'Belirtilmedi';
             if(!analiz[g]) analiz[g] = { sefer: 0, toplamKar: 0 };
             analiz[g].sefer += 1;
-            analiz[g].toplamKar += (k.hasilat - k.toplamGider);
+            const net = ((k.hasilat || 0) + (k.ukomeGeliri || 0)) - (k.toplamGider || 0);
+            analiz[g].toplamKar += net;
         });
 
         const siraliGuzergahlar = Object.keys(analiz).sort((a,b) => analiz[b].toplamKar - analiz[a].toplamKar);
@@ -1741,7 +1896,7 @@
 
     window.onload = function() {
         setTimeout(() => { aracAyarlariniBuluttanYukle(); }, 1000); 
-        yilSecenekleriniDoldur(); // Yılları doldur
+        yilSecenekleriniDoldur(); 
         
         const sabitTarihEl = document.getElementById('sabitGiderTarih');
         if (sabitTarihEl) {
