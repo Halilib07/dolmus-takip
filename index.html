@@ -181,18 +181,35 @@
         }
 
         /* =========================================
-           YENİ PDF GÜZERGAH TABLOSU (FLEXBOX)
+           YENİ PDF GÜZERGAH TABLOSU (SABİT DIV)
            ========================================= */
-        .pdf-flex-table { width: 100%; margin-top: 5px; border: 1px solid #eee; border-radius: 6px; overflow: hidden; }
-        .pdf-flex-header { display: flex; background-color: #ecf0f1; font-weight: bold; color: #2c3e50; font-size: 11px; padding: 10px 8px; border-bottom: 1px solid #ddd; }
-        .pdf-flex-row { display: flex; border-bottom: 1px solid #eee; padding: 10px 8px; font-size: 12px; }
-        .pdf-flex-row:last-child { border-bottom: none; }
-        .pdf-flex-row:nth-child(even) { background-color: #f9f9f9; }
+        .pdf-custom-table {
+            width: 100%;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #34495e;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .pdf-custom-row {
+            display: flex;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        .pdf-custom-row:last-child { border-bottom: none; }
+        .pdf-custom-header {
+            background-color: #ecf0f1;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 1px solid #ddd;
+        }
         
-        .pdf-col-1 { width: 30%; font-weight: bold; color: #2c3e50; }
-        .pdf-col-2 { width: 15%; text-align: center; color: #7f8c8d; }
-        .pdf-col-3 { width: 30%; text-align: left; font-weight: bold; }
-        .pdf-col-4 { width: 25%; text-align: left; color: #7f8c8d; }
+        .pdf-c-1 { flex: 1; width: 30%; }
+        .pdf-c-2 { flex: 1; width: 15%; text-align: center; }
+        .pdf-c-3 { flex: 1; width: 30%; font-weight: bold; }
+        .pdf-c-4 { flex: 1; width: 25%; }
 
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
@@ -228,7 +245,7 @@
             .pdf-stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
             .pdf-2col { grid-template-columns: 1fr; gap: 10px; }
             .pdf-header h1 { font-size: 18px; }
-            .pdf-flex-header, .pdf-flex-row { font-size: 10px; padding: 8px 5px; }
+            .pdf-custom-row { font-size: 10px; padding: 8px 5px; }
         }
     </style>
 </head>
@@ -619,12 +636,12 @@
 
     <div class="pdf-section" style="page-break-inside: avoid;">
         <div class="pdf-section-title">🛣️ Güzergah Verimlilik Analizi</div>
-        <div class="pdf-flex-table">
-            <div class="pdf-flex-header">
-                <div class="pdf-col-1">Güzergah</div>
-                <div class="pdf-col-2">Sefer</div>
-                <div class="pdf-col-3">Toplam Kâr</div>
-                <div class="pdf-col-4">Ort. Kâr/Sefer</div>
+        <div class="pdf-custom-table">
+            <div class="pdf-custom-row pdf-custom-header">
+                <div class="pdf-c-1">Güzergah</div>
+                <div class="pdf-c-2">Sefer</div>
+                <div class="pdf-c-3">Toplam Kâr</div>
+                <div class="pdf-c-4">Ort. Kâr/Sefer</div>
             </div>
             <!-- Veriler buraya JavaScript ile eklenecek -->
             <div id="pdfGuzergahTabloFlex">
@@ -1380,12 +1397,12 @@
             const veri = analiz[g];
             const ort = veri.sefer > 0 ? veri.toplamKar / veri.sefer : 0;
             const div = document.createElement('div');
-            div.className = 'pdf-flex-row';
+            div.className = 'pdf-custom-row';
             div.innerHTML = `
-                <div class="pdf-col-1">${g}</div>
-                <div class="pdf-col-2">${veri.sefer}</div>
-                <div class="pdf-col-3" style="color:${veri.toplamKar >= 0 ? '#27ae60' : '#e74c3c'};">${veri.toplamKar.toLocaleString('tr-TR')} TL</div>
-                <div class="pdf-col-4">${ort.toLocaleString('tr-TR')} TL</div>
+                <div class="pdf-c-1">${g}</div>
+                <div class="pdf-c-2">${veri.sefer}</div>
+                <div class="pdf-c-3" style="color:${veri.toplamKar >= 0 ? '#27ae60' : '#e74c3c'};">${veri.toplamKar.toLocaleString('tr-TR')} TL</div>
+                <div class="pdf-c-4">${ort.toLocaleString('tr-TR')} TL</div>
             `;
             pdfGuzergahTbody.appendChild(div);
         });
