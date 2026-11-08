@@ -447,7 +447,7 @@
                             <th>Diğer</th>
                             <th>Şoför</th>
                             <th>Muhasebe/Sabit</th>
-                            <th>UKOME Desteği</th>
+                            <th>Destek</th>
                             <th>Toplam Gider</th>
                             <th>Net</th>
                             <th>İşlem</th>
@@ -1273,7 +1273,7 @@
         });
     }
 
-    // ========== UKOME DESTEĞİ FONKSİYONLARI ==========
+    // ========== Destek FONKSİYONLARI ==========
     
     function guncelleUkomeBilgi() {
         const yil = document.getElementById('ukomeYil').value;
@@ -1319,7 +1319,7 @@
         const gunlukDestek = tutar / gunSayisi;
         const ayIsimleri = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 
-        const mesaj = `Toplam ${tutar.toLocaleString('tr-TR')} TL UKOME Desteği, ${ayIsimleri[ay]} ${yil} ayındaki ${gunSayisi} güne bölünecek.\nGünlük Gelir: ${gunlukDestek.toLocaleString('tr-TR')} TL\n\nOnaylıyor musunuz?`;
+        const mesaj = `Toplam ${tutar.toLocaleString('tr-TR')} TL Destek, ${ayIsimleri[ay]} ${yil} ayındaki ${gunSayisi} güne bölünecek.\nGünlük Gelir: ${gunlukDestek.toLocaleString('tr-TR')} TL\n\nOnaylıyor musunuz?`;
         if(!confirm(mesaj)) return;
 
         try {
@@ -1342,7 +1342,7 @@
             mesajEl.innerText = "✅ Destek başarıyla o aya ait günlere dağıtıldı!";
             setTimeout(() => { mesajEl.innerText = ""; }, 4000);
 
-            alert(`✅ Başarılı! Her güne ${gunlukDestek.toLocaleString('tr-TR')} TL UKOME desteği eklendi.`);
+            alert(`✅ Başarılı! Her güne ${gunlukDestek.toLocaleString('tr-TR')} TL Destek eklendi.`);
             switchTab('rapor', document.getElementById('raporTabBtn'));
         } catch(e) {
             console.error(e);
@@ -1824,7 +1824,7 @@
 
         trEkle("A. GELİRLER", 0, true);
         trEkle("Günlük Hasılat (Seferler)", tKazanc);
-        if (tUkome > 0) trEkle("Devlet Destekleri (UKOME)", tUkome);
+        if (tUkome > 0) trEkle("Devlet Destekleri / Teşvikler", tUkome);
         
         trEkle("B. GİDERLER", 0, true);
         trEkle("Mazot Gideri", tMazot);
