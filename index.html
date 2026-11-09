@@ -52,20 +52,18 @@
     <style>
         :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; --info: #3498db; --purple: #8e44ad; }
         
-        /* ARKA PLANI OTOBÜS FOTOĞRAFI YAPTIK */
+        /* YENİ: Arka plan koyu, giriş kutusu daha şık */
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-image: url('foto.jpg'); 
-            background-size: cover; 
-            background-position: center; 
-            background-attachment: fixed;
-            margin: 0; 
-            padding: 20px; 
-            color: #333; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+          background-color: var(--bg); 
+          background-image: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); 
+          margin: 0; 
+          padding: 20px; 
+          color: #333; 
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
         }
         
         /* Giriş yapıldıktan sonra arka planı düz renk yapmak için */
@@ -88,7 +86,7 @@
             width: 100%;
             background: rgba(255, 255, 255, 0.85); /* Beyazın %85 şeffaf hali */
             backdrop-filter: blur(10px); /* Arkayı hafif bulanıklaştırır */
-            -webkit-backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur (10px);
             padding: 40px 30px; 
             border-radius: 15px; 
             box-shadow: 0 8px 32px rgba(0,0,0,0.3); 
@@ -240,7 +238,7 @@
             .toplam-sabit { flex-direction: column; align-items: flex-start; gap: 5px; }
             .toplam-sabit strong { font-size: 18px; }
             .rapor-filtre-alani { flex-direction: column; align-items: stretch; }
-            .mali-tablo th:nth-child(1) { width: 50%; }
+            .mali-tablo th:nth-child(1) hbaskaya { width: 50%; }
             .mali-tablo th:nth-child(2) { width: 30%; }
             .mali-tablo th:nth-child(3) { width: 20%; }
         }
