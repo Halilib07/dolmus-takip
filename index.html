@@ -250,15 +250,17 @@
 </head>
 <body>
 
-<div id="loginEkrani" style="padding: 0; overflow: hidden;">
-    <!-- Resim artık kutunun üst kısmında ve tam sığıyor -->
-    <img src="foto.jpg" alt="Dolmuş" style="width: 100%; height: 200px; object-fit: cover; object-position: center; border-bottom: 4px solid var(--primary);">
-    
-    <div style="padding: 30px;">
-        <h2 style="color: var(--primary); margin-top:0; margin-bottom: 20px;">🚐 Sisteme Giriş</h2>
-        <input type="password" id="sifre" placeholder="Lütfen şifrenizi girin" style="width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: #f9f9f9;">
-        <button onclick="girisYap()" style="width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">Giriş Yap</button>
-        <div id="loginHata" style="color: var(--danger); font-weight: bold; margin-top: 15px; display: none;">Hatalı şifre girdiniz!</div>
+<div id="loginEkrani">
+    <!-- Resmin üzerine %10'luk siyah bir perde çekiyoruz ki yazılar okunsun, resim de belli olsun -->
+    <div style="background: rgba(0, 0, 0, 0.1); padding: 40px 30px; width: 100%; height: 100%; box-sizing: border-box;">
+        
+        <h2 style="color: white; margin-top:0; margin-bottom: 25px; font-size: 26px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">🚐 Sisteme Giriş</h2>
+        
+        <input type="password" id="sifre" placeholder="Lütfen şifrenizi girin" style="width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: rgba(255, 255, 255, 0.9);">
+        
+        <button onclick="girisYap()" style="width: 100%; padding: 15px; background: rgba(44, 62, 80, 0.95); color: white; border: 1px solid #2c3e50; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s;">Giriş Yap</button>
+        
+        <div id="loginHata" style="color: #ffcccc; font-weight: bold; margin-top: 15px; display: none; background: rgba(231, 76, 60, 0.9); padding: 8px; border-radius: 5px;">Hatalı şifre girdiniz!</div>
     </div>
 </div>
 
