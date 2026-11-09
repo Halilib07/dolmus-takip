@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dolmuş İşletme Yönetim Paneli</title>
+    
+    <!-- YENİ EKLENEN: PWA Manifest ve İkon Bağlantıları -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Flatpickr Kütüphanesi -->
@@ -668,11 +673,10 @@
         return [year, month, day].join('-');
     }
 
-    // YENİ FONKSİYON: Seçilen tarihe göre formu doldur veya temizle
     // Seçilen tarihe göre formu doldur veya temizle
     function formuTariheGoreDoldur(secilenTarih) {
         if (!secilenTarih) return;
-    
+
         // Şoför girişinde sadece bugünün tarihi için otomatik doldurma yapılsın
         if (!isYonetici) {
             const bugunStr = formatTarih(new Date());
@@ -690,15 +694,15 @@
                 return;
             }
         }
-    
+
         // Seçilen tarihe ait kaydı bul
         const mevcutKayit = kayitlar.find(k => k.tarih === secilenTarih);
-    
+
         if (mevcutKayit) {
             // Kayıt varsa form alanlarını doldur
             if (mevcutKayit.guzergah) document.getElementById('guzergah').value = mevcutKayit.guzergah;
             else document.getElementById('guzergah').value = "";
-    
+
             document.getElementById('hasilat').value = mevcutKayit.hasilat ? sayiyiFormatla(mevcutKayit.hasilat) : "";
             document.getElementById('km').value = mevcutKayit.km ? sayiyiFormatla(mevcutKayit.km) : "";
             document.getElementById('mazotTL').value = mevcutKayit.mazotTL ? sayiyiFormatla(mevcutKayit.mazotTL) : "";
@@ -707,11 +711,11 @@
             document.getElementById('parca').value = mevcutKayit.parca ? sayiyiFormatla(mevcutKayit.parca) : "";
             document.getElementById('diger').value = mevcutKayit.diger ? sayiyiFormatla(mevcutKayit.diger) : "";
             document.getElementById('gunlukSoforUcret').value = mevcutKayit.gunlukSoforUcret ? sayiyiFormatla(mevcutKayit.gunlukSoforUcret) : "";
-    
+
             const mesajEl = document.getElementById('mesaj');
             mesajEl.style.color = "var(--info)";
             mesajEl.innerText = "ℹ️ Bu tarihe ait önceden kaydedilmiş bir kayıt bulundu ve forma yüklendi. Düzenleyip tekrar kaydedebilirsiniz.";
-            setTimeout(() => { mesajEl.innerText = ""; }, 12000);
+            setTimeout(() => { mesajEl.innerText = ""; }, 8000);
             
         } else {
             // Kayıt yoksa formu temizle
@@ -724,13 +728,13 @@
             document.getElementById('parca').value = "";
             document.getElementById('diger').value = "";
             document.getElementById('gunlukSoforUcret').value = "";
-    
+
             // Sadece yönetici için "kayıt yok" mesajı göster (şoförde bugün dışı için zaten temizlendi)
             if (isYonetici) {
                 const mesajEl = document.getElementById('mesaj');
                 mesajEl.style.color = "var(--info)";
                 mesajEl.innerText = "ℹ️ Bu tarihe ait henüz bir kayıt yok. Yeni giriş yapabilirsiniz.";
-                setTimeout(() => { mesajEl.innerText = ""; }, 12000);
+                setTimeout(() => { mesajEl.innerText = ""; }, 8000);
             }
         }
     }
@@ -1279,7 +1283,7 @@
                 fpInstance.setDate(new Date()); // Bu, onChange'i tetikleyecek ve formu güncelleyecektir.
             }
             
-            setTimeout(() => { mesajEl.innerText = ""; }, 3000);
+            setTimeout(() => { mesajEl.innerText = ""; }, 12000);
         } catch (e) {
             console.error(e); mesajEl.style.color = "red"; mesajEl.innerText = "❌ Hata oluştu!";
         } finally { btn.innerText = "Günü Kaydet (Buluta Gönder)"; btn.disabled = false; }
@@ -2541,6 +2545,21 @@
             setTimeout(() => { sabitGiderTarihiDegisti(); }, 1200); 
         }
     };
+</script>
+
+<!-- YENİ EKLENEN: Service Worker Kayıt Kodları -->
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => {
+                    console.log('Service Worker kaydedildi:', registration);
+                })
+                .catch(error => {
+                    console.log('Service Worker kaydı başarısız:', error);
+                });
+        });
+    }
 </script>
 </body>
 </html>
