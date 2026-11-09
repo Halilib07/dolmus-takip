@@ -82,16 +82,20 @@
 
         /* ŞEFFAF (BUZLU CAM) GİRİŞ KUTUSU */
         #loginEkrani { 
+        /* RESİM VE YAZILARI BİRLEŞTİREN ANA ÇERÇEVE */
+        #loginEkrani { 
             max-width: 400px; 
             width: 100%;
-            background: rgba(255, 255, 255, 0.85); /* Beyazın %85 şeffaf hali */
-            backdrop-filter: blur(10px); /* Arkayı hafif bulanıklaştırır */
-            -webkit-backdrop-filter: blur (10px);
-            padding: 40px 30px; 
             border-radius: 15px; 
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3); 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5); 
+            overflow: hidden; /* Köşelerin yuvarlak kalmasını sağlar */
             text-align: center; 
             box-sizing: border-box;
+            position: relative; /* İçindekilerin üst üste binmesi için */
+            /* Resmi buraya arka plan olarak veriyoruz */
+            background-image: url('foto.jpg'); 
+            background-size: cover;
+            background-position: center;
         }
         
         #loginEkrani h2 { color: var(--primary); margin-bottom: 25px; font-size: 24px; }
