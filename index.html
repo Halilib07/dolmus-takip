@@ -91,33 +91,33 @@
         #loginEkrani { 
             max-width: 420px; 
             width: 100%;
-            max-height: 85vh; /* Ekrandan taşmasını engeller */
+            max-height: 85vh; /* Ekrandan taşmayı önler */
             border-radius: 20px; 
             box-shadow: 0 10px 40px rgba(0,0,0,0.6); 
             overflow: hidden; /* Köşelerin yuvarlak kalmasını sağlar */
-            text-align: center; 
-            box-sizing: border-box;
             position: relative; 
-            
-            /* Resmi arka plana tam sığdırıyoruz (contain kullanarak kesilmeyi önlüyoruz) */
-            background-image: url('foto.jpg'); 
-            background-size: cover; /* cover: alanı tam doldurur, gerekirse kırpar */
-            background-position: center center;
-            background-repeat: no-repeat;
-
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* İçeriği en alta yaslar, araç yukarıda görünür */
+            justify-content: flex-end; /* İçeriği en alta yaslar, resim yukarıda kalır */
+            background-color: #1a252f; /* Resim yüklenene kadar koyu arka plan */
         }
         
-        /* Giriş kutularının olduğu kısım - Buzlu Cam Efekti */
+        /* ARKADAKİ DOLMUŞ RESMİ */
+        #loginEkrani .bg-resim {
+            width: 100%;
+            height: 250px; /* Resmin yüksekliğini buradan ayarlayabilirsiniz */
+            object-fit: contain; /* BU ÇOK ÖNEMLİ: Aracın kesilmesini önler, tamamını gösterir */
+            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+        }
+
+        /* ŞİFRE GİRME ALANI (Buzlu Cam Efekti) */
         .login-icerik {
-            background: rgba(255, 255, 255, 0.85); /* Hafif şeffaf beyaz */
-            backdrop-filter: blur(10px); /* Arkadaki resmi hafif bulanıklaştırır, yazıları okunur yapar */
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            padding: 35px 30px; 
-            border-top: 1px solid rgba(255, 255, 255, 0.6);
-            border-radius: 0 0 20px 20px; /* Sadece alt köşeleri yuvarlak yapar */
+            padding: 30px; 
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.5);
         }
         
         #loginEkrani h2 { color: var(--primary); margin-top: 0; margin-bottom: 20px; font-size: 24px; }
@@ -274,9 +274,12 @@
     </style>
 </head>
 <body>
-
 <!-- GİRİŞ EKRANI BAŞLANGICI -->
 <div id="loginEkrani">
+    <!-- Resmi ekliyoruz ve sınıfını veriyoruz -->
+    <img src="foto.jpg" alt="Dolmuş" class="bg-resim">
+    
+    <!-- Giriş Alanları -->
     <div class="login-icerik">
         <h2>🚐 Sisteme Giriş</h2>
         <input type="password" id="sifre" placeholder="Lütfen şifrenizi girin">
@@ -284,6 +287,8 @@
         <div id="loginHata">Hatalı şifre girdiniz!</div>
     </div>
 </div>
+<!-- GİRİŞ EKRANI BİTİŞİ -->
+
 <!-- GİRİŞ EKRANI BİTİŞİ -->
 
 <div id="uygulamaEkrani" class="container">
