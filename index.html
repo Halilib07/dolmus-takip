@@ -52,25 +52,30 @@
     <style>
         :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; --info: #3498db; --purple: #8e44ad; }
         
-        /* YENİ: Arka plan koyu, giriş kutusu daha şık */
+        /* ====================================================
+           1. KAYMAYI ÖNLEYEN VE ARKA PLANI AYARLAYAN KISIM
+           ==================================================== */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Giriş ekranındayken sayfanın esnemesini/kaymasını engeller */
+        }
+
         body { 
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-          background-color: var(--bg); 
-          background-image: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); 
-          margin: 0; 
-          padding: 20px; 
-          color: #333; 
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #1a252f; /* Resim yüklenene kadar koyu arka plan */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
         }
         
-        /* Giriş yapıldıktan sonra arka planı düz renk yapmak için */
+        /* Giriş yapıldıktan sonra arka planı normale döndür ve sayfa kaydırmasını aktif et */
         body.uygulama-acik {
-            display: block;
-            background-image: none;
-            background-color: var(--bg);
+            display: block !important;
+            overflow-y: auto !important; /* Paneller açıldığında aşağı kaydırmaya izin ver */
+            background-color: var(--bg) !important;
             padding: 20px;
         }
 
@@ -80,27 +85,51 @@
         .header-alani h1 { color: var(--primary); margin: 0; padding: 0 60px; font-size: 24px; } 
         .cikis-btn { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; position: absolute; right: 0; top: 0; }
 
-        /* ŞEFFAF (BUZLU CAM) GİRİŞ KUTUSU */
+        /* ====================================================
+           2. GİRİŞ EKRANI (RESİM VE CAM EFEKTİ)
+           ==================================================== */
         #loginEkrani { 
-            max-width: 400px; 
+            max-width: 420px; 
             width: 100%;
-            background: rgba(255, 255, 255, 0.85); /* Beyazın %85 şeffaf hali */
-            backdrop-filter: blur(10px); /* Arkayı hafif bulanıklaştırır */
-            -webkit-backdrop-filter: blur (10px);
-            padding: 40px 30px; 
-            border-radius: 15px; 
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3); 
+            max-height: 85vh; /* Ekrandan taşmasını engeller */
+            border-radius: 20px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6); 
+            overflow: hidden; /* Köşelerin yuvarlak kalmasını sağlar */
             text-align: center; 
             box-sizing: border-box;
+            position: relative; 
+            
+            /* Resmi arka plana tam sığdırıyoruz (contain kullanarak kesilmeyi önlüyoruz) */
+            background-image: url('foto.jpg'); 
+            background-size: cover; /* cover: alanı tam doldurur, gerekirse kırpar */
+            background-position: center center;
+            background-repeat: no-repeat;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* İçeriği en alta yaslar, araç yukarıda görünür */
         }
         
-        #loginEkrani h2 { color: var(--primary); margin-bottom: 25px; font-size: 24px; }
-        #loginEkrani input { width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: rgba(255,255,255,0.9); outline: none; }
+        /* Giriş kutularının olduğu kısım - Buzlu Cam Efekti */
+        .login-icerik {
+            background: rgba(255, 255, 255, 0.85); /* Hafif şeffaf beyaz */
+            backdrop-filter: blur(10px); /* Arkadaki resmi hafif bulanıklaştırır, yazıları okunur yapar */
+            -webkit-backdrop-filter: blur(10px);
+            padding: 35px 30px; 
+            border-top: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 0 0 20px 20px; /* Sadece alt köşeleri yuvarlak yapar */
+        }
+        
+        #loginEkrani h2 { color: var(--primary); margin-top: 0; margin-bottom: 20px; font-size: 24px; }
+        #loginEkrani input { width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: white; outline: none; }
         #loginEkrani input:focus { border-color: var(--primary); }
         #loginEkrani button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         #loginEkrani button:hover { background: #1a252f; }
         #loginHata { color: var(--danger); font-weight: bold; margin-top: 15px; display: none; }
 
+        /* ====================================================
+           3. UYGULAMA İÇİ PANELLER (Giriş Yapıldıktan Sonra)
+           ==================================================== */
         #uygulamaEkrani { display: none; }
         
         .tabs { display: flex; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -246,17 +275,16 @@
 </head>
 <body>
 
-<div id="loginEkrani" style="padding: 0; overflow: hidden;">
-    <!-- Resim artık kutunun üst kısmında ve tam sığıyor -->
-    <img src="foto.jpg" alt="Dolmuş" style="width: 100%; height: 200px; object-fit: cover; object-position: center; border-bottom: 4px solid var(--primary);">
-    
-    <div style="padding: 30px;">
-        <h2 style="color: var(--primary); margin-top:0; margin-bottom: 20px;">🚐 Sisteme Giriş</h2>
-        <input type="password" id="sifre" placeholder="Lütfen şifrenizi girin" style="width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background: #f9f9f9;">
-        <button onclick="girisYap()" style="width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;">Giriş Yap</button>
-        <div id="loginHata" style="color: var(--danger); font-weight: bold; margin-top: 15px; display: none;">Hatalı şifre girdiniz!</div>
+<!-- GİRİŞ EKRANI BAŞLANGICI -->
+<div id="loginEkrani">
+    <div class="login-icerik">
+        <h2>🚐 Sisteme Giriş</h2>
+        <input type="password" id="sifre" placeholder="Lütfen şifrenizi girin">
+        <button onclick="girisYap()">Giriş Yap</button>
+        <div id="loginHata">Hatalı şifre girdiniz!</div>
     </div>
 </div>
+<!-- GİRİŞ EKRANI BİTİŞİ -->
 
 <div id="uygulamaEkrani" class="container">
     <div class="header-alani">
@@ -715,15 +743,12 @@
         return [year, month, day].join('-');
     }
 
-    // Seçilen tarihe göre formu doldur veya temizle
     function formuTariheGoreDoldur(secilenTarih) {
         if (!secilenTarih) return;
 
-        // Şoför girişinde sadece bugünün tarihi için otomatik doldurma yapılsın
         if (!isYonetici) {
             const bugunStr = formatTarih(new Date());
             if (secilenTarih !== bugunStr) {
-                // Şoför bugün dışında bir tarih seçtiyse formu temizle, otomatik doldurma yapma
                 document.getElementById('guzergah').value = "";
                 document.getElementById('hasilat').value = "";
                 document.getElementById('km').value = "";
@@ -737,11 +762,9 @@
             }
         }
 
-        // Seçilen tarihe ait kaydı bul
         const mevcutKayit = kayitlar.find(k => k.tarih === secilenTarih);
 
         if (mevcutKayit) {
-            // Kayıt varsa form alanlarını doldur
             if (mevcutKayit.guzergah) document.getElementById('guzergah').value = mevcutKayit.guzergah;
             else document.getElementById('guzergah').value = "";
 
@@ -760,7 +783,6 @@
             setTimeout(() => { mesajEl.innerText = ""; }, 8000);
             
         } else {
-            // Kayıt yoksa formu temizle
             document.getElementById('guzergah').value = "";
             document.getElementById('hasilat').value = "";
             document.getElementById('km').value = "";
@@ -771,7 +793,6 @@
             document.getElementById('diger').value = "";
             document.getElementById('gunlukSoforUcret').value = "";
 
-            // Sadece yönetici için "kayıt yok" mesajı göster (şoförde bugün dışı için zaten temizlendi)
             if (isYonetici) {
                 const mesajEl = document.getElementById('mesaj');
                 mesajEl.style.color = "var(--info)";
@@ -781,17 +802,15 @@
         }
     }
 
-    // Flatpickr Başlatma ve Tarih Sınırlandırma
     function tarihSeciciyiBaslat() {
         const bugun = new Date();
         bugun.setHours(23, 59, 59, 999);
 
         const enEski = new Date(bugun);
-        enEski.setDate(enEski.getDate() - 2); // Bugün + dün + evvelsi gün
+        enEski.setDate(enEski.getDate() - 2);
 
         const inputEl = document.getElementById('tarih');
         
-        // Eğer önceden oluşturulmuşsa temizle
         if (fpInstance) {
             fpInstance.destroy();
         }
@@ -865,7 +884,6 @@
             document.getElementById('ayarlarTabBtn').style.display = 'block';
             hataEl.style.display = 'none';
             
-            // Arka planı normale döndür
             document.body.classList.add('uygulama-acik');
             
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
@@ -880,7 +898,6 @@
             document.getElementById('ayarlarTabBtn').style.display = 'none';
             hataEl.style.display = 'none';
             
-            // Arka planı normale döndür
             document.body.classList.add('uygulama-acik');
 
             switchTab('giris', document.querySelectorAll('.tab-btn')[0]);
@@ -1328,9 +1345,8 @@
             document.getElementById('diger').value = ''; document.getElementById('gunlukSoforUcret').value = '';
             document.getElementById('guzergah').value = '';
 
-            // Tarihi bugüne sıfırla (ve formu yeniden doldur ki bugünün verisi varsa görünsün)
             if (fpInstance) {
-                fpInstance.setDate(new Date()); // Bu, onChange'i tetikleyecek ve formu güncelleyecektir.
+                fpInstance.setDate(new Date()); 
             }
             
             setTimeout(() => { mesajEl.innerText = ""; }, 12000);
@@ -1350,7 +1366,6 @@
             if(document.getElementById('rapor').classList.contains('active')){ filtreleRapor(); }
             if(document.getElementById('giris').classList.contains('active')){ 
                 aracUyarilariniGuncelle(); 
-                // Formu mevcut tarihe göre doldur (veriler yeni yüklendiği için)
                 const aktifTarih = document.getElementById('tarih').value;
                 if (aktifTarih) formuTariheGoreDoldur(aktifTarih);
             }
@@ -2527,14 +2542,12 @@
         const eskiTarih = kayit.tarih;
 
         if (isYonetici) {
-            // Yönetici her tarihi düzenleyebilir
             if (fpInstance) {
                 fpInstance.set('minDate', null);
                 fpInstance.set('maxDate', null);
                 fpInstance.setDate(eskiTarih, false);
             }
         } else {
-            // Şoför: önce sınırları tazele
             const bugun = new Date();
             bugun.setHours(23, 59, 59, 999);
             const enEski = new Date(bugun);
@@ -2542,7 +2555,6 @@
 
             const eskiTarihObj = new Date(eskiTarih);
             if (eskiTarihObj < enEski || eskiTarihObj > bugun) {
-                // 3 günden eski kayıt: input kilitlenir
                 if (fpInstance) {
                     fpInstance.set('minDate', eskiTarih);
                     fpInstance.set('maxDate', eskiTarih);
@@ -2570,7 +2582,6 @@
         document.getElementById('diger').value = sayiyiFormatla(kayit.diger);
         document.getElementById('gunlukSoforUcret').value = sayiyiFormatla(kayit.gunlukSoforUcret || 0);
 
-        // Düzenleme yaparken tarih değişimini tetikle, böylece onReady/onChange ile form dolacak
         if (fpInstance) {
             fpInstance.setDate(eskiTarih, true);
         }
