@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dolmus-pwa-v1';
+const CACHE_NAME = 'dolmus-pwa-v2';
 const urlsToCache = [
   './',
   './index.html'
