@@ -289,8 +289,6 @@
 </div>
 <!-- GİRİŞ EKRANI BİTİŞİ -->
 
-<!-- GİRİŞ EKRANI BİTİŞİ -->
-
 <div id="uygulamaEkrani" class="container">
     <div class="header-alani">
         <h1>🚐 Dolmuş İşletme Yönetim Paneli</h1>
@@ -753,7 +751,12 @@
 
         if (!isYonetici) {
             const bugunStr = formatTarih(new Date());
-            if (secilenTarih !== bugunStr) {
+            const dunObj = new Date();
+            dunObj.setDate(dunObj.getDate() - 1);
+            const dunStr = formatTarih(dunObj);
+
+            // Tarih BUGÜN veya DÜN değilse formu temizle
+            if (secilenTarih !== bugunStr && secilenTarih !== dunStr) {
                 document.getElementById('guzergah').value = "";
                 document.getElementById('hasilat').value = "";
                 document.getElementById('km').value = "";
@@ -812,6 +815,7 @@
         bugun.setHours(23, 59, 59, 999);
 
         const enEski = new Date(bugun);
+        // Sadece DÜN ve BUGÜN seçilebilir (Geriye dönük 1 gün)
         enEski.setDate(enEski.getDate() - 1);
 
         const inputEl = document.getElementById('tarih');
@@ -1118,13 +1122,14 @@
             bugunD.setHours(0, 0, 0, 0);
         
             const enEskiIzinli = new Date(bugunD);
+            // Şoför sadece DÜN ve BUGÜN girebilir
             enEskiIzinli.setDate(enEskiIzinli.getDate() - 1);
         
             const secilenTarihObj = new Date(secilenTarih);
             secilenTarihObj.setHours(0, 0, 0, 0);
         
             if (secilenTarihObj > bugunD || secilenTarihObj < enEskiIzinli) {
-                alert("⚠️ Şoför olarak sadece bugün ve geriye dönük 2 gün için veri girebilirsiniz.");
+                alert("⚠️ Şoför olarak sadece bugün ve dün için veri girebilirsiniz.");
                 return;
             }
         }
@@ -2556,6 +2561,7 @@
             const bugun = new Date();
             bugun.setHours(23, 59, 59, 999);
             const enEski = new Date(bugun);
+            // Düzenlerken de sadece DÜN ve BUGÜN'e izin ver
             enEski.setDate(enEski.getDate() - 1);
 
             const eskiTarihObj = new Date(eskiTarih);
@@ -2566,7 +2572,7 @@
                     fpInstance.setDate(eskiTarih, false);
                 }
                 document.getElementById('tarih').disabled = true;
-                alert("ℹ️ Bu kayıt 3 günden daha eski bir tarihe ait olduğu için tarih değiştirilemez.\n\nDiğer alanları (hasılat, gider vb.) düzenleyebilirsiniz.\n\nKayıt Tarihi: " + eskiTarih.split('-').reverse().join('.'));
+                alert("ℹ️ Bu kayıt düne veya daha eski bir tarihe ait olduğu için tarih değiştirilemez.\n\nDiğer alanları (hasılat, gider vb.) düzenleyebilirsiniz.\n\nKayıt Tarihi: " + eskiTarih.split('-').reverse().join('.'));
             } else {
                 document.getElementById('tarih').disabled = false;
                 if (fpInstance) {
