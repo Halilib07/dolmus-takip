@@ -5,13 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dolmuş İşletme Yönetim Paneli</title>
     
-    <!-- PWA Manifest ve İkon Bağlantıları -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Flatpickr Kütüphanesi -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
@@ -52,7 +49,6 @@
     <style>
         :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; --info: #3498db; --purple: #8e44ad; }
         
-        /* SAYFANIN KAYMASINI ÖNLEYEN VE ARKA PLANI AYARLAYAN KISIM */
         html, body {
             height: 100%;
             margin: 0;
@@ -69,7 +65,6 @@
             box-sizing: border-box;
         }
         
-        /* Giriş yapıldıktan sonra arka planı normale döndür ve sayfa kaydırmasını aktif et */
         body.uygulama-acik {
             display: block !important;
             overflow-y: auto !important; 
@@ -83,7 +78,6 @@
         .header-alani h1 { color: var(--primary); margin: 0; padding: 0 60px; font-size: 24px; } 
         .cikis-btn { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; position: absolute; right: 0; top: 0; }
 
-        /* GİRİŞ EKRANI */
         #loginEkrani { 
             max-width: 420px; 
             width: 100%;
@@ -98,7 +92,6 @@
             background-color: #1a252f; 
         }
         
-        /* ARKADAKİ DOLMUŞ RESMİ */
         #loginEkrani .bg-resim {
             width: 100%;
             height: 250px; 
@@ -106,7 +99,6 @@
             background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
         }
 
-        /* ŞİFRE GİRME ALANI (Buzlu Cam Efekti) */
         .login-icerik {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
@@ -123,7 +115,6 @@
         #loginEkrani button:hover { background: #1a252f; }
         #loginHata { color: var(--danger); font-weight: bold; margin-top: 15px; display: none; }
 
-        /* UYGULAMA İÇİ PANELLER */
         #uygulamaEkrani { display: none; }
         
         .tabs { display: flex; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -268,7 +259,6 @@
     </style>
 </head>
 <body>
-<!-- GİRİŞ EKRANI BAŞLANGICI -->
 <div id="loginEkrani">
     <img src="foto.jpg" alt="Dolmuş" class="bg-resim">
     <div class="login-icerik">
@@ -278,7 +268,6 @@
         <div id="loginHata">Hatalı şifre girdiniz!</div>
     </div>
 </div>
-<!-- GİRİŞ EKRANI BİTİŞİ -->
 
 <div id="uygulamaEkrani" class="container">
     <div class="header-alani">
@@ -292,7 +281,6 @@
         <button class="tab-btn" id="ayarlarTabBtn" onclick="switchTab('ayarlar', this)" style="display:none;">⚙️ Sistem Ayarları</button>
     </div>
 
-    <!-- ŞOFÖR EKRANI -->
     <div id="giris" class="tab-content active">
         <div class="uyari-panosu" id="uyariPanosu">
             <div class="uyari-kutu durum-gri" id="muayeneKutu">
@@ -367,49 +355,23 @@
         </div>
     </div>
 
-    <!-- YÖNETİCİ / RAPOR EKRANI -->
     <div id="rapor" class="tab-content">
         <div class="rapor-filtre-alani">
             <div class="input-grup">
                 <label for="filtreYil" class="select-label">Yıl Seçimi</label>
-                <select id="filtreYil" onchange="yilAyDegisti()">
-                    <option value="">Tümü</option>
-                </select>
+                <select id="filtreYil" onchange="yilAyDegisti()"><option value="">Tümü</option></select>
             </div>
             <div class="input-grup">
                 <label for="filtreAy" class="select-label">Ay Seçimi</label>
                 <select id="filtreAy" onchange="yilAyDegisti()">
-                    <option value="">Tümü</option>
-                    <option value="1">Ocak</option>
-                    <option value="2">Şubat</option>
-                    <option value="3">Mart</option>
-                    <option value="4">Nisan</option>
-                    <option value="5">Mayıs</option>
-                    <option value="6">Haziran</option>
-                    <option value="7">Temmuz</option>
-                    <option value="8">Ağustos</option>
-                    <option value="9">Eylül</option>
-                    <option value="10">Ekim</option>
-                    <option value="11">Kasım</option>
-                    <option value="12">Aralık</option>
+                    <option value="">Tümü</option><option value="1">Ocak</option><option value="2">Şubat</option><option value="3">Mart</option><option value="4">Nisan</option><option value="5">Mayıs</option><option value="6">Haziran</option><option value="7">Temmuz</option><option value="8">Ağustos</option><option value="9">Eylül</option><option value="10">Ekim</option><option value="11">Kasım</option><option value="12">Aralık</option>
                 </select>
             </div>
-            <div class="input-grup">
-                <input type="date" id="filtreBaslangic">
-                <label for="filtreBaslangic">Başlangıç Tarihi</label>
-            </div>
-            <div class="input-grup">
-                <input type="date" id="filtreBitis">
-                <label for="filtreBitis">Bitiş Tarihi</label>
-            </div>
+            <div class="input-grup"><input type="date" id="filtreBaslangic"><label for="filtreBaslangic">Başlangıç Tarihi</label></div>
+            <div class="input-grup"><input type="date" id="filtreBitis"><label for="filtreBitis">Bitiş Tarihi</label></div>
             <div class="input-grup">
                 <label for="filtreGuzergah" class="select-label">Güzergah Filtresi</label>
-                <select id="filtreGuzergah">
-                    <option value="Tumu">Tümü</option>
-                    <option value="Kumluca">Kumluca</option>
-                    <option value="Turunçova">Turunçova</option>
-                    <option value="Dağdibi">Dağdibi</option>
-                </select>
+                <select id="filtreGuzergah"><option value="Tumu">Tümü</option><option value="Kumluca">Kumluca</option><option value="Turunçova">Turunçova</option><option value="Dağdibi">Dağdibi</option></select>
             </div>
             <button onclick="filtreleRapor()">Filtrele / Raporla</button>
         </div>
@@ -475,7 +437,6 @@
         </div>
     </div>
 
-    <!-- AYARLAR SEKME EKRANI -->
     <div id="ayarlar" class="tab-content">
         <div class="card">
             <h2>⚙️ Sistem Ayarları (Araç Bakım & Takip)</h2>
@@ -1080,13 +1041,11 @@
             sabitGiderPayi: ayniTarihliKayit ? (ayniTarihliKayit.sabitGiderPayi || 0) : 0,
             ukomeGeliri: ayniTarihliKayit ? (ayniTarihliKayit.ukomeGeliri || 0) : 0,
             
-            // Zorunlu alanlar her zaman formdan alınır
             guzergah: secilenGuzergah,
             hasilat: hasilatDeger,
             km: kmDeger,
             gunlukSoforUcret: soforDeger,
             
-            // Bağımsız giderler: Formda boş bırakıldıysa (silinmek istendiyse) 0 yapılır.
             mazotTL: mazotDeger,
             siviBakim: siviBakimDeger,
             tamir: tamirDeger,
@@ -1202,7 +1161,6 @@
             let dagitimGerekiyor = false;
             const batch = window.writeBatch(window.db);
 
-            // Fişler (Muhasebe/Sabit Gider)
             for (const kayit of kayitlar) {
                 if (!kayit.tarih) continue;
                 const kTarihObj = new Date(kayit.tarih);
@@ -1260,7 +1218,6 @@
                 }
             }
 
-            // UKOME (Devlet Destekleri)
             for (const kayit of kayitlar) {
                 if (!kayit.tarih) continue;
                 const kTarihObj = new Date(kayit.tarih);
@@ -1288,7 +1245,6 @@
                 }
             }
 
-            // Geçici Vergi
             for (const kayit of kayitlar) {
                 if (!kayit.tarih) continue;
                 const kTarihObj = new Date(kayit.tarih);
@@ -1348,13 +1304,10 @@
 
             if (dagitimGerekiyor) {
                 await batch.commit();
-                console.log("Otomatik dağıtım ve temizlik yapıldı.");
             }
         });
     }
 
-    // ========== UKOME FONKSİYONLARI ==========
-    
     async function guncelleUkomeBilgi() {
         const yil = document.getElementById('ukomeYil').value;
         const ay = document.getElementById('ukomeAy').value;
@@ -1500,8 +1453,6 @@
         }
     }
 
-    // ========== GEÇİCİ VERGİ FONKSİYONLARI ==========
-    
     async function guncelleGeciciVergiBilgi() {
         const yil = document.getElementById('geciciVergiYil').value;
         const donem = document.getElementById('geciciVergiDonem').value;
@@ -1688,8 +1639,6 @@
             alert("Silme işlemi sırasında hata oluştu!");
         }
     }
-
-    // ========== SABİT GİDER FİŞİ FONKSİYONLARI ==========
 
     function guncelleToplamSabit() {
         const toplam = 
@@ -2425,7 +2374,6 @@
     };
 </script>
 
-<!-- Service Worker Kayıt Kodları -->
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
