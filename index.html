@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dolmuş İşletme Yönetim Paneli</title>
     
+    <!-- PWA Manifest ve İkon Bağlantıları -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <!-- Flatpickr Kütüphanesi -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
@@ -49,15 +52,18 @@
     <style>
         :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; --info: #3498db; --purple: #8e44ad; }
         
+        /* ====================================================
+           1. KAYMAYI ÖNLEYEN VE ARKA PLANI AYARLAYAN KISIM
+           ==================================================== */
         html, body {
             height: 100%;
             margin: 0;
-            overflow: hidden; 
+            overflow: hidden; /* Giriş ekranındayken sayfanın esnemesini/kaymasını engeller */
         }
 
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #1a252f; 
+            background-color: #1a252f; /* Resim yüklenene kadar koyu arka plan */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -65,9 +71,10 @@
             box-sizing: border-box;
         }
         
+        /* Giriş yapıldıktan sonra arka planı normale döndür ve sayfa kaydırmasını aktif et */
         body.uygulama-acik {
             display: block !important;
-            overflow-y: auto !important; 
+            overflow-y: auto !important; /* Paneller açıldığında aşağı kaydırmaya izin ver */
             background-color: var(--bg) !important;
             padding: 20px;
         }
@@ -78,27 +85,32 @@
         .header-alani h1 { color: var(--primary); margin: 0; padding: 0 60px; font-size: 24px; } 
         .cikis-btn { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; position: absolute; right: 0; top: 0; }
 
+        /* ====================================================
+           2. GİRİŞ EKRANI (RESİM VE CAM EFEKTİ)
+           ==================================================== */
         #loginEkrani { 
             max-width: 420px; 
             width: 100%;
-            max-height: 85vh; 
+            max-height: 85vh; /* Ekrandan taşmayı önler */
             border-radius: 20px; 
             box-shadow: 0 10px 40px rgba(0,0,0,0.6); 
-            overflow: hidden; 
+            overflow: hidden; /* Köşelerin yuvarlak kalmasını sağlar */
             position: relative; 
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; 
-            background-color: #1a252f; 
+            justify-content: flex-end; /* İçeriği en alta yaslar, resim yukarıda kalır */
+            background-color: #1a252f; /* Resim yüklenene kadar koyu arka plan */
         }
         
+        /* ARKADAKİ DOLMUŞ RESMİ */
         #loginEkrani .bg-resim {
             width: 100%;
-            height: 250px; 
-            object-fit: contain; 
+            height: 250px; /* Resmin yüksekliğini buradan ayarlayabilirsiniz */
+            object-fit: contain; /* BU ÇOK ÖNEMLİ: Aracın kesilmesini önler, tamamını gösterir */
             background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
         }
 
+        /* ŞİFRE GİRME ALANI (Buzlu Cam Efekti) */
         .login-icerik {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
@@ -115,6 +127,9 @@
         #loginEkrani button:hover { background: #1a252f; }
         #loginHata { color: var(--danger); font-weight: bold; margin-top: 15px; display: none; }
 
+        /* ====================================================
+           3. UYGULAMA İÇİ PANELLER (Giriş Yapıldıktan Sonra)
+           ==================================================== */
         #uygulamaEkrani { display: none; }
         
         .tabs { display: flex; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -259,8 +274,12 @@
     </style>
 </head>
 <body>
+<!-- GİRİŞ EKRANI BAŞLANGICI -->
 <div id="loginEkrani">
+    <!-- Resmi ekliyoruz ve sınıfını veriyoruz -->
     <img src="foto.jpg" alt="Dolmuş" class="bg-resim">
+    
+    <!-- Giriş Alanları -->
     <div class="login-icerik">
         <h2>🚐 Sisteme Giriş</h2>
         <input type="password" id="sifre" placeholder="Lütfen şifrenizi girin">
@@ -268,6 +287,9 @@
         <div id="loginHata">Hatalı şifre girdiniz!</div>
     </div>
 </div>
+<!-- GİRİŞ EKRANI BİTİŞİ -->
+
+<!-- GİRİŞ EKRANI BİTİŞİ -->
 
 <div id="uygulamaEkrani" class="container">
     <div class="header-alani">
@@ -281,6 +303,7 @@
         <button class="tab-btn" id="ayarlarTabBtn" onclick="switchTab('ayarlar', this)" style="display:none;">⚙️ Sistem Ayarları</button>
     </div>
 
+    <!-- ŞOFÖR EKRANI -->
     <div id="giris" class="tab-content active">
         <div class="uyari-panosu" id="uyariPanosu">
             <div class="uyari-kutu durum-gri" id="muayeneKutu">
@@ -355,69 +378,151 @@
         </div>
     </div>
 
+    <!-- YÖNETİCİ / RAPOR EKRANI -->
     <div id="rapor" class="tab-content">
+        
         <div class="rapor-filtre-alani">
             <div class="input-grup">
                 <label for="filtreYil" class="select-label">Yıl Seçimi</label>
-                <select id="filtreYil" onchange="yilAyDegisti()"><option value="">Tümü</option></select>
+                <select id="filtreYil" onchange="yilAyDegisti()">
+                    <option value="">Tümü</option>
+                </select>
             </div>
             <div class="input-grup">
                 <label for="filtreAy" class="select-label">Ay Seçimi</label>
                 <select id="filtreAy" onchange="yilAyDegisti()">
-                    <option value="">Tümü</option><option value="1">Ocak</option><option value="2">Şubat</option><option value="3">Mart</option><option value="4">Nisan</option><option value="5">Mayıs</option><option value="6">Haziran</option><option value="7">Temmuz</option><option value="8">Ağustos</option><option value="9">Eylül</option><option value="10">Ekim</option><option value="11">Kasım</option><option value="12">Aralık</option>
+                    <option value="">Tümü</option>
+                    <option value="1">Ocak</option>
+                    <option value="2">Şubat</option>
+                    <option value="3">Mart</option>
+                    <option value="4">Nisan</option>
+                    <option value="5">Mayıs</option>
+                    <option value="6">Haziran</option>
+                    <option value="7">Temmuz</option>
+                    <option value="8">Ağustos</option>
+                    <option value="9">Eylül</option>
+                    <option value="10">Ekim</option>
+                    <option value="11">Kasım</option>
+                    <option value="12">Aralık</option>
                 </select>
             </div>
-            <div class="input-grup"><input type="date" id="filtreBaslangic"><label for="filtreBaslangic">Başlangıç Tarihi</label></div>
-            <div class="input-grup"><input type="date" id="filtreBitis"><label for="filtreBitis">Bitiş Tarihi</label></div>
+            <div class="input-grup">
+                <input type="date" id="filtreBaslangic">
+                <label for="filtreBaslangic">Başlangıç Tarihi</label>
+            </div>
+            <div class="input-grup">
+                <input type="date" id="filtreBitis">
+                <label for="filtreBitis">Bitiş Tarihi</label>
+            </div>
             <div class="input-grup">
                 <label for="filtreGuzergah" class="select-label">Güzergah Filtresi</label>
-                <select id="filtreGuzergah"><option value="Tumu">Tümü</option><option value="Kumluca">Kumluca</option><option value="Turunçova">Turunçova</option><option value="Dağdibi">Dağdibi</option></select>
+                <select id="filtreGuzergah">
+                    <option value="Tumu">Tümü</option>
+                    <option value="Kumluca">Kumluca</option>
+                    <option value="Turunçova">Turunçova</option>
+                    <option value="Dağdibi">Dağdibi</option>
+                </select>
             </div>
             <button onclick="filtreleRapor()">Filtrele / Raporla</button>
         </div>
 
         <div class="stats-row">
-            <div class="stat-box"><h3>Toplam Kazanç</h3><p id="rKazanc" class="text-success">0 TL</p></div>
-            <div class="stat-box"><h3>Toplam Gider</h3><p id="rGider" class="text-danger">0 TL</p></div>
-            <div class="stat-box"><h3>Net Kâr</h3><p id="rKar">0 TL</p></div>
-            <div class="stat-box" style="border-top-color: var(--info);"><h3>Günlük Ortalama Kâr</h3><p id="rOrtKar">0 TL</p></div>
-            <div class="stat-box" style="border-top-color: var(--warning);"><h3>Toplam Sefer (Gün)</h3><p id="rSeferSayisi">0</p></div>
+            <div class="stat-box">
+                <h3>Toplam Kazanç</h3>
+                <p id="rKazanc" class="text-success">0 TL</p>
+            </div>
+            <div class="stat-box">
+                <h3>Toplam Gider</h3>
+                <p id="rGider" class="text-danger">0 TL</p>
+            </div>
+            <div class="stat-box">
+                <h3>Net Kâr</h3>
+                <p id="rKar">0 TL</p>
+            </div>
+            <div class="stat-box" style="border-top-color: var(--info);">
+                <h3>Günlük Ortalama Kâr</h3>
+                <p id="rOrtKar">0 TL</p>
+            </div>
+            <div class="stat-box" style="border-top-color: var(--warning);">
+                <h3>Toplam Sefer (Gün)</h3>
+                <p id="rSeferSayisi">0</p>
+            </div>
         </div>
 
         <div class="card">
             <h2>📊 Maliyet Kalemleri ve Kar/Zarar Tablosu</h2>
             <div class="mali-tablo-wrapper">
                 <table class="mali-tablo" id="maliTablo">
-                    <thead><tr><th>KALEMLER</th><th>TUTAR (TL)</th><th>ORAN (%)</th></tr></thead>
-                    <tbody></tbody>
+                    <thead>
+                        <tr>
+                            <th>KALEMLER</th>
+                            <th>TUTAR (TL)</th>
+                            <th>ORAN (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
 
         <div class="chart-grid">
-            <div class="chart-card"><h3>📈 Kazanç - Gider Trendi (Günlük)</h3><div class="chart-container-wrapper"><canvas id="trendGrafik"></canvas></div></div>
-            <div class="chart-card"><h3>🍕 Gider Dağılımı (Kalem Kalem)</h3><div class="chart-container-wrapper"><canvas id="giderGrafik"></canvas></div></div>
+            <div class="chart-card">
+                <h3>📈 Kazanç - Gider Trendi (Günlük)</h3>
+                <div class="chart-container-wrapper">
+                    <canvas id="trendGrafik"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>🍕 Gider Dağılımı (Kalem Kalem)</h3>
+                <div class="chart-container-wrapper">
+                    <canvas id="giderGrafik"></canvas>
+                </div>
+            </div>
         </div>
 
         <div class="chart-grid">
-            <div class="chart-card"><h3>📊 Haftanın Günlerine Göre Ortalama Kâr</h3><div class="chart-container-wrapper"><canvas id="haftalikGrafik"></canvas></div></div>
+            <div class="chart-card">
+                <h3>📊 Haftanın Günlerine Göre Ortalama Kâr</h3>
+                <div class="chart-container-wrapper">
+                    <canvas id="haftalikGrafik"></canvas>
+                </div>
+            </div>
             <div class="chart-card">
                 <h3>🛣️ Güzergah Verimlilik Analizi</h3>
                 <div class="analiz-tablo-wrapper">
                     <table class="analiz-tablo">
-                        <thead><tr><th>Güzergah</th><th>Sefer</th><th>Toplam Kâr</th><th>Ort. Kâr/Sefer</th></tr></thead>
-                        <tbody id="guzergahAnalizTablo"></tbody>
+                        <thead>
+                            <tr>
+                                <th>Güzergah</th>
+                                <th>Sefer</th>
+                                <th>Toplam Kâr</th>
+                                <th>Ort. Kâr/Sefer</th>
+                            </tr>
+                        </thead>
+                        <tbody id="guzergahAnalizTablo">
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
         <div class="chart-grid">
-            <div class="chart-card chart-full-width"><h3>📅 Seçilen Aralık: Günlük Kâr/Zarar (Sütun Grafik)</h3><div class="chart-container-wrapper"><canvas id="gunlukSutunGrafik"></canvas></div></div>
+            <div class="chart-card chart-full-width">
+                <h3>📅 Seçilen Aralık: Günlük Kâr/Zarar (Sütun Grafik)</h3>
+                <div class="chart-container-wrapper">
+                    <canvas id="gunlukSutunGrafik"></canvas>
+                </div>
+            </div>
         </div>
 
         <div class="chart-grid">
-            <div class="chart-card chart-full-width"><h3>📅 Aylık Getiri Eğrisi (Net Kâr/Zarar)</h3><div class="chart-container-wrapper"><canvas id="aylikGrafik"></canvas></div></div>
+            <div class="chart-card chart-full-width">
+                <h3>📅 Aylık Getiri Eğrisi (Net Kâr/Zarar)</h3>
+                <div class="chart-container-wrapper">
+                    <canvas id="aylikGrafik"></canvas>
+                </div>
+            </div>
         </div>
 
         <div class="card">
@@ -426,7 +531,23 @@
                 <table class="detay-tablo">
                     <thead>
                         <tr>
-                            <th>Sefer Tarihi</th><th>İlk Giriş</th><th>Son Giriş</th><th>Güzergah</th><th>Hasılat</th><th>KM</th><th>Mazot</th><th>Sıvı Bakım</th><th>Tamir</th><th>Parça</th><th>Diğer</th><th>Şoför</th><th>Muhasebe/Sabit</th><th>Destek</th><th>Toplam Gider</th><th>Net</th><th>İşlem</th>
+                            <th>Sefer Tarihi</th>
+                            <th>İlk Giriş</th>
+                            <th>Son Giriş</th>
+                            <th>Güzergah</th>
+                            <th>Hasılat</th>
+                            <th>KM</th>
+                            <th>Mazot</th>
+                            <th>Sıvı Bakım</th>
+                            <th>Tamir</th>
+                            <th>Parça</th>
+                            <th>Diğer</th>
+                            <th>Şoför</th>
+                            <th>Muhasebe/Sabit</th>
+                            <th>Destek</th>
+                            <th>Toplam Gider</th>
+                            <th>Net</th>
+                            <th>İşlem</th>
                         </tr>
                     </thead>
                     <tbody id="tabloListesi">
@@ -437,76 +558,160 @@
         </div>
     </div>
 
+    <!-- AYARLAR SEKME EKRANI -->
     <div id="ayarlar" class="tab-content">
         <div class="card">
             <h2>⚙️ Sistem Ayarları (Araç Bakım & Takip)</h2>
             <div class="form-grid">
-                <div class="input-grup"><input type="date" id="ayarMuayeneTarihi" onchange="aracAyarlariniKaydet()"><label for="ayarMuayeneTarihi">Araç Muayenesinin Yapıldığı Tarih</label></div>
-                <div class="input-grup"><input type="date" id="ayarEgzozTarihi" onchange="aracAyarlariniKaydet()"><label for="ayarEgzozTarihi">Egzoz Emisyonun Yapıldığı Tarih</label></div>
-                <div class="input-grup"><input type="text" inputmode="numeric" id="ayarYagKm" class="para" placeholder="" onchange="aracAyarlariniKaydet()"><label for="ayarYagKm">Son Yağ Değişimi Yapılan KM</label></div>
-                <div class="input-grup"><input type="text" inputmode="numeric" id="ayarYagOmru" class="para" placeholder="" onchange="aracAyarlariniKaydet()"><label for="ayarYagOmru">Yağ Değişim Ömrü (Örn: 10.000 KM)</label></div>
-                <div class="input-grup"><input type="text" inputmode="numeric" id="ayarTrigerKm" class="para" placeholder="" onchange="aracAyarlariniKaydet()"><label for="ayarTrigerKm">Son Triger Seti Değişim KM</label></div>
-                <div class="input-grup"><input type="text" inputmode="numeric" id="ayarTrigerOmru" class="para" placeholder="" onchange="aracAyarlariniKaydet()"><label for="ayarTrigerOmru">Triger Seti Ömrü (Örn: 100.000 KM)</label></div>
+                <div class="input-grup">
+                    <input type="date" id="ayarMuayeneTarihi" onchange="aracAyarlariniKaydet()">
+                    <label for="ayarMuayeneTarihi">Araç Muayenesinin Yapıldığı Tarih</label>
+                </div>
+                <div class="input-grup">
+                    <input type="date" id="ayarEgzozTarihi" onchange="aracAyarlariniKaydet()">
+                    <label for="ayarEgzozTarihi">Egzoz Emisyonun Yapıldığı Tarih</label>
+                </div>
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="ayarYagKm" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
+                    <label for="ayarYagKm">Son Yağ Değişimi Yapılan KM</label>
+                </div>
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="ayarYagOmru" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
+                    <label for="ayarYagOmru">Yağ Değişim Ömrü (Örn: 10.000 KM)</label>
+                </div>
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="ayarTrigerKm" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
+                    <label for="ayarTrigerKm">Son Triger Seti Değişim KM</label>
+                </div>
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="ayarTrigerOmru" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
+                    <label for="ayarTrigerOmru">Triger Seti Ömrü (Örn: 100.000 KM)</label>
+                </div>
             </div>
             <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Girdiğiniz tarihlerin üzerine sistem otomatik olarak <b>+1 Yıl</b> ekler. Yağ ve Triger ömrü için belirlediğiniz KM, şoförün girdiği <b>en güncel tarihli</b> KM'den düşülerek hesaplanır.</p>
         </div>
 
+        <!-- ========== UKOME ========== -->
         <div class="card" style="border-left: 5px solid var(--success);">
             <h2>🏛️ Devlet Destekleri / UKOME Engelli Desteği</h2>
             <p style="font-size: 13px; color: #555; margin-bottom: 15px;">UKOME tarafından engelli taşımacılığı için verilen aylık desteği buradan ilgili aya dağıtabilirsiniz. Daha önce girilmiş bir destek varsa <b>güncelleyebilir</b> veya <b>silebilirsiniz</b>. Silme işleminde o aya ait tüm günlük dağıtımlar da temizlenir.</p>
             <div class="form-grid">
-                <div class="input-grup"><label for="ukomeYil" class="select-label">Yıl Seçin</label><select id="ukomeYil" onchange="guncelleUkomeBilgi()"></select></div>
+                <div class="input-grup">
+                    <label for="ukomeYil" class="select-label">Yıl Seçin</label>
+                    <select id="ukomeYil" onchange="guncelleUkomeBilgi()"></select>
+                </div>
                 <div class="input-grup">
                     <label for="ukomeAy" class="select-label">Ay Seçin</label>
                     <select id="ukomeAy" onchange="guncelleUkomeBilgi()">
-                        <option value="1">Ocak</option><option value="2">Şubat</option><option value="3">Mart</option><option value="4">Nisan</option><option value="5">Mayıs</option><option value="6">Haziran</option><option value="7">Temmuz</option><option value="8">Ağustos</option><option value="9">Eylül</option><option value="10">Ekim</option><option value="11">Kasım</option><option value="12">Aralık</option>
+                        <option value="1">Ocak</option>
+                        <option value="2">Şubat</option>
+                        <option value="3">Mart</option>
+                        <option value="4">Nisan</option>
+                        <option value="5">Mayıs</option>
+                        <option value="6">Haziran</option>
+                        <option value="7">Temmuz</option>
+                        <option value="8">Ağustos</option>
+                        <option value="9">Eylül</option>
+                        <option value="10">Ekim</option>
+                        <option value="11">Kasım</option>
+                        <option value="12">Aralık</option>
                     </select>
                 </div>
-                <div class="input-grup full"><input type="text" inputmode="numeric" id="ukomeTutar" class="para" placeholder="" onchange="guncelleUkomeBilgi()"><label for="ukomeTutar">Aylık Destek Tutarı (TL)</label></div>
+                <div class="input-grup full">
+                    <input type="text" inputmode="numeric" id="ukomeTutar" class="para" placeholder="" onchange="guncelleUkomeBilgi()">
+                    <label for="ukomeTutar">Aylık Destek Tutarı (TL)</label>
+                </div>
                 <button class="btn-ukome" id="ukomeDagitBtn" onclick="ukomeDagit()">Devlet Desteğini Bu Aya Dağıt</button>
                 <button class="btn-sil-fis" id="ukomeSilBtn" onclick="ukomeSil()">Bu Aya Ait Devlet Desteğini ve Dağıtımını İptal Et (Sil)</button>
             </div>
             <div id="ukomeMesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
         </div>
 
+        <!-- ========== GEÇİCİ VERGİ ========== -->
         <div class="card" style="border-left: 5px solid var(--warning);">
             <h2>📅 Geçici Vergi (3 Aylık Dönem)</h2>
             <p style="font-size: 13px; color: #555; margin-bottom: 15px;">Muhaseecinizin istediği 3 aylık Geçici Vergi tutarını buradan ilgili döneme dağıtabilirsiniz. Daha önce girilmiş bir vergi varsa <b>güncelleyebilir</b> veya <b>silebilirsiniz</b>. Silme işleminde o döneme ait tüm günlük dağıtımlar da temizlenir.</p>
             <div class="form-grid">
-                <div class="input-grup"><label for="geciciVergiYil" class="select-label">Yıl Seçin</label><select id="geciciVergiYil" onchange="guncelleGeciciVergiBilgi()"></select></div>
+                <div class="input-grup">
+                    <label for="geciciVergiYil" class="select-label">Yıl Seçin</label>
+                    <select id="geciciVergiYil" onchange="guncelleGeciciVergiBilgi()"></select>
+                </div>
                 <div class="input-grup">
                     <label for="geciciVergiDonem" class="select-label">Dönem Seçin</label>
                     <select id="geciciVergiDonem" onchange="guncelleGeciciVergiBilgi()">
-                        <option value="1">1. Dönem (Ocak - Şubat - Mart)</option><option value="2">2. Dönem (Nisan - Mayıs - Haziran)</option><option value="3">3. Dönem (Temmuz - Ağustos - Eylül)</option><option value="4">4. Dönem (Ekim - Kasım - Aralık)</option>
+                        <option value="1">1. Dönem (Ocak - Şubat - Mart)</option>
+                        <option value="2">2. Dönem (Nisan - Mayıs - Haziran)</option>
+                        <option value="3">3. Dönem (Temmuz - Ağustos - Eylül)</option>
+                        <option value="4">4. Dönem (Ekim - Kasım - Aralık)</option>
                     </select>
                 </div>
-                <div class="input-grup full"><input type="text" inputmode="numeric" id="geciciVergiTutar" class="para" placeholder="" onchange="guncelleGeciciVergiBilgi()"><label for="geciciVergiTutar">Geçici Vergi Tutarı (TL)</label></div>
+                <div class="input-grup full">
+                    <input type="text" inputmode="numeric" id="geciciVergiTutar" class="para" placeholder="" onchange="guncelleGeciciVergiBilgi()">
+                    <label for="geciciVergiTutar">Geçici Vergi Tutarı (TL)</label>
+                </div>
                 <button class="btn-ukome" style="background: var(--warning);" id="geciciVergiDagitBtn" onclick="geciciVergiDagit()">Geçici Vergiyi Döneme Dağıt</button>
                 <button class="btn-sil-fis" id="geciciVergiSilBtn" onclick="geciciVergiSil()">Bu Döneme Ait Geçici Vergiyi ve Dağıtımını İptal Et (Sil)</button>
             </div>
             <div id="geciciVergiMesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
         </div>
 
+        <!-- ========== SABİT GİDER FİŞİ ========== -->
         <div class="card">
             <h2>🧾 Muhasebe / Sabit Gider Fişi Girişi</h2>
             <div class="form-grid">
                 <input type="hidden" id="sabitGiderDocId" value="">
-                <div class="input-grup"><input type="date" id="sabitGiderTarih" onchange="sabitGiderTarihiDegisti()"><label for="sabitGiderTarih">Fişin Kesim Tarihi (Arşiv)</label></div>
+                
+                <div class="input-grup">
+                    <input type="date" id="sabitGiderTarih" onchange="sabitGiderTarihiDegisti()">
+                    <label for="sabitGiderTarih">Fişin Kesim Tarihi (Arşiv)</label>
+                </div>
+                
                 <div class="input-grup">
                     <label class="select-label" style="color:var(--purple);">Dağıtılacak Dönem (Otomatik)</label>
                     <div class="hedef-ay-kutu" id="hedefAyGosterge">Seçilmedi...</div>
                 </div>
-                <div class="input-grup"><input type="text" inputmode="numeric" id="pesinVergi" class="para" placeholder="" onchange="guncelleToplamSabit()"><label for="pesinVergi">Peşin Vergi (TL)</label></div>
-                <div class="input-grup"><input type="text" inputmode="numeric" id="stopaj" class="para" placeholder="" onchange="guncelleToplamSabit()"><label for="stopaj">Stopaj (TL)</label></div>
-                <div class="input-grup"><input type="text" inputmode="numeric" id="kdv" class="para" placeholder="" onchange="guncelleToplamSabit()"><label for="kdv">K.D.V. (TL)</label></div>
-                <div class="input-grup"><input type="text" inputmode="numeric" id="gelirVergisi" class="para" placeholder="" onchange="guncelleToplamSabit()"><label for="gelirVergisi">Gelir Vergisi (TL)</label></div>
-                <div class="input-grup"><input type="text" inputmode="numeric" id="bagKur" class="para" placeholder="" onchange="guncelleToplamSabit()"><label for="bagKur">Bağ-Kur (TL)</label></div>
-                <div class="input-grup"><input type="text" inputmode="numeric" id="sigorta" class="para" placeholder="" onchange="guncelleToplamSabit()"><label for="sigorta">Sigorta (TL)</label></div>
-                <div class="input-grup"><input type="text" inputmode="numeric" id="matbaaNoter" class="para" placeholder="" onchange="guncelleToplamSabit()"><label for="matbaaNoter">Matbaa / Noter (TL)</label></div>
-                <div class="input-grup"><input type="text" inputmode="numeric" id="muhasebe" class="para" placeholder="" onchange="guncelleToplamSabit()"><label for="muhasebe">Muhasebe (TL)</label></div>
-                <div class="input-grup full"><input type="text" inputmode="numeric" id="sabitDigerGider" class="para" placeholder="" onchange="guncelleToplamSabit()"><label for="sabitDigerGider">Diğer Giderler (Trafik Cezası vs.) TL</label></div>
+
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="pesinVergi" class="para" placeholder="" onchange="guncelleToplamSabit()">
+                    <label for="pesinVergi">Peşin Vergi (TL)</label>
+                </div>
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="stopaj" class="para" placeholder="" onchange="guncelleToplamSabit()">
+                    <label for="stopaj">Stopaj (TL)</label>
+                </div>
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="kdv" class="para" placeholder="" onchange="guncelleToplamSabit()">
+                    <label for="kdv">K.D.V. (TL)</label>
+                </div>
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="gelirVergisi" class="para" placeholder="" onchange="guncelleToplamSabit()">
+                    <label for="gelirVergisi">Gelir Vergisi (TL)</label>
+                </div>
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="bagKur" class="para" placeholder="" onchange="guncelleToplamSabit()">
+                    <label for="bagKur">Bağ-Kur (TL)</label>
+                </div>
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="sigorta" class="para" placeholder="" onchange="guncelleToplamSabit()">
+                    <label for="sigorta">Sigorta (TL)</label>
+                </div>
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="matbaaNoter" class="para" placeholder="" onchange="guncelleToplamSabit()">
+                    <label for="matbaaNoter">Matbaa / Noter (TL)</label>
+                </div>
+                <div class="input-grup">
+                    <input type="text" inputmode="numeric" id="muhasebe" class="para" placeholder="" onchange="guncelleToplamSabit()">
+                    <label for="muhasebe">Muhasebe (TL)</label>
+                </div>
+                <div class="input-grup full">
+                    <input type="text" inputmode="numeric" id="sabitDigerGider" class="para" placeholder="" onchange="guncelleToplamSabit()">
+                    <label for="sabitDigerGider">Diğer Giderler (Trafik Cezası vs.) TL</label>
+                </div>
                 
-                <div class="toplam-sabit"><span>Toplam Aylık Sabit Gider:</span><strong id="toplamAylikSabit">0 TL</strong></div>
+                <div class="toplam-sabit">
+                    <span>Toplam Aylık Sabit Gider:</span>
+                    <strong id="toplamAylikSabit">0 TL</strong>
+                </div>
                 <button class="btn-dagit" id="sabitGiderKaydetBtn" onclick="sabitGiderleriDagit()">Sabit Giderleri Seçilen Aya Dağıt</button>
                 <button class="btn-sil-fis" id="sabitGiderSilBtn" onclick="sabitGiderFisiSil()">Bu Aya Ait Fişi ve Dağıtımını İptal Et (Sil)</button>
             </div>
@@ -546,16 +751,9 @@
     function formuTariheGoreDoldur(secilenTarih) {
         if (!secilenTarih) return;
 
-        // ŞOFÖR İÇİN SADECE BUGÜN VE DÜN İÇİN OTOMATİK DOLDURMA
         if (!isYonetici) {
-            const bugun = new Date();
-            const dun = new Date();
-            dun.setDate(dun.getDate() - 1);
-            
-            const bugunStr = formatTarih(bugun);
-            const dunStr = formatTarih(dun);
-
-            if (secilenTarih !== bugunStr && secilenTarih !== dunStr) {
+            const bugunStr = formatTarih(new Date());
+            if (secilenTarih !== bugunStr) {
                 document.getElementById('guzergah').value = "";
                 document.getElementById('hasilat').value = "";
                 document.getElementById('km').value = "";
@@ -614,7 +812,7 @@
         bugun.setHours(23, 59, 59, 999);
 
         const enEski = new Date(bugun);
-        enEski.setDate(enEski.getDate() - 1); // Sadece BUGÜN ve DÜN
+        enEski.setDate(enEski.getDate() - 2);
 
         const inputEl = document.getElementById('tarih');
         
@@ -915,18 +1113,18 @@
         const secilenTarih = document.getElementById('tarih').value;
         if(!secilenTarih) { alert("Lütfen bir tarih seçin!"); return; }
 
-        // Şoförün 2 günlük kısıtlaması
         if (!isYonetici) {
             const bugunD = new Date();
             bugunD.setHours(0, 0, 0, 0);
+        
             const enEskiIzinli = new Date(bugunD);
-            enEskiIzinli.setDate(enEskiIzinli.getDate() - 1); // Sadece dün ve bugün
-            
+            enEskiIzinli.setDate(enEskiIzinli.getDate() - 2);
+        
             const secilenTarihObj = new Date(secilenTarih);
             secilenTarihObj.setHours(0, 0, 0, 0);
-            
+        
             if (secilenTarihObj > bugunD || secilenTarihObj < enEskiIzinli) {
-                alert("⚠️ Şoför olarak sadece bugün ve dün için veri girebilirsiniz.");
+                alert("⚠️ Şoför olarak sadece bugün ve geriye dönük 2 gün için veri girebilirsiniz.");
                 return;
             }
         }
@@ -946,85 +1144,75 @@
         const herhangiBirVeriVar =
             hasilatDeger > 0 || kmDeger > 0 || mazotDeger > 0 ||
             siviBakimDeger > 0 || tamirDeger > 0 || parcaDeger > 0 ||
-            digerDeger > 0 || soforDeger > 0 || secilenGuzergah !== "";
+            digerDeger > 0 || soforDeger > 0;
 
-        // ========================================================
-        // 1. KURAL: TÜM VERİLER SİLİNDİYSE (FORM TAMAMEN BOŞSA)
-        // ========================================================
-        if (!herhangiBirVeriVar) {
-            if (ayniTarihliKayit) {
-                const onay = confirm("⚠️ DİKKAT: Formdaki tüm verileri sildiniz.\n\nBu tarihe ait kaydın tamamen SİLİNMESİNİ onaylıyor musunuz?");
-                if (onay) {
-                    try {
-                        await window.deleteDoc(window.doc(window.db, "kayitlar", ayniTarihliKayit.id));
-                        const mesajEl = document.getElementById('mesaj');
-                        mesajEl.style.color = "green";
-                        mesajEl.innerText = "✅ Bu güne ait kayıt tamamen silindi!";
-                        
-                        document.getElementById('hasilat').value = ''; document.getElementById('km').value = '';
-                        document.getElementById('mazotTL').value = ''; document.getElementById('siviBakim').value = '';
-                        document.getElementById('tamir').value = ''; document.getElementById('parca').value = '';
-                        document.getElementById('diger').value = ''; document.getElementById('gunlukSoforUcret').value = '';
-                        document.getElementById('guzergah').value = '';
-                        
-                        setTimeout(() => { mesajEl.innerText = ""; }, 4000);
-                    } catch (e) {
-                        console.error(e); alert("Silme sırasında hata oluştu!");
-                    }
-                }
-            } else {
-                alert("⚠️ Hiçbir veri girmediniz. Kaydetmek için en az bir kazanç veya gider tutarı giriniz.");
-            }
+        if (!herhangiBirVeriVar && !ayniTarihliKayit) {
+            alert("⚠️ Hiçbir veri girmediniz. Kaydetmek için en az bir kazanç veya gider tutarı giriniz.");
             return;
         }
 
-        // ========================================================
-        // 2. KURAL: SİLME KOŞUL KONTROLLERİ (Kısmi Silmeler İçin)
-        // ========================================================
-        if (ayniTarihliKayit) {
-            if (hasilatDeger === 0 || kmDeger === 0 || soforDeger === 0 || secilenGuzergah === "") {
-                alert("⚠️ HATA: Kazanç, KM, Güzergah ve Şoför Ücreti alanları silinemez (sadece düzeltilebilir). Lütfen bu alanları doldurun.");
-                return;
-            }
-            
-            const eskiSiviBakim = ayniTarihliKayit.siviBakim || 0;
-            if (eskiSiviBakim > 0 && siviBakimDeger === 0) {
-                alert("⚠️ HATA: Daha önce Sıvı Bakım girildiği için bu alanı tek başına silemezsiniz. Ancak değerini güncelleyebilirsiniz.");
-                return;
-            }
-        } else {
-            if (hasilatDeger > 0) {
-                if (!secilenGuzergah) { alert("⚠️ Günlük Kazanç girdiniz. Lütfen Güzergah seçin!"); return; }
-                if (kmDeger === 0) { alert("⚠️ Günlük Kazanç girdiniz. Lütfen Güncel KM'yi giriniz!"); return; }
-                if (soforDeger === 0) { alert("⚠️ Günlük Kazanç girdiniz. Lütfen Günlük Şoför Ücreti'ni giriniz!"); return; }
-            }
-            if (siviBakimDeger > 0 && kmDeger === 0) {
-                alert("⚠️ Sıvı Bakım tutarı girdiniz. Lütfen Güncel KM'yi de giriniz!"); return;
-            }
-        }
-
-        // KM Mantık Kontrolleri
         if (kmDeger > 0) {
-            const oncekiKayitlar = kayitlar.filter(k => k.tarih && k.km > 0 && (!ayniTarihliKayit || k.id !== ayniTarihliKayit.id) && new Date(k.tarih) < new Date(secilenTarih));
+            const oncekiKayitlar = kayitlar.filter(k => {
+                if (!k.tarih || !k.km || k.km <= 0) return false;
+                if (ayniTarihliKayit && k.id === ayniTarihliKayit.id) return false;
+                return new Date(k.tarih) < new Date(secilenTarih);
+            });
+
             if (oncekiKayitlar.length > 0) {
                 oncekiKayitlar.sort((a, b) => new Date(b.tarih) - new Date(a.tarih));
-                if (kmDeger < oncekiKayitlar[0].km) {
-                    alert(`⚠️ HATA: Girdiğiniz KM önceki kayıttan (${oncekiKayitlar[0].km}) küçük olamaz!`);
+                const oncekiKm = oncekiKayitlar[0].km;
+                const oncekiTarih = oncekiKayitlar[0].tarih;
+                if (kmDeger < oncekiKm) {
+                    alert(`⚠️ HATA: Girdiğiniz KM (${kmDeger.toLocaleString('tr-TR')}) önceki kayıttan küçük olamaz!\n\nÖnceki Kayıt: ${oncekiTarih.split('-').reverse().join('.')} → ${oncekiKm.toLocaleString('tr-TR')} KM\nGirdiğiniz: ${kmDeger.toLocaleString('tr-TR')} KM\n\nAraç kilometresi geriye gidemez.`);
+                    document.getElementById('km').focus();
                     return;
                 }
             }
-            const sonrakiKayitlar = kayitlar.filter(k => k.tarih && k.km > 0 && (!ayniTarihliKayit || k.id !== ayniTarihliKayit.id) && new Date(k.tarih) > new Date(secilenTarih));
+
+            const sonrakiKayitlar = kayitlar.filter(k => {
+                if (!k.tarih || !k.km || k.km <= 0) return false;
+                if (ayniTarihliKayit && k.id === ayniTarihliKayit.id) return false;
+                return new Date(k.tarih) > new Date(secilenTarih);
+            });
+
             if (sonrakiKayitlar.length > 0) {
                 sonrakiKayitlar.sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
-                if (kmDeger > sonrakiKayitlar[0].km) {
-                    alert(`⚠️ HATA: Girdiğiniz KM sonraki kayıttan (${sonrakiKayitlar[0].km}) büyük olamaz!`);
+                const sonrakiKm = sonrakiKayitlar[0].km;
+                const sonrakiTarih = sonrakiKayitlar[0].tarih;
+                if (kmDeger > sonrakiKm) {
+                    alert(`⚠️ HATA: Girdiğiniz KM (${kmDeger.toLocaleString('tr-TR')}) sonraki kayıttan büyük olamaz!\n\nSonraki Kayıt: ${sonrakiTarih.split('-').reverse().join('.')} → ${sonrakiKm.toLocaleString('tr-TR')} KM\nGirdiğiniz: ${kmDeger.toLocaleString('tr-TR')} KM\n\nAraç kilometresi sonraki kayıttan büyük olamaz.`);
+                    document.getElementById('km').focus();
                     return;
                 }
             }
         }
 
+        const efektifKm = kmDeger > 0 ? kmDeger : (ayniTarihliKayit ? (ayniTarihliKayit.km || 0) : 0);
+        const efektifSofor = soforDeger > 0 ? soforDeger : (ayniTarihliKayit ? (ayniTarihliKayit.gunlukSoforUcret || 0) : 0);
+        const efektifGuzergah = secilenGuzergah || (ayniTarihliKayit ? (ayniTarihliKayit.guzergah || "") : "");
+
+        if (siviBakimDeger > 0 && efektifKm === 0) {
+            alert("⚠️ DİKKAT: Sıvı Bakım tutarı girdiniz. Lütfen Güncel KM'yi de giriniz!");
+            document.getElementById('km').focus(); return; 
+        }
+
+        if (hasilatDeger > 0) {
+            if (!efektifGuzergah) {
+                alert("⚠️ Günlük Kazanç girdiniz. Lütfen Güzergah seçin!");
+                document.getElementById('guzergah').focus(); return;
+            }
+            if (efektifKm === 0) {
+                alert("⚠️ Günlük Kazanç girdiniz. Lütfen Güncel KM'yi giriniz!");
+                document.getElementById('km').focus(); return;
+            }
+            if (efektifSofor === 0) {
+                alert("⚠️ Günlük Kazanç girdiniz. Lütfen Günlük Şoför Ücreti'ni giriniz!");
+                document.getElementById('gunlukSoforUcret').focus(); return;
+            }
+        }
+
         if (ayniTarihliKayit) {
-            const onay = confirm("⚠️ DİKKAT: " + secilenTarih.split('-').reverse().join('.') + " tarihinde zaten bir kayıt var!\n\nGüncelleme yapılacaktır. Onaylıyor musunuz?");
+            const onay = confirm("⚠️ DİKKAT: " + secilenTarih.split('-').reverse().join('.') + " tarihinde zaten bir kayıt var!\n\nSadece DOLDURDUĞUNUZ kutular güncellenecek, BOŞ bıraktığınız kutular eski haliyle kalacaktır. Onaylıyor musunuz?");
             if (!onay) return; 
         }
 
@@ -1033,64 +1221,106 @@
         btn.innerText = "Buluta Kaydediliyor...";
         btn.disabled = true;
 
+        const yeniDegerler = {
+            guzergah: secilenGuzergah || null,
+            hasilat: document.getElementById('hasilat').value !== "" ? formatiCoz(document.getElementById('hasilat').value) : null,
+            km: document.getElementById('km').value !== "" ? formatiCoz(document.getElementById('km').value) : null,
+            mazotTL: document.getElementById('mazotTL').value !== "" ? formatiCoz(document.getElementById('mazotTL').value) : null,
+            siviBakim: document.getElementById('siviBakim').value !== "" ? formatiCoz(document.getElementById('siviBakim').value) : null,
+            tamir: document.getElementById('tamir').value !== "" ? formatiCoz(document.getElementById('tamir').value) : null,
+            parca: document.getElementById('parca').value !== "" ? formatiCoz(document.getElementById('parca').value) : null,
+            diger: document.getElementById('diger').value !== "" ? formatiCoz(document.getElementById('diger').value) : null,
+            gunlukSoforUcret: document.getElementById('gunlukSoforUcret').value !== "" ? formatiCoz(document.getElementById('gunlukSoforUcret').value) : null,
+        };
+
         let kayit = {
             tarih: secilenTarih,
             zaman: ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now(),
             kayitSaati: Date.now(),
             muhasebeKalemleri: ayniTarihliKayit ? (ayniTarihliKayit.muhasebeKalemleri || {}) : {},
             sabitGiderPayi: ayniTarihliKayit ? (ayniTarihliKayit.sabitGiderPayi || 0) : 0,
-            ukomeGeliri: ayniTarihliKayit ? (ayniTarihliKayit.ukomeGeliri || 0) : 0,
-            
-            guzergah: secilenGuzergah,
-            hasilat: hasilatDeger,
-            km: kmDeger,
-            gunlukSoforUcret: soforDeger,
-            
-            mazotTL: mazotDeger,
-            siviBakim: siviBakimDeger,
-            tamir: tamirDeger,
-            parca: parcaDeger,
-            diger: digerDeger
+            ukomeGeliri: ayniTarihliKayit ? (ayniTarihliKayit.ukomeGeliri || 0) : 0
         };
+
+        const alanlar = ['guzergah', 'hasilat', 'km', 'mazotTL', 'siviBakim', 'tamir', 'parca', 'diger', 'gunlukSoforUcret'];
+        alanlar.forEach(alan => {
+            if (yeniDegerler[alan] !== null) { kayit[alan] = yeniDegerler[alan]; }
+            else if (ayniTarihliKayit) { kayit[alan] = ayniTarihliKayit[alan] || 0; }
+            else { kayit[alan] = (alan === 'guzergah') ? "Belirtilmedi" : 0; }
+        });
 
         const [yilStr, ayStr] = secilenTarih.split('-');
         const ayId = `${yilStr}_${parseInt(ayStr)}`;
         
         try {
             const fisDoc = await window.getDoc(window.doc(window.db, "muhasebeFisleri", ayId));
-            if (fisDoc.exists() && (!ayniTarihliKayit || !ayniTarihliKayit.muhasebeKalemleri || Object.keys(ayniTarihliKayit.muhasebeKalemleri).length === 0)) {
+            if (fisDoc.exists()) {
                 const fis = fisDoc.data();
-                const oAyinKayitlari = kayitlar.filter(k => k.tarih && new Date(k.tarih).getFullYear() === parseInt(yilStr) && (new Date(k.tarih).getMonth() + 1) === parseInt(ayStr) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : ''));
-                const gunSayisi = oAyinKayitlari.length + 1;
-                let toplamPay = 0;
-                kayit.muhasebeKalemleri = {};
-                ['pesinVergi', 'stopaj', 'kdv', 'gelirVergisi', 'bagKur', 'sigorta', 'matbaaNoter', 'muhasebe', 'sabitDigerGider'].forEach(kalem => {
-                    const tutar = fis[kalem] || 0;
-                    if (tutar > 0) { kayit.muhasebeKalemleri[kalem] = tutar / gunSayisi; toplamPay += tutar / gunSayisi; }
+                const oAyinKayitlari = kayitlar.filter(k => {
+                    if(!k.tarih) return false;
+                    const kTarihObj = new Date(k.tarih);
+                    return kTarihObj.getFullYear() === parseInt(yilStr) && (kTarihObj.getMonth() + 1) === parseInt(ayStr) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : '');
                 });
-                kayit.sabitGiderPayi = toplamPay;
+                const gunSayisi = oAyinKayitlari.length + 1;
+
+                if (!ayniTarihliKayit || !ayniTarihliKayit.muhasebeKalemleri || Object.keys(ayniTarihliKayit.muhasebeKalemleri).length === 0) {
+                    let toplamPay = 0;
+                    kayit.muhasebeKalemleri = {};
+                    const kalemler = ['pesinVergi', 'stopaj', 'kdv', 'gelirVergisi', 'bagKur', 'sigorta', 'matbaaNoter', 'muhasebe', 'sabitDigerGider'];
+                    kalemler.forEach(kalem => {
+                        const tutar = fis[kalem] || 0;
+                        const gunlukTutar = tutar / gunSayisi;
+                        if (gunlukTutar > 0) {
+                            kayit.muhasebeKalemleri[kalem] = gunlukTutar;
+                            toplamPay += gunlukTutar;
+                        }
+                    });
+                    kayit.sabitGiderPayi = toplamPay;
+                }
             }
 
             const ukomeDoc = await window.getDoc(window.doc(window.db, "ukomeDestekleri", ayId));
-            if (ukomeDoc.exists() && (!ayniTarihliKayit || !ayniTarihliKayit.ukomeGeliri || ayniTarihliKayit.ukomeGeliri === 0)) {
+            if (ukomeDoc.exists()) {
                 const ukome = ukomeDoc.data();
-                const oAyinKayitlari = kayitlar.filter(k => k.tarih && new Date(k.tarih).getFullYear() === parseInt(yilStr) && (new Date(k.tarih).getMonth() + 1) === parseInt(ayStr) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : ''));
-                kayit.ukomeGeliri = ukome.toplam / (oAyinKayitlari.length + 1);
+                const oAyinKayitlari = kayitlar.filter(k => {
+                    if(!k.tarih) return false;
+                    const kTarihObj = new Date(k.tarih);
+                    return kTarihObj.getFullYear() === parseInt(yilStr) && (kTarihObj.getMonth() + 1) === parseInt(ayStr) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : '');
+                });
+                const gunSayisi = oAyinKayitlari.length + 1;
+                
+                if (!ayniTarihliKayit || !ayniTarihliKayit.ukomeGeliri || ayniTarihliKayit.ukomeGeliri === 0) {
+                    kayit.ukomeGeliri = ukome.toplam / gunSayisi;
+                }
             }
 
             const ayInt = parseInt(ayStr);
             const donem = ayInt <= 3 ? 1 : (ayInt <= 6 ? 2 : (ayInt <= 9 ? 3 : 4));
             const gvDocId = `${yilStr}_D${donem}`;
             const gvDoc = await window.getDoc(window.doc(window.db, "geciciVergiler", gvDocId));
-            if (gvDoc.exists() && (!ayniTarihliKayit || !ayniTarihliKayit.muhasebeKalemleri || !ayniTarihliKayit.muhasebeKalemleri.geciciVergi)) {
+            if (gvDoc.exists()) {
                 const gv = gvDoc.data();
-                let donemAylar = donem === 1 ? [1,2,3] : donem === 2 ? [4,5,6] : donem === 3 ? [7,8,9] : [10,11,12];
-                const oDonemKayitlari = kayitlar.filter(k => k.tarih && new Date(k.tarih).getFullYear() === parseInt(yilStr) && donemAylar.includes(new Date(k.tarih).getMonth() + 1) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : ''));
-                const gunlukVergi = gv.toplam / (oDonemKayitlari.length + 1);
-                if(!kayit.muhasebeKalemleri) kayit.muhasebeKalemleri = {};
-                kayit.muhasebeKalemleri.geciciVergi = gunlukVergi;
-                kayit.sabitGiderPayi = (kayit.sabitGiderPayi || 0) + gunlukVergi;
+                let donemAylar = [];
+                if (donem === 1) donemAylar = [1, 2, 3];
+                else if (donem === 2) donemAylar = [4, 5, 6];
+                else if (donem === 3) donemAylar = [7, 8, 9];
+                else if (donem === 4) donemAylar = [10, 11, 12];
+
+                const oDonemKayitlari = kayitlar.filter(k => {
+                    if(!k.tarih) return false;
+                    const kTarihObj = new Date(k.tarih);
+                    return kTarihObj.getFullYear() === parseInt(yilStr) && donemAylar.includes(kTarihObj.getMonth() + 1) && k.id !== (ayniTarihliKayit ? ayniTarihliKayit.id : '');
+                });
+                const donemGunSayisi = oDonemKayitlari.length + 1;
+
+                if (!ayniTarihliKayit || !ayniTarihliKayit.muhasebeKalemleri || !ayniTarihliKayit.muhasebeKalemleri.geciciVergi) {
+                    const gunlukVergi = gv.toplam / donemGunSayisi;
+                    if(!kayit.muhasebeKalemleri) kayit.muhasebeKalemleri = {};
+                    kayit.muhasebeKalemleri.geciciVergi = gunlukVergi;
+                    kayit.sabitGiderPayi = (kayit.sabitGiderPayi || 0) + gunlukVergi;
+                }
             }
+
         } catch(e) { console.log("Kontrol hatası:", e); }
 
         kayit.toplamGider = kayit.mazotTL + kayit.siviBakim + kayit.tamir + kayit.parca + kayit.diger + kayit.gunlukSoforUcret + kayit.sabitGiderPayi;
@@ -1120,15 +1350,14 @@
             document.getElementById('diger').value = ''; document.getElementById('gunlukSoforUcret').value = '';
             document.getElementById('guzergah').value = '';
 
-            if (fpInstance) { fpInstance.setDate(new Date()); }
-            setTimeout(() => { mesajEl.innerText = ""; }, 12000);
+            if (fpInstance) {
+                fpInstance.setDate(new Date()); 
+            }
             
+            setTimeout(() => { mesajEl.innerText = ""; }, 12000);
         } catch (e) {
             console.error(e); mesajEl.style.color = "red"; mesajEl.innerText = "❌ Hata oluştu!";
-        } finally { 
-            btn.innerText = "Günü Kaydet (Buluta Gönder)"; 
-            btn.disabled = false; 
-        }
+        } finally { btn.innerText = "Günü Kaydet (Buluta Gönder)"; btn.disabled = false; }
     }
 
     window.dinleVeriler = function() {
@@ -1161,6 +1390,7 @@
             let dagitimGerekiyor = false;
             const batch = window.writeBatch(window.db);
 
+            // Fişler (Muhasebe/Sabit Gider)
             for (const kayit of kayitlar) {
                 if (!kayit.tarih) continue;
                 const kTarihObj = new Date(kayit.tarih);
@@ -1218,6 +1448,7 @@
                 }
             }
 
+            // UKOME (Devlet Destekleri)
             for (const kayit of kayitlar) {
                 if (!kayit.tarih) continue;
                 const kTarihObj = new Date(kayit.tarih);
@@ -1245,6 +1476,7 @@
                 }
             }
 
+            // Geçici Vergi
             for (const kayit of kayitlar) {
                 if (!kayit.tarih) continue;
                 const kTarihObj = new Date(kayit.tarih);
@@ -1304,10 +1536,13 @@
 
             if (dagitimGerekiyor) {
                 await batch.commit();
+                console.log("Otomatik dağıtım ve temizlik yapıldı.");
             }
         });
     }
 
+    // ========== UKOME FONKSİYONLARI ==========
+    
     async function guncelleUkomeBilgi() {
         const yil = document.getElementById('ukomeYil').value;
         const ay = document.getElementById('ukomeAy').value;
@@ -1453,6 +1688,8 @@
         }
     }
 
+    // ========== GEÇİCİ VERGİ FONKSİYONLARI ==========
+    
     async function guncelleGeciciVergiBilgi() {
         const yil = document.getElementById('geciciVergiYil').value;
         const donem = document.getElementById('geciciVergiDonem').value;
@@ -1639,6 +1876,8 @@
             alert("Silme işlemi sırasında hata oluştu!");
         }
     }
+
+    // ========== SABİT GİDER FİŞİ FONKSİYONLARI ==========
 
     function guncelleToplamSabit() {
         const toplam = 
@@ -2317,7 +2556,7 @@
             const bugun = new Date();
             bugun.setHours(23, 59, 59, 999);
             const enEski = new Date(bugun);
-            enEski.setDate(enEski.getDate() - 1); // Sadece dün ve bugün
+            enEski.setDate(enEski.getDate() - 2);
 
             const eskiTarihObj = new Date(eskiTarih);
             if (eskiTarihObj < enEski || eskiTarihObj > bugun) {
@@ -2327,7 +2566,7 @@
                     fpInstance.setDate(eskiTarih, false);
                 }
                 document.getElementById('tarih').disabled = true;
-                alert("ℹ️ Bu kayıt 2 günden daha eski bir tarihe ait olduğu için tarih değiştirilemez.\n\nDiğer alanları (hasılat, gider vb.) düzenleyebilirsiniz.\n\nKayıt Tarihi: " + eskiTarih.split('-').reverse().join('.'));
+                alert("ℹ️ Bu kayıt 3 günden daha eski bir tarihe ait olduğu için tarih değiştirilemez.\n\nDiğer alanları (hasılat, gider vb.) düzenleyebilirsiniz.\n\nKayıt Tarihi: " + eskiTarih.split('-').reverse().join('.'));
             } else {
                 document.getElementById('tarih').disabled = false;
                 if (fpInstance) {
@@ -2374,6 +2613,7 @@
     };
 </script>
 
+<!-- YENİ EKLENEN: Service Worker Kayıt Kodları -->
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
