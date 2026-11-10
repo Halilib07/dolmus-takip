@@ -812,7 +812,7 @@
         bugun.setHours(23, 59, 59, 999);
 
         const enEski = new Date(bugun);
-        enEski.setDate(enEski.getDate() - 2);
+        enEski.setDate(enEski.getDate() - 1);
 
         const inputEl = document.getElementById('tarih');
         
@@ -1118,7 +1118,7 @@
             bugunD.setHours(0, 0, 0, 0);
         
             const enEskiIzinli = new Date(bugunD);
-            enEskiIzinli.setDate(enEskiIzinli.getDate() - 2);
+            enEskiIzinli.setDate(enEskiIzinli.getDate() - 1);
         
             const secilenTarihObj = new Date(secilenTarih);
             secilenTarihObj.setHours(0, 0, 0, 0);
