@@ -1129,7 +1129,7 @@
         const anaAlanlarDolu = hasilatDeger > 0 || kmDeger > 0 || secilenGuzergah !== "" || soforDeger > 0;
         const bagimsizGiderVar = mazotDeger > 0 || siviBakimDeger > 0 || tamirDeger > 0 || parcaDeger > 0 || digerDeger > 0;
 
-        // 1. ANA ALANLAR ZORUNLULUK KONTROLÜ
+        // 1. KOŞUL: ANA ALANLAR ZORUNLULUK KONTROLÜ
         if (anaAlanlarDolu) {
             if (hasilatDeger === 0 || kmDeger === 0 || secilenGuzergah === "" || soforDeger === 0) {
                 alert("⚠️ HATA: Günlük Kazanç, Güncel KM, Güzergah ve Şoför Ücreti alanları birbirine bağlıdır.\n\nBunlardan birini doldurduysanız HEPSİNİ doldurmak zorundasınız. Eğer bu alanları silmek istiyorsanız 4'ünü birden silin.");
@@ -1137,7 +1137,14 @@
             }
         }
 
-        // 2. TAMAMEN SİLME VEYA BOŞ KAYIT KONTROLÜ
+        // 2. KOŞUL: SIVI BAKIM VE KM ZORUNLULUK KONTROLÜ
+        if (siviBakimDeger > 0 && kmDeger === 0) {
+            alert("⚠️ DİKKAT: Sıvı Bakım tutarı girdiniz. Lütfen Güncel KM'yi de giriniz!");
+            document.getElementById('km').focus(); 
+            return; 
+        }
+
+        // 3. KOŞUL: TAMAMEN SİLME VEYA BOŞ KAYIT KONTROLÜ
         if (!anaAlanlarDolu && !bagimsizGiderVar) {
             if (ayniTarihliKayit) {
                 const onay = confirm("⚠️ Formdaki tüm verileri sildiniz.\n\nBu güne ait kaydı sistemden TAMAMEN SİLMEK istiyor musunuz?");
