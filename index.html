@@ -52,18 +52,15 @@
     <style>
         :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; --info: #3498db; --purple: #8e44ad; }
         
-        /* ====================================================
-           1. KAYMAYI ÖNLEYEN VE ARKA PLANI AYARLAYAN KISIM
-           ==================================================== */
         html, body {
             height: 100%;
             margin: 0;
-            overflow: hidden; /* Giriş ekranındayken sayfanın esnemesini/kaymasını engeller */
+            overflow: hidden;
         }
 
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #1a252f; /* Resim yüklenene kadar koyu arka plan */
+            background-color: #1a252f;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -71,10 +68,9 @@
             box-sizing: border-box;
         }
         
-        /* Giriş yapıldıktan sonra arka planı normale döndür ve sayfa kaydırmasını aktif et */
         body.uygulama-acik {
             display: block !important;
-            overflow-y: auto !important; /* Paneller açıldığında aşağı kaydırmaya izin ver */
+            overflow-y: auto !important;
             background-color: var(--bg) !important;
             padding: 20px;
         }
@@ -85,32 +81,27 @@
         .header-alani h1 { color: var(--primary); margin: 0; padding: 0 60px; font-size: 24px; } 
         .cikis-btn { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; position: absolute; right: 0; top: 0; }
 
-        /* ====================================================
-           2. GİRİŞ EKRANI (RESİM VE CAM EFEKTİ)
-           ==================================================== */
         #loginEkrani { 
             max-width: 420px; 
             width: 100%;
-            max-height: 85vh; /* Ekrandan taşmayı önler */
+            max-height: 85vh;
             border-radius: 20px; 
             box-shadow: 0 10px 40px rgba(0,0,0,0.6); 
-            overflow: hidden; /* Köşelerin yuvarlak kalmasını sağlar */
+            overflow: hidden;
             position: relative; 
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* İçeriği en alta yaslar, resim yukarıda kalır */
-            background-color: #1a252f; /* Resim yüklenene kadar koyu arka plan */
+            justify-content: flex-end;
+            background-color: #1a252f;
         }
         
-        /* ARKADAKİ DOLMUŞ RESMİ */
         #loginEkrani .bg-resim {
             width: 100%;
-            height: 250px; /* Resmin yüksekliğini buradan ayarlayabilirsiniz */
-            object-fit: contain; /* BU ÇOK ÖNEMLİ: Aracın kesilmesini önler, tamamını gösterir */
+            height: 250px;
+            object-fit: contain;
             background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
         }
 
-        /* ŞİFRE GİRME ALANI (Buzlu Cam Efekti) */
         .login-icerik {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
@@ -127,9 +118,6 @@
         #loginEkrani button:hover { background: #1a252f; }
         #loginHata { color: var(--danger); font-weight: bold; margin-top: 15px; display: none; }
 
-        /* ====================================================
-           3. UYGULAMA İÇİ PANELLER (Giriş Yapıldıktan Sonra)
-           ==================================================== */
         #uygulamaEkrani { display: none; }
         
         .tabs { display: flex; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -276,10 +264,7 @@
 <body>
 <!-- GİRİŞ EKRANI BAŞLANGICI -->
 <div id="loginEkrani">
-    <!-- Resmi ekliyoruz ve sınıfını veriyoruz -->
     <img src="foto.jpg" alt="Dolmuş" class="bg-resim">
-    
-    <!-- Giriş Alanları -->
     <div class="login-icerik">
         <h2>🚐 Sisteme Giriş</h2>
         <input type="password" id="sifre" placeholder="Lütfen şifrenizi girin">
@@ -589,7 +574,6 @@
             <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Girdiğiniz tarihlerin üzerine sistem otomatik olarak <b>+1 Yıl</b> ekler. Yağ ve Triger ömrü için belirlediğiniz KM, şoförün girdiği <b>en güncel tarihli</b> KM'den düşülerek hesaplanır.</p>
         </div>
 
-        <!-- ========== UKOME ========== -->
         <div class="card" style="border-left: 5px solid var(--success);">
             <h2>🏛️ Devlet Destekleri / UKOME Engelli Desteği</h2>
             <p style="font-size: 13px; color: #555; margin-bottom: 15px;">UKOME tarafından engelli taşımacılığı için verilen aylık desteği buradan ilgili aya dağıtabilirsiniz. Daha önce girilmiş bir destek varsa <b>güncelleyebilir</b> veya <b>silebilirsiniz</b>. Silme işleminde o aya ait tüm günlük dağıtımlar da temizlenir.</p>
@@ -625,7 +609,6 @@
             <div id="ukomeMesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
         </div>
 
-        <!-- ========== GEÇİCİ VERGİ ========== -->
         <div class="card" style="border-left: 5px solid var(--warning);">
             <h2>📅 Geçici Vergi (3 Aylık Dönem)</h2>
             <p style="font-size: 13px; color: #555; margin-bottom: 15px;">Muhaseecinizin istediği 3 aylık Geçici Vergi tutarını buradan ilgili döneme dağıtabilirsiniz. Daha önce girilmiş bir vergi varsa <b>güncelleyebilir</b> veya <b>silebilirsiniz</b>. Silme işleminde o döneme ait tüm günlük dağıtımlar da temizlenir.</p>
@@ -653,7 +636,6 @@
             <div id="geciciVergiMesaj" style="text-align:center; margin-top:10px; font-weight:bold;"></div>
         </div>
 
-        <!-- ========== SABİT GİDER FİŞİ ========== -->
         <div class="card">
             <h2>🧾 Muhasebe / Sabit Gider Fişi Girişi</h2>
             <div class="form-grid">
@@ -755,7 +737,6 @@
             dunObj.setDate(dunObj.getDate() - 1);
             const dunStr = formatTarih(dunObj);
 
-            // Tarih BUGÜN veya DÜN değilse formu temizle
             if (secilenTarih !== bugunStr && secilenTarih !== dunStr) {
                 document.getElementById('guzergah').value = "";
                 document.getElementById('hasilat').value = "";
@@ -815,8 +796,7 @@
         bugun.setHours(23, 59, 59, 999);
 
         const enEski = new Date(bugun);
-        // Sadece DÜN ve BUGÜN seçilebilir (Geriye dönük 1 gün)
-        enEski.setDate(enEski.getDate() - 1);
+        enEski.setDate(enEski.getDate() - 1); // Bugün ve Dün
 
         const inputEl = document.getElementById('tarih');
         
@@ -1122,8 +1102,7 @@
             bugunD.setHours(0, 0, 0, 0);
         
             const enEskiIzinli = new Date(bugunD);
-            // Şoför sadece DÜN ve BUGÜN girebilir
-            enEskiIzinli.setDate(enEskiIzinli.getDate() - 1);
+            enEskiIzinli.setDate(enEskiIzinli.getDate() - 1); // Sadece bugün ve dün
         
             const secilenTarihObj = new Date(secilenTarih);
             secilenTarihObj.setHours(0, 0, 0, 0);
@@ -1146,13 +1125,37 @@
         const parcaDeger = formatiCoz(document.getElementById('parca').value);
         const digerDeger = formatiCoz(document.getElementById('diger').value);
 
-        const herhangiBirVeriVar =
-            hasilatDeger > 0 || kmDeger > 0 || mazotDeger > 0 ||
-            siviBakimDeger > 0 || tamirDeger > 0 || parcaDeger > 0 ||
-            digerDeger > 0 || soforDeger > 0;
+        // ANA ALANLAR (Zorunlu Grup): Kazanç, KM, Güzergah, Şoför Ücreti
+        const anaAlanlarDolu = hasilatDeger > 0 || kmDeger > 0 || secilenGuzergah !== "" || soforDeger > 0;
+        const bagimsizGiderVar = mazotDeger > 0 || siviBakimDeger > 0 || tamirDeger > 0 || parcaDeger > 0 || digerDeger > 0;
 
-        if (!herhangiBirVeriVar && !ayniTarihliKayit) {
-            alert("⚠️ Hiçbir veri girmediniz. Kaydetmek için en az bir kazanç veya gider tutarı giriniz.");
+        // 1. ANA ALANLAR ZORUNLULUK KONTROLÜ
+        if (anaAlanlarDolu) {
+            if (hasilatDeger === 0 || kmDeger === 0 || secilenGuzergah === "" || soforDeger === 0) {
+                alert("⚠️ HATA: Günlük Kazanç, Güncel KM, Güzergah ve Şoför Ücreti alanları birbirine bağlıdır.\n\nBunlardan birini doldurduysanız HEPSİNİ doldurmak zorundasınız. Eğer bu alanları silmek istiyorsanız 4'ünü birden silin.");
+                return;
+            }
+        }
+
+        // 2. TAMAMEN SİLME VEYA BOŞ KAYIT KONTROLÜ
+        if (!anaAlanlarDolu && !bagimsizGiderVar) {
+            if (ayniTarihliKayit) {
+                const onay = confirm("⚠️ Formdaki tüm verileri sildiniz.\n\nBu güne ait kaydı sistemden TAMAMEN SİLMEK istiyor musunuz?");
+                if (onay) {
+                    try {
+                        await window.deleteDoc(window.doc(window.db, "kayitlar", ayniTarihliKayit.id));
+                        const mesajEl = document.getElementById('mesaj');
+                        mesajEl.style.color = "green";
+                        mesajEl.innerText = "✅ Bu güne ait kayıt tamamen silindi.";
+                        setTimeout(() => { mesajEl.innerText = ""; }, 5000);
+                    } catch (e) {
+                        console.error(e);
+                        alert("Silme işlemi sırasında hata oluştu!");
+                    }
+                }
+            } else {
+                alert("⚠️ Hiçbir veri girmediniz. Kaydetmek için en az bir kazanç veya gider tutarı giriniz.");
+            }
             return;
         }
 
@@ -1192,32 +1195,8 @@
             }
         }
 
-        const efektifKm = kmDeger > 0 ? kmDeger : (ayniTarihliKayit ? (ayniTarihliKayit.km || 0) : 0);
-        const efektifSofor = soforDeger > 0 ? soforDeger : (ayniTarihliKayit ? (ayniTarihliKayit.gunlukSoforUcret || 0) : 0);
-        const efektifGuzergah = secilenGuzergah || (ayniTarihliKayit ? (ayniTarihliKayit.guzergah || "") : "");
-
-        if (siviBakimDeger > 0 && efektifKm === 0) {
-            alert("⚠️ DİKKAT: Sıvı Bakım tutarı girdiniz. Lütfen Güncel KM'yi de giriniz!");
-            document.getElementById('km').focus(); return; 
-        }
-
-        if (hasilatDeger > 0) {
-            if (!efektifGuzergah) {
-                alert("⚠️ Günlük Kazanç girdiniz. Lütfen Güzergah seçin!");
-                document.getElementById('guzergah').focus(); return;
-            }
-            if (efektifKm === 0) {
-                alert("⚠️ Günlük Kazanç girdiniz. Lütfen Güncel KM'yi giriniz!");
-                document.getElementById('km').focus(); return;
-            }
-            if (efektifSofor === 0) {
-                alert("⚠️ Günlük Kazanç girdiniz. Lütfen Günlük Şoför Ücreti'ni giriniz!");
-                document.getElementById('gunlukSoforUcret').focus(); return;
-            }
-        }
-
         if (ayniTarihliKayit) {
-            const onay = confirm("⚠️ DİKKAT: " + secilenTarih.split('-').reverse().join('.') + " tarihinde zaten bir kayıt var!\n\nSadece DOLDURDUĞUNUZ kutular güncellenecek, BOŞ bıraktığınız kutular eski haliyle kalacaktır. Onaylıyor musunuz?");
+            const onay = confirm("⚠️ DİKKAT: " + secilenTarih.split('-').reverse().join('.') + " tarihinde zaten bir kayıt var!\n\nMevcut kayıt formdaki bilgilerle güncellenecektir. (Boş bıraktığınız kutular varsa o bilgiler silinecektir). Onaylıyor musunuz?");
             if (!onay) return; 
         }
 
@@ -1226,33 +1205,23 @@
         btn.innerText = "Buluta Kaydediliyor...";
         btn.disabled = true;
 
-        const yeniDegerler = {
-            guzergah: secilenGuzergah || null,
-            hasilat: document.getElementById('hasilat').value !== "" ? formatiCoz(document.getElementById('hasilat').value) : null,
-            km: document.getElementById('km').value !== "" ? formatiCoz(document.getElementById('km').value) : null,
-            mazotTL: document.getElementById('mazotTL').value !== "" ? formatiCoz(document.getElementById('mazotTL').value) : null,
-            siviBakim: document.getElementById('siviBakim').value !== "" ? formatiCoz(document.getElementById('siviBakim').value) : null,
-            tamir: document.getElementById('tamir').value !== "" ? formatiCoz(document.getElementById('tamir').value) : null,
-            parca: document.getElementById('parca').value !== "" ? formatiCoz(document.getElementById('parca').value) : null,
-            diger: document.getElementById('diger').value !== "" ? formatiCoz(document.getElementById('diger').value) : null,
-            gunlukSoforUcret: document.getElementById('gunlukSoforUcret').value !== "" ? formatiCoz(document.getElementById('gunlukSoforUcret').value) : null,
-        };
-
         let kayit = {
             tarih: secilenTarih,
             zaman: ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now(),
             kayitSaati: Date.now(),
+            guzergah: secilenGuzergah || "",
+            hasilat: hasilatDeger,
+            km: kmDeger,
+            mazotTL: mazotDeger,
+            siviBakim: siviBakimDeger,
+            tamir: tamirDeger,
+            parca: parcaDeger,
+            diger: digerDeger,
+            gunlukSoforUcret: soforDeger,
             muhasebeKalemleri: ayniTarihliKayit ? (ayniTarihliKayit.muhasebeKalemleri || {}) : {},
             sabitGiderPayi: ayniTarihliKayit ? (ayniTarihliKayit.sabitGiderPayi || 0) : 0,
             ukomeGeliri: ayniTarihliKayit ? (ayniTarihliKayit.ukomeGeliri || 0) : 0
         };
-
-        const alanlar = ['guzergah', 'hasilat', 'km', 'mazotTL', 'siviBakim', 'tamir', 'parca', 'diger', 'gunlukSoforUcret'];
-        alanlar.forEach(alan => {
-            if (yeniDegerler[alan] !== null) { kayit[alan] = yeniDegerler[alan]; }
-            else if (ayniTarihliKayit) { kayit[alan] = ayniTarihliKayit[alan] || 0; }
-            else { kayit[alan] = (alan === 'guzergah') ? "Belirtilmedi" : 0; }
-        });
 
         const [yilStr, ayStr] = secilenTarih.split('-');
         const ayId = `${yilStr}_${parseInt(ayStr)}`;
@@ -2561,8 +2530,7 @@
             const bugun = new Date();
             bugun.setHours(23, 59, 59, 999);
             const enEski = new Date(bugun);
-            // Düzenlerken de sadece DÜN ve BUGÜN'e izin ver
-            enEski.setDate(enEski.getDate() - 1);
+            enEski.setDate(enEski.getDate() - 1); // Dün ve bugüne izin ver
 
             const eskiTarihObj = new Date(eskiTarih);
             if (eskiTarihObj < enEski || eskiTarihObj > bugun) {
