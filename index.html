@@ -821,7 +821,8 @@
                 const dateStr = formatTarih(dayElem.dateObj); 
                 const mevcutKayit = kayitlar.find(k => k.tarih === dateStr);
                 
-                if (mevcutKayit && (Number(mevcutKayit.mazotTL) > 0 || mevcutKayit.mazotAlimGunu)) {
+                // Sadece mazot alım günüyse VEYA (dağıtım yapılmamış normal mazot varsa) renklendir
+                if (mevcutKayit && (mevcutKayit.mazotAlimGunu || (Number(mevcutKayit.mazotTL) > 0 && !mevcutKayit.dagitimMazot))) {
                     dayElem.classList.add('mazotlu-gun');
                     let tutar = mevcutKayit.mazotAlimGunu ? (mevcutKayit.orijinalMazotTutari || 0) : mevcutKayit.mazotTL;
                     dayElem.title = `Mazot Gideri: ${Number(tutar).toLocaleString('tr-TR')} TL`;
@@ -1147,7 +1148,6 @@
 
         const gunSayisi = dagitilacakGunler.length;
         
-        // HATA DÜZELTME: Tam sayıya (TL) yuvarlayarak dağıt, kalan kuruşu asıl güne ekle
         const tamPay = Math.floor(toplamMazot / gunSayisi);
         const kalan = toplamMazot - (tamPay * gunSayisi);
         const asilGunPay = tamPay + kalan;
@@ -1175,7 +1175,8 @@
                 
                 batch.update(window.doc(window.db, "kayitlar", kayit.id), {
                     mazotTL: mevcutGunlukMazot + tamPay,
-                    toplamGider: mevcutToplamGider + tamPay
+                    toplamGider: mevcutToplamGider + tamPay,
+                    dagitimMazot: true // Bu güne dağıtım yapıldığını işaretle (takvimde renklenmemesi için)
                 });
             });
 
@@ -1319,6 +1320,7 @@
             mazotTL: mazotDeger,
             mazotAlimGunu: ayniTarihliKayit ? (ayniTarihliKayit.mazotAlimGunu || false) : false,
             orijinalMazotTutari: ayniTarihliKayit ? (ayniTarihliKayit.orijinalMazotTutari || 0) : 0,
+            dagitimMazot: ayniTarihliKayit ? (ayniTarihliKayit.dagitimMazot || false) : false, // Dağıtım flag'ini koru
             siviBakim: siviBakimDeger,
             tamir: tamirDeger,
             parca: parcaDeger,
