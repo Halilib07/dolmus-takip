@@ -224,6 +224,22 @@
 
         .flatpickr-input[readonly] { background: white !important; cursor: pointer; }
 
+        /* Mazot gideri olan günler için özel renk (Sadece Yönetici İçin) */
+        .flatpickr-day.mazotlu-gun {
+            background-color: #ffeaa7 !important; /* Açık sarı/turuncu */
+            border-color: #fdcb6e !important;
+            color: #d63031 !important; /* Kırmızımsı metin */
+            font-weight: bold;
+        }
+        .flatpickr-day.mazotlu-gun:hover {
+            background-color: #fdcb6e !important;
+        }
+        .flatpickr-day.mazotlu-gun.selected {
+            background-color: #e17055 !important;
+            border-color: #e17055 !important;
+            color: white !important;
+        }
+
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
             .chart-grid { grid-template-columns: 1fr; } 
@@ -813,6 +829,20 @@
             minDate: isYonetici ? null : enEski,
             maxDate: isYonetici ? null : bugun,
             disableMobile: true,
+            
+            // SADECE YÖNETİCİ İÇİN MAZOTLU GÜNLERİ BOYAMA
+            onDayCreate: function(dObj, dStr, fp, dayElem) {
+                if (!isYonetici) return; // Eğer şoförse buradan çık, hiçbir şey boyama
+
+                const dateStr = formatTarih(dayElem.dateObj); 
+                const mevcutKayit = kayitlar.find(k => k.tarih === dateStr);
+                
+                if (mevcutKayit && mevcutKayit.mazotTL > 0) {
+                    dayElem.classList.add('mazotlu-gun');
+                    dayElem.title = `Mazot Gideri: ${mevcutKayit.mazotTL.toLocaleString('tr-TR')} TL`;
+                }
+            },
+            
             onReady: function(selectedDates, dateStr, instance) {
                 formuTariheGoreDoldur(dateStr);
             },
@@ -1354,6 +1384,11 @@
                 aracUyarilariniGuncelle(); 
                 const aktifTarih = document.getElementById('tarih').value;
                 if (aktifTarih) formuTariheGoreDoldur(aktifTarih);
+                
+                // YENİ EKLENEN: Sadece Yönetici ise takvimi yenile
+                if (isYonetici && typeof fpInstance !== 'undefined' && fpInstance) {
+                    fpInstance.redraw();
+                }
             }
 
             const fisSnapshot = await window.getDocs(window.collection(window.db, "muhasebeFisleri"));
@@ -2594,7 +2629,7 @@
     };
 </script>
 
-<!-- YENİ EKLENEN: Service Worker Kayıt Kodları -->
+<!-- Service Worker Kayıt Kodları -->
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
