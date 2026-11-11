@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dolmuş İşletme Yönetim Paneli</title>
     
-    <!-- PWA Manifest ve İkon Bağlantıları -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Flatpickr Kütüphanesi -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
@@ -188,17 +186,15 @@
 
         .flatpickr-input[readonly] { background: white !important; cursor: pointer; }
 
-        /* Mazot gideri olan günler için özel renk (Sadece Yönetici İçin) */
         .flatpickr-day.mazotlu-gun {
-            background-color: #ffeaa7 !important; /* Açık sarı/turuncu */
+            background-color: #ffeaa7 !important; 
             border-color: #fdcb6e !important;
-            color: #d63031 !important; /* Kırmızımsı metin */
+            color: #d63031 !important; 
             font-weight: bold;
         }
         .flatpickr-day.mazotlu-gun:hover { background-color: #fdcb6e !important; }
         .flatpickr-day.mazotlu-gun.selected { background-color: #e17055 !important; border-color: #e17055 !important; color: white !important; }
 
-        /* Mazot Dağıt Butonu Stili */
         .mazot-dagit-btn {
             position: absolute;
             right: 8px;
@@ -211,10 +207,9 @@
             cursor: pointer;
             font-size: 11px;
             font-weight: bold;
-            display: none; /* Varsayılan olarak gizli */
+            display: none; 
             z-index: 10;
         }
-        /* Buton görünürken input'un sağına boşluk bırak */
         .mazot-input-grup.has-btn input { padding-right: 75px; }
 
         @media (max-width: 1024px) {
@@ -256,7 +251,6 @@
     </style>
 </head>
 <body>
-<!-- GİRİŞ EKRANI BAŞLANGICI -->
 <div id="loginEkrani">
     <img src="foto.jpg" alt="Dolmuş" class="bg-resim">
     <div class="login-icerik">
@@ -266,7 +260,6 @@
         <div id="loginHata">Hatalı şifre girdiniz!</div>
     </div>
 </div>
-<!-- GİRİŞ EKRANI BİTİŞİ -->
 
 <div id="uygulamaEkrani" class="container">
     <div class="header-alani">
@@ -280,7 +273,6 @@
         <button class="tab-btn" id="ayarlarTabBtn" onclick="switchTab('ayarlar', this)" style="display:none;">⚙️ Sistem Ayarları</button>
     </div>
 
-    <!-- ŞOFÖR / YÖNETİCİ GÜNLÜK GİRİŞ EKRANI -->
     <div id="giris" class="tab-content active">
         <div class="uyari-panosu" id="uyariPanosu">
             <div class="uyari-kutu durum-gri" id="muayeneKutu">
@@ -326,7 +318,6 @@
                     <label for="km">Güncel KM (Araç KM'si)</label>
                 </div>
                 
-                <!-- MAZOT ALANI VE DAĞIT BUTONU -->
                 <div class="input-grup mazot-input-grup" id="mazotInputGrup">
                     <input type="text" inputmode="numeric" id="mazotTL" class="para" placeholder="">
                     <label for="mazotTL">Mazot (TL)</label>
@@ -359,7 +350,6 @@
         </div>
     </div>
 
-    <!-- YÖNETİCİ / RAPOR EKRANI -->
     <div id="rapor" class="tab-content">
         
         <div class="rapor-filtre-alani">
@@ -539,7 +529,6 @@
         </div>
     </div>
 
-    <!-- AYARLAR SEKME EKRANI -->
     <div id="ayarlar" class="tab-content">
         <div class="card">
             <h2>⚙️ Sistem Ayarları (Araç Bakım & Takip)</h2>
@@ -751,7 +740,6 @@
 
         const mevcutKayit = kayitlar.find(k => k.tarih === secilenTarih);
 
-        // Mazot Dağıt butonu kontrolü
         const mazotDagitBtn = document.getElementById('mazotDagitBtn');
         const mazotInputGrup = document.getElementById('mazotInputGrup');
 
@@ -761,18 +749,14 @@
 
             document.getElementById('hasilat').value = mevcutKayit.hasilat ? sayiyiFormatla(mevcutKayit.hasilat) : "";
             document.getElementById('km').value = mevcutKayit.km ? sayiyiFormatla(mevcutKayit.km) : "";
-            
-            // Eğer mazot dağıtıldıysa formda 0 görünecek (veya boş), ama orijinal tutarı saklıyoruz
             document.getElementById('mazotTL').value = mevcutKayit.mazotTL ? sayiyiFormatla(mevcutKayit.mazotTL) : "";
-            
             document.getElementById('siviBakim').value = mevcutKayit.siviBakim ? sayiyiFormatla(mevcutKayit.siviBakim) : "";
             document.getElementById('tamir').value = mevcutKayit.tamir ? sayiyiFormatla(mevcutKayit.tamir) : "";
             document.getElementById('parca').value = mevcutKayit.parca ? sayiyiFormatla(mevcutKayit.parca) : "";
             document.getElementById('diger').value = mevcutKayit.diger ? sayiyiFormatla(mevcutKayit.diger) : "";
             document.getElementById('gunlukSoforUcret').value = mevcutKayit.gunlukSoforUcret ? sayiyiFormatla(mevcutKayit.gunlukSoforUcret) : "";
 
-            // Yönetici ise ve bu güne ait mazot verisi varsa butonu göster
-            if (isYonetici && mevcutKayit.mazotTL > 0) {
+            if (isYonetici && (Number(mevcutKayit.mazotTL) > 0 || mevcutKayit.mazotAlimGunu)) {
                 mazotDagitBtn.style.display = 'block';
                 mazotInputGrup.classList.add('has-btn');
             } else {
@@ -831,18 +815,16 @@
             maxDate: isYonetici ? null : bugun,
             disableMobile: true,
             
-            // SADECE YÖNETİCİ İÇİN MAZOTLU GÜNLERİ BOYAMA
             onDayCreate: function(dObj, dStr, fp, dayElem) {
                 if (!isYonetici) return; 
 
                 const dateStr = formatTarih(dayElem.dateObj); 
                 const mevcutKayit = kayitlar.find(k => k.tarih === dateStr);
                 
-                // Mazot tutarı > 0 ise VEYA geçmişte mazot alım günü olarak işaretlendiyse boya
-                if (mevcutKayit && (mevcutKayit.mazotTL > 0 || mevcutKayit.mazotAlimGunu)) {
+                if (mevcutKayit && (Number(mevcutKayit.mazotTL) > 0 || mevcutKayit.mazotAlimGunu)) {
                     dayElem.classList.add('mazotlu-gun');
                     let tutar = mevcutKayit.mazotAlimGunu ? (mevcutKayit.orijinalMazotTutari || 0) : mevcutKayit.mazotTL;
-                    dayElem.title = `Mazot Gideri: ${tutar.toLocaleString('tr-TR')} TL`;
+                    dayElem.title = `Mazot Gideri: ${Number(tutar).toLocaleString('tr-TR')} TL`;
                 }
             },
             
@@ -918,7 +900,7 @@
             document.getElementById('uygulamaEkrani').style.display = 'block';
             document.getElementById('raporTabBtn').style.display = 'none'; 
             document.getElementById('ayarlarTabBtn').style.display = 'none';
-            document.getElementById('mazotDagitBtn').style.display = 'none'; // Şoförde kesinlikle gizli
+            document.getElementById('mazotDagitBtn').style.display = 'none'; 
             hataEl.style.display = 'none';
             
             document.body.classList.add('uygulama-acik');
@@ -1126,7 +1108,6 @@
         }
     }
 
-    // ========== MAZOT DAĞIT FONKSİYONU ==========
     async function mazotDagit() {
         const secilenTarih = document.getElementById('tarih').value;
         const mevcutKayit = kayitlar.find(k => k.tarih === secilenTarih);
@@ -1134,72 +1115,69 @@
         if (!mevcutKayit) {
             alert("Önce bu güne ait bir kayıt oluşturmalısınız."); return;
         }
-        if (!mevcutKayit.mazotTL || mevcutKayit.mazotTL <= 0) {
+        
+        const toplamMazot = Number(mevcutKayit.mazotTL) || 0;
+
+        if (toplamMazot <= 0) {
             alert("Dağıtılacak mazot tutarı bulunamadı! Lütfen önce mazot tutarını girin ve kaydedin."); return;
         }
 
-        // 1. Önceki mazot alım gününü bul (Tarihi geriye doğru tara)
-        const oncekiMazotKayitlari = kayitlar.filter(k => k.tarih < secilenTarih && (k.mazotTL > 0 || k.mazotAlimGunu)).sort((a,b) => new Date(b.tarih) - new Date(a.tarih));
+        const oncekiMazotKayitlari = kayitlar.filter(k => k.tarih < secilenTarih && (Number(k.mazotTL) > 0 || k.mazotAlimGunu)).sort((a,b) => new Date(b.tarih) - new Date(a.tarih));
         
         let baslangicTarih;
         if (oncekiMazotKayitlari.length > 0) {
             baslangicTarih = oncekiMazotKayitlari[0].tarih;
         } else {
-            // Eğer önceki yoksa, o ayın 1'ini başlangıç yap
             const ay = secilenTarih.substring(0, 7);
             baslangicTarih = ay + "-01";
         }
 
-        // 2. Aradaki sefer yapılan günleri bul (başlangıç tarihi hariç, bugün dahil)
         const dagitilacakGunler = kayitlar.filter(k => 
             k.tarih > baslangicTarih && k.tarih <= secilenTarih && 
-            (k.hasilat > 0 || k.km > 0 || k.guzergah) // Sadece çalışılmış günler
+            (Number(k.hasilat) > 0 || Number(k.km) > 0 || k.guzergah)
         );
 
         if (dagitilacakGunler.length === 0) {
             alert("Arada dağıtım yapılacak çalışılmış gün bulunamadı!"); return;
         }
 
-        // Eğer seçili gün dagitilacakGunler içinde yoksa (teorik olarak olmalı ama) manuel ekle
         if (!dagitilacakGunler.find(k => k.tarih === secilenTarih)) {
             dagitilacakGunler.push(mevcutKayit);
         }
 
         const gunSayisi = dagitilacakGunler.length;
-        const dagitilacakTutar = mevcutKayit.mazotTL;
-        const gunlukPay = dagitilacakTutar / gunSayisi;
+        const gunlukPay = Number((toplamMazot / gunSayisi).toFixed(2));
 
-        const onay = confirm(`Toplam ${dagitilacakTutar.toLocaleString('tr-TR')} TL mazot gideri,\n\nEn son mazot alım tarihi olan ${baslangicTarih.split('-').reverse().join('.')} ile bugün (${secilenTarih.split('-').reverse().join('.')}) arasındaki ${gunSayisi} çalışılmış güne eşit olarak (Günlük ${gunlukPay.toLocaleString('tr-TR')} TL) dağıtılacak.\n\nToplu alım günü takvimde renkli kalmaya devam edecek ancak gider tutarı sıfırlanacaktır. Onaylıyor musunuz?`);
+        const onay = confirm(`Toplam ${toplamMazot.toLocaleString('tr-TR')} TL mazot gideri,\n\nEn son mazot alım tarihi olan ${baslangicTarih.split('-').reverse().join('.')} ile bugün (${secilenTarih.split('-').reverse().join('.')}) arasındaki ${gunSayisi} çalışılmış güne eşit olarak (Günlük ${gunlukPay.toLocaleString('tr-TR')} TL) dağıtılacak.\n\nToplu alım günü takvimde renkli kalmaya devam edecek. Onaylıyor musunuz?`);
         if (!onay) return;
 
         try {
             const batch = window.writeBatch(window.db);
 
-            // Asıl günü güncelle: Mazot giderini toplam giderden düş, mazotTL'yi sıfırla ama etiketle
+            // ASIL GÜNÜ GÜNCELLE: Toplam giderden mazotun tamamını düş, sadece günlük payı ekle. Mazot değerini gunlukPay yap.
             batch.update(window.doc(window.db, "kayitlar", mevcutKayit.id), {
-                mazotTL: 0,
-                mazotAlimGunu: true, // Takvimde görünmesi için
-                orijinalMazotTutari: dagitilacakTutar, // İleride lazım olursa diye sakla
-                toplamGider: (mevcutKayit.toplamGider || 0) - dagitilacakTutar
+                mazotTL: gunlukPay,
+                mazotAlimGunu: true,
+                orijinalMazotTutari: toplamMazot,
+                toplamGider: (Number(mevcutKayit.toplamGider) || 0) - toplamMazot + gunlukPay
             });
 
-            // Diğer günleri güncelle: Mazot giderini ekle, toplam gidere yansıt
+            // DİĞER GÜNLERİ GÜNCELLE
             dagitilacakGunler.forEach(kayit => {
-                if (kayit.id === mevcutKayit.id) return; // Asıl günü atla (yukarıda işledik)
+                if (kayit.id === mevcutKayit.id) return; // Asıl günü atla
                 
-                // O gün şoför zaten mazot girmişse, üzerine ekle
-                const mevcutGunlukMazot = kayit.mazotTL || 0;
+                const mevcutGunlukMazot = Number(kayit.mazotTL) || 0;
+                const mevcutToplamGider = Number(kayit.toplamGider) || 0;
                 
                 batch.update(window.doc(window.db, "kayitlar", kayit.id), {
                     mazotTL: mevcutGunlukMazot + gunlukPay,
-                    toplamGider: (kayit.toplamGider || 0) + gunlukPay
+                    toplamGider: mevcutToplamGider + gunlukPay
                 });
             });
 
             await batch.commit();
-            alert(`✅ Başarılı! Toplam ${dagitilacakTutar.toLocaleString('tr-TR')} TL mazot gideri ${gunSayisi} güne bölündü (Günlük ${gunlukPay.toLocaleString('tr-TR')} TL).`);
+            alert(`✅ Başarılı! Toplam ${toplamMazot.toLocaleString('tr-TR')} TL mazot gideri ${gunSayisi} güne bölündü (Günlük ${gunlukPay.toLocaleString('tr-TR')} TL).`);
             
-            // Veriler güncellenince formu tekrar doldur
             setTimeout(() => {
                 formuTariheGoreDoldur(secilenTarih);
                 if (fpInstance) fpInstance.redraw();
@@ -1210,7 +1188,6 @@
             alert("Dağıtım sırasında hata oluştu!");
         }
     }
-    // ==============================================
 
     async function kaydet() {
         if(!window.firebaseHazir) { alert("Bulut sistemi henüz yüklenmedi..."); return; }
@@ -1336,8 +1313,8 @@
             hasilat: hasilatDeger,
             km: kmDeger,
             mazotTL: mazotDeger,
-            mazotAlimGunu: ayniTarihliKayit ? (ayniTarihliKayit.mazotAlimGunu || false) : false, // Eski kayıttan koru
-            orijinalMazotTutari: ayniTarihliKayit ? (ayniTarihliKayit.orijinalMazotTutari || 0) : 0, // Eski kayıttan koru
+            mazotAlimGunu: ayniTarihliKayit ? (ayniTarihliKayit.mazotAlimGunu || false) : false,
+            orijinalMazotTutari: ayniTarihliKayit ? (ayniTarihliKayit.orijinalMazotTutari || 0) : 0,
             siviBakim: siviBakimDeger,
             tamir: tamirDeger,
             parca: parcaDeger,
@@ -2398,7 +2375,7 @@
         liste.forEach(k => {
             const tr = document.createElement('tr');
             const net = ((k.hasilat||0) + (k.ukomeGeliri||0)) - (k.toplamGider||0);
-            // Eğer mazot dağıtıldıysa mazot sütununda orijinal tutarı parantez içinde gösterelim
+            
             let mazotGosterim = Math.round(k.mazotTL||0).toLocaleString('tr-TR');
             if (k.mazotAlimGunu && k.orijinalMazotTutari > 0) {
                 mazotGosterim = `<span style="color:var(--warning); font-weight:bold;" title="Dağıtılan Toplu Mazot">${Math.round(k.orijinalMazotTutari).toLocaleString('tr-TR')}*</span>`;
@@ -2713,7 +2690,6 @@
     };
 </script>
 
-<!-- Service Worker Kayıt Kodları -->
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
