@@ -102,7 +102,7 @@
         .rapor-filtre-alani .input-grup { margin-top: 0; flex: 1; min-width: 120px; }
         .rapor-filtre-alani button { padding: 12px 20px; background: var(--info); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; height: 46px; }
         
-        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); }
         .stat-box h3 { margin: 0 0 10px; font-size: 14px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px;}
         .stat-box p { margin: 0; font-size: 24px; font-weight: bold; color: var(--primary); }
@@ -123,7 +123,7 @@
         .text-muted { color: #7f8c8d; font-size: 12px; }
 
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .detay-tablo { width: 100%; min-width: 1400px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        .detay-tablo { width: 100%; min-width: 1600px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
         .detay-tablo th, .detay-tablo td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
         .detay-tablo th { background: #ecf0f1; font-weight: bold; }
         
@@ -411,12 +411,16 @@
                 <p id="rKar">0 TL</p>
             </div>
             <div class="stat-box" style="border-top-color: var(--info);">
-                <h3>Günlük Ortalama Kâr</h3>
+                <h3>Günlük Ort. Kâr</h3>
                 <p id="rOrtKar">0 TL</p>
             </div>
+            <div class="stat-box" style="border-top-color: var(--purple);">
+                <h3>Ort. KM Maliyeti</h3>
+                <p id="rOrtKmMaliyet">0 TL/KM</p>
+            </div>
             <div class="stat-box" style="border-top-color: var(--warning);">
-                <h3>Toplam Sefer (Gün)</h3>
-                <p id="rSeferSayisi">0</p>
+                <h3>Toplam Sefer</h3>
+                <p id="rSeferSayisi">0 Gün</p>
             </div>
         </div>
 
@@ -508,7 +512,9 @@
                             <th>Güzergah</th>
                             <th>Hasılat</th>
                             <th>KM</th>
+                            <th>Günlük KM</th>
                             <th>Mazot</th>
+                            <th>KM Başı Mazot</th>
                             <th>Sıvı Bakım</th>
                             <th>Tamir</th>
                             <th>Parça</th>
@@ -522,7 +528,7 @@
                         </tr>
                     </thead>
                     <tbody id="tabloListesi">
-                        <tr><td colspan="17" class="loading">Veriler buluttan yükleniyor...</td></tr>
+                        <tr><td colspan="19" class="loading">Veriler buluttan yükleniyor...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -691,6 +697,7 @@
 <script>
     let kayitlar = [];
     let filtrelenmisKayitlar = [];
+    let gunlukKmMap = {}; // Her kaydın günlük KM'sini tutacak obje
     let secilenHedefAy = ""; 
     let secilenUkomeAyId = "";
     let isYonetici = false; 
@@ -713,6 +720,26 @@
         if (day.length < 2) day = '0' + day;
 
         return [year, month, day].join('-');
+    }
+
+    function gunlukKmleriHesapla() {
+        gunlukKmMap = {};
+        const siraliKayitlar = [...kayitlar].sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
+        
+        let oncekiKm = null;
+        siraliKayitlar.forEach(k => {
+            if (k.km && Number(k.km) > 0) {
+                if (oncekiKm !== null) {
+                    let fark = Number(k.km) - Number(oncekiKm);
+                    gunlukKmMap[k.id] = fark > 0 ? fark : 0;
+                } else {
+                    gunlukKmMap[k.id] = 0; 
+                }
+                oncekiKm = Number(k.km);
+            } else {
+                gunlukKmMap[k.id] = 0;
+            }
+        });
     }
 
     function formuTariheGoreDoldur(secilenTarih) {
@@ -821,7 +848,6 @@
                 const dateStr = formatTarih(dayElem.dateObj); 
                 const mevcutKayit = kayitlar.find(k => k.tarih === dateStr);
                 
-                // Sadece mazot alım günüyse VEYA (dağıtım yapılmamış normal mazot varsa) renklendir
                 if (mevcutKayit && (mevcutKayit.mazotAlimGunu || (Number(mevcutKayit.mazotTL) > 0 && !mevcutKayit.dagitimMazot))) {
                     dayElem.classList.add('mazotlu-gun');
                     let tutar = mevcutKayit.mazotAlimGunu ? (mevcutKayit.orijinalMazotTutari || 0) : mevcutKayit.mazotTL;
@@ -1158,7 +1184,6 @@
         try {
             const batch = window.writeBatch(window.db);
 
-            // ASIL GÜNÜ GÜNCELLE
             batch.update(window.doc(window.db, "kayitlar", mevcutKayit.id), {
                 mazotTL: asilGunPay,
                 mazotAlimGunu: true,
@@ -1166,9 +1191,8 @@
                 toplamGider: (Number(mevcutKayit.toplamGider) || 0) - toplamMazot + asilGunPay
             });
 
-            // DİĞER GÜNLERİ GÜNCELLE
             dagitilacakGunler.forEach(kayit => {
-                if (kayit.id === mevcutKayit.id) return; // Asıl günü atla
+                if (kayit.id === mevcutKayit.id) return; 
                 
                 const mevcutGunlukMazot = Number(kayit.mazotTL) || 0;
                 const mevcutToplamGider = Number(kayit.toplamGider) || 0;
@@ -1176,7 +1200,7 @@
                 batch.update(window.doc(window.db, "kayitlar", kayit.id), {
                     mazotTL: mevcutGunlukMazot + tamPay,
                     toplamGider: mevcutToplamGider + tamPay,
-                    dagitimMazot: true // Bu güne dağıtım yapıldığını işaretle (takvimde renklenmemesi için)
+                    dagitimMazot: true 
                 });
             });
 
@@ -1320,7 +1344,7 @@
             mazotTL: mazotDeger,
             mazotAlimGunu: ayniTarihliKayit ? (ayniTarihliKayit.mazotAlimGunu || false) : false,
             orijinalMazotTutari: ayniTarihliKayit ? (ayniTarihliKayit.orijinalMazotTutari || 0) : 0,
-            dagitimMazot: ayniTarihliKayit ? (ayniTarihliKayit.dagitimMazot || false) : false, // Dağıtım flag'ini koru
+            dagitimMazot: ayniTarihliKayit ? (ayniTarihliKayit.dagitimMazot || false) : false, 
             siviBakim: siviBakimDeger,
             tamir: tamirDeger,
             parca: parcaDeger,
@@ -1450,6 +1474,8 @@
             kayitlar = [];
             snapshot.forEach((doc) => { kayitlar.push({ id: doc.id, ...doc.data() }); });
             
+            gunlukKmleriHesapla();
+
             if(document.getElementById('rapor').classList.contains('active')){ filtreleRapor(); }
             if(document.getElementById('giris').classList.contains('active')){ 
                 aracUyarilariniGuncelle(); 
@@ -2275,6 +2301,7 @@
         let tKazanc = 0, tGider = 0, tSofor = 0, tMazot = 0, tSivi = 0, tTamir = 0, tParca = 0, tDiger = 0, tUkome = 0;
         let tMuhasebeKalemleri = { pesinVergi: 0, stopaj: 0, kdv: 0, gelirVergisi: 0, bagKur: 0, sigorta: 0, matbaaNoter: 0, muhasebe: 0, sabitDigerGider: 0, geciciVergi: 0 };
         let tSabit = 0;
+        let toplamGunlukKM = 0;
         
         filtrelenmisKayitlar.forEach(k => {
             tKazanc += k.hasilat || 0;
@@ -2287,6 +2314,8 @@
             tParca += k.parca || 0;
             tDiger += k.diger || 0;
             tSabit += k.sabitGiderPayi || 0;
+            
+            toplamGunlukKM += (gunlukKmMap[k.id] || 0);
 
             if (k.muhasebeKalemleri) {
                 for (const key in tMuhasebeKalemleri) {
@@ -2301,12 +2330,14 @@
         const netKar = toplamGelir - tGider;
         const gunSayisi = filtrelenmisKayitlar.length;
         const ortKar = gunSayisi > 0 ? netKar / gunSayisi : 0;
+        const ortKmMaliyet = toplamGunlukKM > 0 ? (tMazot / toplamGunlukKM) : 0;
 
         document.getElementById('rKazanc').innerText = Math.round(toplamGelir).toLocaleString('tr-TR') + " TL";
         document.getElementById('rGider').innerText = Math.round(tGider).toLocaleString('tr-TR') + " TL";
         document.getElementById('rKar').innerText = Math.round(netKar).toLocaleString('tr-TR') + " TL";
         document.getElementById('rKar').className = netKar >= 0 ? 'text-success' : 'text-danger';
         document.getElementById('rOrtKar').innerText = Math.round(ortKar).toLocaleString('tr-TR') + " TL";
+        document.getElementById('rOrtKmMaliyet').innerText = ortKmMaliyet.toFixed(2) + " TL/KM";
         document.getElementById('rSeferSayisi').innerText = gunSayisi + " Gün";
 
         maliTabloDoldur(toplamGelir, tKazanc, tUkome, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
@@ -2387,6 +2418,9 @@
                 mazotGosterim = `<span style="color:var(--warning); font-weight:bold;" title="Dağıtılan Toplu Mazot">${Math.round(k.orijinalMazotTutari).toLocaleString('tr-TR')}*</span>`;
             }
 
+            const gunlukKM = gunlukKmMap[k.id] || 0;
+            const kmBasiMazot = gunlukKM > 0 ? (Number(k.mazotTL) / gunlukKM) : 0;
+
             tr.innerHTML = `
                 <td>${(k.tarih || '').split('-').reverse().join('.')}</td>
                 <td>${tarihSaatFormatla(k.zaman)}</td>
@@ -2394,7 +2428,9 @@
                 <td><span style="background:#ecf0f1; padding:3px 8px; border-radius:4px; font-weight:bold;">${k.guzergah || '-'}</span></td>
                 <td>${Math.round(k.hasilat||0).toLocaleString('tr-TR')} TL</td>
                 <td>${Math.round(k.km||0).toLocaleString('tr-TR')}</td>
+                <td style="font-weight:bold; color:var(--info);">${gunlukKM.toLocaleString('tr-TR')}</td>
                 <td>${mazotGosterim}</td>
+                <td style="font-weight:bold; color:var(--purple);">${kmBasiMazot.toFixed(2)} TL</td>
                 <td>${Math.round(k.siviBakim||0).toLocaleString('tr-TR')}</td>
                 <td>${Math.round(k.tamir||0).toLocaleString('tr-TR')}</td>
                 <td>${Math.round(k.parca||0).toLocaleString('tr-TR')}</td>
