@@ -1129,10 +1129,10 @@
         const anaAlanlarDolu = hasilatDeger > 0 || kmDeger > 0 || secilenGuzergah !== "" || soforDeger > 0;
         const bagimsizGiderVar = mazotDeger > 0 || siviBakimDeger > 0 || tamirDeger > 0 || parcaDeger > 0 || digerDeger > 0;
 
-        // 1. KOŞUL: ANA ALANLAR ZORUNLULUK KONTROLÜ
-        if (anaAlanlarDolu) {
-            if (hasilatDeger === 0 || kmDeger === 0 || secilenGuzergah === "" || soforDeger === 0) {
-                alert("⚠️ HATA: Günlük Kazanç, Güncel KM, Güzergah ve Şoför Ücreti alanları birbirine bağlıdır.\n\nBunlardan birini doldurduysanız HEPSİNİ doldurmak zorundasınız. Eğer bu alanları silmek istiyorsanız 4'ünü birden silin.");
+        // 1. KOŞUL: ANA ALANLAR ZORUNLULUK KONTROLÜ (Sadece Kazanç girildiyse diğerleri zorunlu)
+        if (hasilatDeger > 0) {
+            if (kmDeger === 0 || secilenGuzergah === "" || soforDeger === 0) {
+                alert("⚠️ HATA: Günlük Kazanç girdiğinizde Güncel KM, Güzergah ve Şoför Ücreti alanlarını da doldurmak zorundasınız.");
                 return;
             }
         }
