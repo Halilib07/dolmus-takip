@@ -114,7 +114,7 @@
         .chart-container-wrapper { position: relative; flex-grow: 1; min-height: 250px; width: 100%; }
         
         .analiz-tablo-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;}
-        .analiz-tablo { width: 100%; min-width: 600px; border-collapse: collapse; background: white; table-layout: auto; }
+        .analiz-tablo { width: 100%; min-width: 750px; border-collapse: collapse; background: white; table-layout: auto; }
         .analiz-tablo th, .analiz-tablo td { padding: 10px 8px; text-align: center; border-bottom: 1px solid #eee; font-size: 13px; white-space: nowrap; }
         .analiz-tablo th { background: #ecf0f1; font-weight: bold; }
         
@@ -482,6 +482,7 @@
                                 <th>Ort. KM</th>
                                 <th>Toplam Yakıt</th>
                                 <th>Ort. Yakıt</th>
+                                <th>KM Başı Yakıt</th>
                             </tr>
                         </thead>
                         <tbody id="guzergahAnalizTablo">
@@ -2666,6 +2667,7 @@
             const ortKar = veri.sefer > 0 ? veri.toplamKar / veri.sefer : 0;
             const ortKM = veri.sefer > 0 ? veri.toplamKM / veri.sefer : 0;
             const ortYakit = veri.sefer > 0 ? veri.toplamYakit / veri.sefer : 0;
+            const kmBasiYakit = veri.toplamKM > 0 ? (veri.toplamYakit / veri.toplamKM) : 0;
             
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -2677,6 +2679,7 @@
                 <td>${Math.round(ortKM).toLocaleString('tr-TR')} KM</td>
                 <td class="text-danger">${Math.round(veri.toplamYakit).toLocaleString('tr-TR')} TL</td>
                 <td>${Math.round(ortYakit).toLocaleString('tr-TR')} TL</td>
+                <td style="font-weight:bold; color:var(--warning);">${kmBasiYakit.toFixed(2)} TL</td>
             `;
             tbody.appendChild(tr);
         });
