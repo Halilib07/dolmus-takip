@@ -102,10 +102,10 @@
         .rapor-filtre-alani .input-grup { margin-top: 0; flex: 1; min-width: 120px; }
         .rapor-filtre-alani button { padding: 12px 20px; background: var(--info); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; height: 46px; }
         
-        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); }
         .stat-box h3 { margin: 0 0 10px; font-size: 14px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px;}
-        .stat-box p { margin: 0; font-size: 24px; font-weight: bold; color: var(--primary); }
+        .stat-box p { margin: 0; font-size: 22px; font-weight: bold; color: var(--primary); }
         
         .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; align-items: stretch; }
         .chart-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow: hidden; }
@@ -113,13 +113,14 @@
         
         .chart-container-wrapper { position: relative; flex-grow: 1; min-height: 250px; width: 100%; }
         
-        .analiz-tablo-wrapper { width: 100%; overflow-x: auto; }
-        .analiz-tablo { width: 100%; min-width: 350px; border-collapse: collapse; background: white; table-layout: auto; }
-        .analiz-tablo th, .analiz-tablo td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; white-space: nowrap; }
+        .analiz-tablo-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;}
+        .analiz-tablo { width: 100%; min-width: 600px; border-collapse: collapse; background: white; table-layout: auto; }
+        .analiz-tablo th, .analiz-tablo td { padding: 10px 8px; text-align: center; border-bottom: 1px solid #eee; font-size: 13px; white-space: nowrap; }
         .analiz-tablo th { background: #ecf0f1; font-weight: bold; }
         
         .text-danger { color: var(--danger); }
         .text-success { color: var(--success); }
+        .text-info { color: var(--info); }
         .text-muted { color: #7f8c8d; font-size: 12px; }
 
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -418,6 +419,10 @@
                 <h3>Ort. KM Maliyeti</h3>
                 <p id="rOrtKmMaliyet">0 TL/KM</p>
             </div>
+            <div class="stat-box" style="border-top-color: var(--info);">
+                <h3>Toplam KM</h3>
+                <p id="rToplamKM">0 KM</p>
+            </div>
             <div class="stat-box" style="border-top-color: var(--warning);">
                 <h3>Toplam Sefer</h3>
                 <p id="rSeferSayisi">0 Gün</p>
@@ -473,6 +478,10 @@
                                 <th>Sefer</th>
                                 <th>Toplam Kâr</th>
                                 <th>Ort. Kâr/Sefer</th>
+                                <th>Toplam KM</th>
+                                <th>Ort. KM</th>
+                                <th>Toplam Yakıt</th>
+                                <th>Ort. Yakıt</th>
                             </tr>
                         </thead>
                         <tbody id="guzergahAnalizTablo">
@@ -697,7 +706,7 @@
 <script>
     let kayitlar = [];
     let filtrelenmisKayitlar = [];
-    let gunlukKmMap = {}; // Her kaydın günlük KM'sini tutacak obje
+    let gunlukKmMap = {}; 
     let secilenHedefAy = ""; 
     let secilenUkomeAyId = "";
     let isYonetici = false; 
@@ -2338,6 +2347,7 @@
         document.getElementById('rKar').className = netKar >= 0 ? 'text-success' : 'text-danger';
         document.getElementById('rOrtKar').innerText = Math.round(ortKar).toLocaleString('tr-TR') + " TL";
         document.getElementById('rOrtKmMaliyet').innerText = ortKmMaliyet.toFixed(2) + " TL/KM";
+        document.getElementById('rToplamKM').innerText = Math.round(toplamGunlukKM).toLocaleString('tr-TR') + " KM";
         document.getElementById('rSeferSayisi').innerText = gunSayisi + " Gün";
 
         maliTabloDoldur(toplamGelir, tKazanc, tUkome, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
@@ -2637,10 +2647,16 @@
         const analiz = {};
         liste.forEach(k => {
             const g = k.guzergah || 'Belirtilmedi';
-            if(!analiz[g]) analiz[g] = { sefer: 0, toplamKar: 0 };
+            if(!analiz[g]) analiz[g] = { sefer: 0, toplamKar: 0, toplamKM: 0, toplamYakit: 0 };
+            
             analiz[g].sefer += 1;
+            
             const net = ((k.hasilat || 0) + (k.ukomeGeliri || 0)) - (k.toplamGider || 0);
             analiz[g].toplamKar += net;
+            
+            const gunlukKM = gunlukKmMap[k.id] || 0;
+            analiz[g].toplamKM += gunlukKM;
+            analiz[g].toplamYakit += (Number(k.mazotTL) || 0);
         });
 
         const siraliGuzergahlar = Object.keys(analiz).sort((a,b) => analiz[b].toplamKar - analiz[a].toplamKar);
@@ -2648,12 +2664,19 @@
         siraliGuzergahlar.forEach(g => {
             const veri = analiz[g];
             const ortKar = veri.sefer > 0 ? veri.toplamKar / veri.sefer : 0;
+            const ortKM = veri.sefer > 0 ? veri.toplamKM / veri.sefer : 0;
+            const ortYakit = veri.sefer > 0 ? veri.toplamYakit / veri.sefer : 0;
+            
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td style="font-weight:bold;">${g}</td>
                 <td>${veri.sefer}</td>
                 <td class="${veri.toplamKar >= 0 ? 'text-success' : 'text-danger'}" style="font-weight:bold;">${Math.round(veri.toplamKar).toLocaleString('tr-TR')} TL</td>
                 <td>${Math.round(ortKar).toLocaleString('tr-TR')} TL</td>
+                <td class="text-info" style="font-weight:bold;">${Math.round(veri.toplamKM).toLocaleString('tr-TR')} KM</td>
+                <td>${Math.round(ortKM).toLocaleString('tr-TR')} KM</td>
+                <td class="text-danger">${Math.round(veri.toplamYakit).toLocaleString('tr-TR')} TL</td>
+                <td>${Math.round(ortYakit).toLocaleString('tr-TR')} TL</td>
             `;
             tbody.appendChild(tr);
         });
