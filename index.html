@@ -124,9 +124,11 @@
         .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .stat-box h3 { margin: 0; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
         .stat-icon { font-size: 20px; opacity: 0.6; }
-        .stat-box p { margin: 0; font-size: 24px; font-weight: 700; color: var(--primary); }
         
-        .trend { font-size: 12px; font-weight: 600; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+        /* Ana değerler için margin-bottom eklendi */
+        .stat-box p { margin: 0 0 8px 0; font-size: 24px; font-weight: 700; color: var(--primary); }
+        
+        .trend { font-size: 12px; font-weight: 600; display: flex; flex-direction: column; gap: 2px; }
         .trend.up { color: var(--success); }
         .trend.down { color: var(--danger); }
         .trend.neutral { color: var(--text-muted); }
@@ -435,7 +437,7 @@
                     <span class="stat-icon">🎯</span>
                 </div>
                 <p id="rKarMarji">%0</p>
-                <div class="trend neutral">Gelire oranı</div>
+                <div id="trendKarMarji" class="trend neutral"></div>
             </div>
             
             <div class="stat-box" style="border-top-color: var(--purple);">
@@ -444,7 +446,7 @@
                     <span class="stat-icon">🛣️</span>
                 </div>
                 <p id="rOrtKmMaliyet">0 TL</p>
-                <div class="trend neutral">Yakıt / KM</div>
+                <div id="trendOrtKmMaliyet" class="trend neutral"></div>
             </div>
 
             <div class="stat-box" style="border-top-color: var(--warning);">
@@ -453,7 +455,7 @@
                     <span class="stat-icon">📍</span>
                 </div>
                 <p id="rToplamKM" style="font-size: 20px;">0 KM</p>
-                <div id="rSeferSayisi" class="trend neutral">0 Gün</div>
+                <div id="rSeferSayisi" class="trend neutral"></div>
             </div>
         </div>
 
@@ -2383,7 +2385,7 @@
         
         const karMarji = toplamGelir > 0 ? ((netKar / toplamGelir) * 100) : 0;
 
-        // Trend Hesaplamaları
+        // --- TREND HESAPLAMALARI BAŞLANGIÇ ---
         const gunFarki = Math.ceil((bitis - baslangic) / (1000 * 60 * 60 * 24));
         const oncekiBitir = new Date(baslangic);
         oncekiBitir.setDate(oncekiBitir.getDate() - 1);
@@ -2392,40 +2394,89 @@
         oncekiBasla.setHours(0,0,0,0);
         oncekiBitir.setHours(23,59,59,999);
 
-        let oKazanc = 0, oGider = 0, oKar = 0;
+        // Önceki dönem verilerini hesapla
+        let oKazanc = 0, oGider = 0, oMazot = 0, oMazotluGunlerKM = 0, oToplamGunlukKM = 0, oGunSayisi = 0;
         kayitlar.forEach(k => {
             const kTarih = new Date(k.tarih);
             if(kTarih >= oncekiBasla && kTarih <= oncekiBitir) {
                 oKazanc += (k.hasilat || 0) + (k.ukomeGeliri || 0);
                 oGider += (k.toplamGider || 0);
+                oMazot += (k.mazotTL || 0);
+                oGunSayisi += 1;
+                
+                let gunlukKM = (gunlukKmMap[k.id] || 0);
+                oToplamGunlukKM += gunlukKM;
+                if ((k.mazotTL || 0) > 0) {
+                    oMazotluGunlerKM += gunlukKM;
+                }
             }
         });
-        oKar = oKazanc - oGider;
 
-        const trendHesapla = (mevcut, onceki) => {
-            if(onceki === 0) return `<span class="trend neutral">Önceki veri yok</span>`;
-            const fark = ((mevcut - onceki) / Math.abs(onceki)) * 100;
-            if(fark > 0) return `<span class="trend up">▲ %${fark.toFixed(1)} artış (Önceki Dönem)</span>`;
-            if(fark < 0) return `<span class="trend down">▼ %${Math.abs(fark).toFixed(1)} düşüş (Önceki Dönem)</span>`;
-            return `<span class="trend neutral">Değişim yok</span>`;
+        const oKar = oKazanc - oGider;
+        const oKarMarji = oKazanc > 0 ? ((oKar / oKazanc) * 100) : 0;
+        const oOrtKmMaliyet = oMazotluGunlerKM > 0 ? (oMazot / oMazotluGunlerKM) : 0;
+
+        // Jenerik Trend Hesaplama Fonksiyonu
+        const trendHesapla = (mevcut, onceki, tip) => {
+            let oncekiStr = "";
+            if (tip === 'para') oncekiStr = Math.round(onceki).toLocaleString('tr-TR') + " TL";
+            else if (tip === 'yuzde') oncekiStr = "%" + onceki.toFixed(1);
+            else if (tip === 'km') oncekiStr = Math.round(onceki).toLocaleString('tr-TR') + " KM";
+            else if (tip === 'tl_km') oncekiStr = onceki.toFixed(2) + " TL/KM";
+            else if (tip === 'gun') oncekiStr = Math.round(onceki) + " Gün";
+
+            let trendClass = 'neutral';
+            let trendText = 'Değişim yok';
+
+            if (onceki === 0 && mevcut === 0) {
+                trendText = 'Veri yok';
+            } else if (onceki === 0) {
+                trendClass = 'up';
+                trendText = '▲ Yeni Veri';
+            } else {
+                const fark = ((mevcut - onceki) / Math.abs(onceki)) * 100;
+                if (fark > 0) { trendClass = 'up'; trendText = `▲ %${fark.toFixed(1)} artış`; }
+                else if (fark < 0) { trendClass = 'down'; trendText = `▼ %${Math.abs(fark).toFixed(1)} düşüş`; }
+            }
+
+            return `
+                <div style="display: flex; flex-direction: column; gap: 2px; margin-top: 8px;">
+                    <span class="trend ${trendClass}" style="margin-top: 0; font-size: 12px;">${trendText}</span>
+                    <span style="font-size: 11px; color: #7f8c8d; font-weight: normal;">Geçen Dönem: ${oncekiStr}</span>
+                </div>
+            `;
         };
 
+        // Değerleri HTML'e Yaz
         document.getElementById('rKazanc').innerText = Math.round(toplamGelir).toLocaleString('tr-TR') + " TL";
-        document.getElementById('trendKazanc').innerHTML = trendHesapla(toplamGelir, oKazanc);
+        document.getElementById('trendKazanc').innerHTML = trendHesapla(toplamGelir, oKazanc, 'para');
 
         document.getElementById('rGider').innerText = Math.round(tGider).toLocaleString('tr-TR') + " TL";
-        document.getElementById('trendGider').innerHTML = trendHesapla(tGider, oGider);
+        document.getElementById('trendGider').innerHTML = trendHesapla(tGider, oGider, 'para');
 
         document.getElementById('rKar').innerText = Math.round(netKar).toLocaleString('tr-TR') + " TL";
         document.getElementById('rKar').className = netKar >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById('trendKar').innerHTML = trendHesapla(netKar, oKar);
+        document.getElementById('trendKar').innerHTML = trendHesapla(netKar, oKar, 'para');
 
         document.getElementById('rKarMarji').innerText = "%" + karMarji.toFixed(1);
         document.getElementById('rKarMarji').style.color = karMarji >= 0 ? 'var(--success)' : 'var(--danger)';
+        document.getElementById('trendKarMarji').innerHTML = trendHesapla(karMarji, oKarMarji, 'yuzde');
 
         document.getElementById('rOrtKmMaliyet').innerText = ortKmMaliyet.toFixed(2) + " TL/KM";
+        document.getElementById('trendOrtKmMaliyet').innerHTML = trendHesapla(ortKmMaliyet, oOrtKmMaliyet, 'tl_km');
+
         document.getElementById('rToplamKM').innerText = Math.round(toplamGunlukKM).toLocaleString('tr-TR') + " KM";
-        document.getElementById('rSeferSayisi').innerText = gunSayisi + " Gün";
+        
+        let kmTrendHTML = trendHesapla(toplamGunlukKM, oToplamGunlukKM, 'km');
+        let gunTrendHTML = trendHesapla(gunSayisi, oGunSayisi, 'gun');
+        
+        document.getElementById('rSeferSayisi').innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                ${kmTrendHTML}
+                <div style="border-top: 1px dashed #eee; padding-top: 4px;">${gunTrendHTML}</div>
+            </div>
+        `;
+        // --- TREND HESAPLAMALARI BİTİŞ ---
 
         maliTabloDoldur(toplamGelir, tKazanc, tUkome, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
 
