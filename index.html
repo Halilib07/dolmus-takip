@@ -8,7 +8,10 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     
+    <!-- Grafik Kütüphanesi -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- GERÇEK EXCEL DOSYASI İÇİN SHEETJS KÜTÜPHANESİ -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -185,7 +188,6 @@
         .mali-tablo .kar-row td { font-weight: bold; background: #e8f8f5; color: var(--success); font-size: 16px; border-top: 2px solid var(--success); }
         .mali-tablo .grup-toplam td { font-weight: bold; color: var(--primary); font-size: 15px; background-color: #f8f9fa; border-bottom: 2px solid #bdc3c7; }
 
-        /* Diğer eski CSS ayarları (uyarı kutuları, takvim vb.) korundu */
         .uyari-panosu { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
         .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 100px; }
         .uyari-kutu h4 { margin: 0 0 5px 0; font-size: 13px; opacity: 0.9; }
@@ -235,6 +237,7 @@
             .detay-tablo { min-width: 100% !important; font-size: 10px !important; }
             .detay-tablo th, .detay-tablo td { padding: 5px !important; }
             .yazdir-baslik { display: block !important; text-align: center; margin-bottom: 20px; font-size: 20px; font-weight: bold; }
+            .islem-btn-kolonu { display: none !important; }
         }
         .yazdir-baslik { display: none; }
 
@@ -566,7 +569,7 @@
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                 <h2 style="font-size: 16px; margin:0; color:var(--primary);">Filtrelenen Kayıtlar (Detaylı)</h2>
-                <button onclick="tabloyuExcelIndir()" style="background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:13px;">📥 Excel'e Aktar</button>
+                <button onclick="tabloyuExcelIndir()" style="background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:5px;">📥 Excel'e Aktar (.xlsx)</button>
             </div>
             <div class="tablo-kapsayici">
                 <table class="detay-tablo">
@@ -2407,7 +2410,7 @@
         
         const karMarji = toplamGelir > 0 ? ((netKar / toplamGelir) * 100) : 0;
 
-        // YENİ: Trend Hesaplamaları (Seçili dönemin süresi kadar önceki dönemle kıyaslama)
+        // Trend Hesaplamaları
         const gunFarki = Math.ceil((bitis - baslangic) / (1000 * 60 * 60 * 24));
         const oncekiBitir = new Date(baslangic);
         oncekiBitir.setDate(oncekiBitir.getDate() - 1);
@@ -2854,41 +2857,66 @@
         }
     }
 
-    // YENİ FONKSİYONLAR: Excel ve Yazdırma
+    // YENİ FONKSİYONLAR: Gerçek Excel (.xlsx) İndirme ve Yazdırma
     function tabloyuExcelIndir() {
         if (!filtrelenmisKayitlar || filtrelenmisKayitlar.length === 0) {
             alert("İndirilecek veri bulunamadı!"); return;
         }
 
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // Türkçe karakterler için BOM
-        csvContent += "Tarih,Güzergah,Hasılat,Mazot,Sıvı Bakım,Tamir,Parça,Diğer,Şoför,Sabit Gider,Toplam Gider,Net Kâr\n";
-
-        filtrelenmisKayitlar.forEach(k => {
+        // Excel'e aktarılacak veriyi başlıklarla birlikte hazırla
+        const excelData = filtrelenmisKayitlar.map(k => {
             const net = ((k.hasilat || 0) + (k.ukomeGeliri || 0)) - (k.toplamGider || 0);
-            const row = [
-                k.tarih.split('-').reverse().join('.'),
-                k.guzergah || '-',
-                k.hasilat || 0,
-                k.mazotTL || 0,
-                k.siviBakim || 0,
-                k.tamir || 0,
-                k.parca || 0,
-                k.diger || 0,
-                k.gunlukSoforUcret || 0,
-                k.sabitGiderPayi || 0,
-                k.toplamGider || 0,
-                net
-            ];
-            csvContent += row.join(",") + "\n";
+            const gunlukKM = gunlukKmMap[k.id] || 0;
+            const kmBasiMazot = gunlukKM > 0 ? (Number(k.mazotTL) / gunlukKM) : 0;
+            
+            return {
+                "Tarih": (k.tarih || '').split('-').reverse().join('.'),
+                "Güzergah": k.guzergah || '-',
+                "Hasılat (TL)": k.hasilat || 0,
+                "KM": k.km || 0,
+                "Günlük KM": gunlukKM,
+                "Mazot (TL)": k.mazotTL || 0,
+                "KM Başı Mazot (TL)": Number(kmBasiMazot.toFixed(2)),
+                "Sıvı Bakım (TL)": k.siviBakim || 0,
+                "Tamir (TL)": k.tamir || 0,
+                "Parça (TL)": k.parca || 0,
+                "Diğer (TL)": k.diger || 0,
+                "Şoför (TL)": k.gunlukSoforUcret || 0,
+                "Muhasebe/Sabit (TL)": Math.round(k.sabitGiderPayi || 0),
+                "Devlet Desteği (TL)": Math.round(k.ukomeGeliri || 0),
+                "Toplam Gider (TL)": Math.round(k.toplamGider || 0),
+                "Net Kâr (TL)": Math.round(net)
+            };
         });
 
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Dolmus_Raporu_${formatTarih(new Date())}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // SheetJS kullanarak çalışma kitabı ve sayfası oluştur
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Rapor");
+
+        // Sütun genişliklerini ayarla (daha okunaklı bir tablo için)
+        const wscols = [
+            {wch: 12}, // Tarih
+            {wch: 15}, // Güzergah
+            {wch: 12}, // Hasılat
+            {wch: 10}, // KM
+            {wch: 10}, // Günlük KM
+            {wch: 12}, // Mazot
+            {wch: 15}, // KM Başı Mazot
+            {wch: 12}, // Sıvı Bakım
+            {wch: 12}, // Tamir
+            {wch: 12}, // Parça
+            {wch: 12}, // Diğer
+            {wch: 12}, // Şoför
+            {wch: 18}, // Muhasebe
+            {wch: 15}, // Destek
+            {wch: 15}, // Toplam Gider
+            {wch: 12}  // Net Kâr
+        ];
+        worksheet['!cols'] = wscols;
+
+        // Dosyayı .xlsx formatında indir
+        XLSX.writeFile(workbook, `Dolmus_Raporu_${formatTarih(new Date())}.xlsx`);
     }
 
     function raporuYazdir() {
