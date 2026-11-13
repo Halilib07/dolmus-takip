@@ -112,8 +112,6 @@
         .rapor-filtre-alani .input-grup { margin-top: 0; flex: 1; min-width: 120px; }
         .rapor-filtre-alani button { padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; height: 46px; transition:0.2s; }
         .rapor-filtre-alani button:hover { background: #1a252f; }
-        .btn-yazdir { background: var(--info) !important; }
-        .btn-yazdir:hover { background: #2980b9 !important; }
 
         /* KURUMSAL İSTATİSTİK KARTLARI */
         .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
@@ -219,27 +217,6 @@
         .flatpickr-day.mazotlu-gun.selected { background-color: #e17055 !important; border-color: #e17055 !important; color: white !important; }
         .mazot-dagit-btn { position: absolute; right: 8px; top: 12px; padding: 6px 10px; background: var(--warning); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; display: none; z-index: 10; }
         .mazot-input-grup.has-btn input { padding-right: 75px; }
-
-        /* YAZDIRMA (PRINT) MODU İÇİN ÖZEL CSS */
-        @media print {
-            body { background: white !important; padding: 0 !important; overflow: visible !important; }
-            body.uygulama-acik { padding: 0 !important; }
-            .container { max-width: 100% !important; margin: 0 !important; }
-            .header-alani, .tabs, .rapor-filtre-alani, .islem-btn, button, #loginEkrani, .mazot-dagit-btn, .cikis-btn { display: none !important; }
-            .tab-content { display: block !important; }
-            #giris, #ayarlar { display: none !important; } /* Sadece raporu yazdır */
-            .card, .stat-box, .chart-card { box-shadow: none !important; border: 1px solid #ccc !important; margin-bottom: 10px !important; page-break-inside: avoid; }
-            .chart-grid { display: block !important; }
-            .chart-card { width: 100% !important; margin-bottom: 20px !important; }
-            .stat-box p { font-size: 18px !important; }
-            .stats-row { display: grid !important; grid-template-columns: 1fr 1fr 1fr !important; gap: 10px !important; }
-            .tablo-kapsayici { overflow: visible !important; }
-            .detay-tablo { min-width: 100% !important; font-size: 10px !important; }
-            .detay-tablo th, .detay-tablo td { padding: 5px !important; }
-            .yazdir-baslik { display: block !important; text-align: center; margin-bottom: 20px; font-size: 20px; font-weight: bold; }
-            .islem-btn-kolonu { display: none !important; }
-        }
-        .yazdir-baslik { display: none; }
 
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
@@ -379,8 +356,6 @@
     </div>
 
     <div id="rapor" class="tab-content">
-        <div class="yazdir-baslik">Dolmuş İşletme Yönetim Raporu</div>
-        
         <div class="rapor-filtre-alani">
             <div class="input-grup">
                 <label for="filtreYil" class="select-label">Yıl Seçimi</label>
@@ -424,7 +399,6 @@
                 </select>
             </div>
             <button onclick="filtreleRapor()">Filtrele</button>
-            <button class="btn-yazdir" onclick="raporuYazdir()">🖨️ PDF / Yazdır</button>
         </div>
 
         <div class="stats-row">
@@ -593,7 +567,7 @@
                             <th>Destek</th>
                             <th>Toplam Gider</th>
                             <th>Net</th>
-                            <th class="islem-btn-kolonu">İşlem</th>
+                            <th>İşlem</th>
                         </tr>
                     </thead>
                     <tbody id="tabloListesi">
@@ -605,7 +579,6 @@
     </div>
 
     <div id="ayarlar" class="tab-content">
-        <!-- Ayarlar sekmesi içeriği değişmedi, orijinal kod korundu -->
         <div class="card">
             <h2>⚙️ Sistem Ayarları (Araç Bakım & Takip)</h2>
             <div class="form-grid">
@@ -2556,7 +2529,7 @@
                 <td class="${net >= 0 ? 'text-success' : 'text-danger'}" style="font-weight:bold;">
                     ${Math.round(net).toLocaleString('tr-TR')} TL
                 </td>
-                <td class="islem-btn-kolonu">
+                <td>
                     <button onclick="duzenle('${k.id}')" class="islem-btn btn-duzenle">Düzenle</button>
                     <button onclick="sil('${k.id}')" class="islem-btn" style="background:var(--danger);">Sil</button>
                 </td>
@@ -2857,7 +2830,6 @@
         }
     }
 
-    // YENİ FONKSİYONLAR: Gerçek Excel (.xlsx) İndirme ve Yazdırma
     function tabloyuExcelIndir() {
         if (!filtrelenmisKayitlar || filtrelenmisKayitlar.length === 0) {
             alert("İndirilecek veri bulunamadı!"); return;
@@ -2917,10 +2889,6 @@
 
         // Dosyayı .xlsx formatında indir
         XLSX.writeFile(workbook, `Dolmus_Raporu_${formatTarih(new Date())}.xlsx`);
-    }
-
-    function raporuYazdir() {
-        window.print();
     }
 
     window.onload = function() {
