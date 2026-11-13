@@ -220,27 +220,103 @@
         .mazot-dagit-btn { position: absolute; right: 8px; top: 12px; padding: 6px 10px; background: var(--warning); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; display: none; z-index: 10; }
         .mazot-input-grup.has-btn input { padding-right: 75px; }
 
-        /* YAZDIRMA (PRINT) MODU İÇİN ÖZEL CSS */
+        /* ========================================================= */
+        /* YAZDIRMA (PRINT) / PDF MODU İÇİN ÖZEL ÇOK SAYFALI CSS     */
+        /* ========================================================= */
         @media print {
-            body { background: white !important; padding: 0 !important; overflow: visible !important; }
+            /* A4 Kağıt boyutu ve kenar boşlukları */
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
+
+            body { 
+                background: white !important; 
+                padding: 0 !important; 
+                overflow: visible !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+            }
             body.uygulama-acik { padding: 0 !important; }
             .container { max-width: 100% !important; margin: 0 !important; }
-            .header-alani, .tabs, .rapor-filtre-alani, .islem-btn, button, #loginEkrani, .mazot-dagit-btn, .cikis-btn { display: none !important; }
+            
+            /* Menüleri, butonları, filtreleri gizle */
+            .header-alani, .tabs, .rapor-filtre-alani, .islem-btn, button, #loginEkrani, .mazot-dagit-btn, .cikis-btn { 
+                display: none !important; 
+            }
+            
             .tab-content { display: block !important; }
             #giris, #ayarlar { display: none !important; } /* Sadece raporu yazdır */
-            .card, .stat-box, .chart-card { box-shadow: none !important; border: 1px solid #ccc !important; margin-bottom: 10px !important; page-break-inside: avoid; }
-            .chart-grid { display: block !important; }
-            .chart-card { width: 100% !important; margin-bottom: 20px !important; }
+            
+            /* Rapor Başlığı */
+            .yazdir-baslik { 
+                display: block !important; 
+                text-align: center; 
+                margin-bottom: 20px; 
+                font-size: 22px; 
+                font-weight: bold; 
+                page-break-after: avoid;
+            }
+
+            /* Kartların ve Grafiklerin içi bölünmesin, bir sonraki sayfaya geçsin */
+            .card, .stat-box, .chart-card { 
+                box-shadow: none !important; 
+                border: 1px solid #ccc !important; 
+                margin-bottom: 20px !important; 
+                page-break-inside: avoid; 
+                break-inside: avoid;
+            }
+
+            /* Grafiklerin yan yana değil, alt alta ve düzgün boyutta çıkması için */
+            .chart-grid { 
+                display: block !important; 
+            }
+            .chart-card { 
+                width: 100% !important; 
+                margin-bottom: 20px !important; 
+                page-break-inside: avoid;
+            }
+            .chart-container-wrapper {
+                height: 300px !important; /* Grafik boyutu sabitlemesi */
+            }
+
+            /* İstatistik Kutuları */
+            .stats-row { 
+                display: grid !important; 
+                grid-template-columns: 1fr 1fr 1fr !important; 
+                gap: 10px !important; 
+                page-break-inside: avoid;
+            }
             .stat-box p { font-size: 18px !important; }
-            .stats-row { display: grid !important; grid-template-columns: 1fr 1fr 1fr !important; gap: 10px !important; }
-            .tablo-kapsayici { overflow: visible !important; }
-            .detay-tablo { min-width: 100% !important; font-size: 10px !important; }
-            .detay-tablo th, .detay-tablo td { padding: 5px !important; }
-            .yazdir-baslik { display: block !important; text-align: center; margin-bottom: 20px; font-size: 20px; font-weight: bold; }
-            .islem-btn-kolonu { display: none !important; }
+
+            /* Detaylı Tablo */
+            .tablo-kapsayici { 
+                overflow: visible !important; 
+                width: 100% !important;
+            }
+            .detay-tablo { 
+                min-width: 100% !important; 
+                width: 100% !important;
+                font-size: 8px !important; /* Fontu küçült ki sığsın */
+                table-layout: fixed !important; 
+            }
+            .detay-tablo th, .detay-tablo td { 
+                padding: 4px !important; 
+                white-space: normal !important; /* Uzun yazıları alta indir */
+                word-wrap: break-word;
+            }
+            .islem-btn-kolonu { 
+                display: none !important; 
+            }
+            
+            /* Belirli bölümlerden sonra sayfa sonu zorla (Tablo çok uzunsa) */
+            .page-break-before {
+                page-break-before: always !important;
+            }
         }
         .yazdir-baslik { display: none; }
 
+        /* Mobil ve tablet ayarları */
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
             .chart-grid { grid-template-columns: 1fr; } 
@@ -566,7 +642,8 @@
             </div>
         </div>
 
-        <div class="card">
+        <!-- Tablo yeni sayfada başlasın diye page-break-before classı eklendi -->
+        <div class="card page-break-before">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                 <h2 style="font-size: 16px; margin:0; color:var(--primary);">Filtrelenen Kayıtlar (Detaylı)</h2>
                 <button onclick="tabloyuExcelIndir()" style="background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:5px;">📥 Excel'e Aktar (.xlsx)</button>
@@ -605,7 +682,6 @@
     </div>
 
     <div id="ayarlar" class="tab-content">
-        <!-- Ayarlar sekmesi içeriği değişmedi, orijinal kod korundu -->
         <div class="card">
             <h2>⚙️ Sistem Ayarları (Araç Bakım & Takip)</h2>
             <div class="form-grid">
