@@ -2312,6 +2312,7 @@
         let tMuhasebeKalemleri = { pesinVergi: 0, stopaj: 0, kdv: 0, gelirVergisi: 0, bagKur: 0, sigorta: 0, matbaaNoter: 0, muhasebe: 0, sabitDigerGider: 0, geciciVergi: 0 };
         let tSabit = 0;
         let toplamGunlukKM = 0;
+        let mazotluGunlerKM = 0; // YENİ: Sadece mazot alınan günlerin KM'sini tutar
         
         filtrelenmisKayitlar.forEach(k => {
             tKazanc += k.hasilat || 0;
@@ -2325,7 +2326,13 @@
             tDiger += k.diger || 0;
             tSabit += k.sabitGiderPayi || 0;
             
-            toplamGunlukKM += (gunlukKmMap[k.id] || 0);
+            let gunlukKM = (gunlukKmMap[k.id] || 0);
+            toplamGunlukKM += gunlukKM;
+
+            // YENİ: Eğer bu güne ait mazot gideri girilmişse, bu günün KM'sini ayrı bir havuza ekle
+            if ((k.mazotTL || 0) > 0) {
+                mazotluGunlerKM += gunlukKM;
+            }
 
             if (k.muhasebeKalemleri) {
                 for (const key in tMuhasebeKalemleri) {
@@ -2340,7 +2347,9 @@
         const netKar = toplamGelir - tGider;
         const gunSayisi = filtrelenmisKayitlar.length;
         const ortKar = gunSayisi > 0 ? netKar / gunSayisi : 0;
-        const ortKmMaliyet = toplamGunlukKM > 0 ? (tMazot / toplamGunlukKM) : 0;
+        
+        // YENİ: Ortalama maliyet, toplam mazotun sadece mazot alınan günlerin KM'sine bölünmesiyle bulunur
+        const ortKmMaliyet = mazotluGunlerKM > 0 ? (tMazot / mazotluGunlerKM) : 0;
 
         document.getElementById('rKazanc').innerText = Math.round(toplamGelir).toLocaleString('tr-TR') + " TL";
         document.getElementById('rGider').innerText = Math.round(tGider).toLocaleString('tr-TR') + " TL";
