@@ -48,7 +48,17 @@
         window.dinleVeriler();
     </script>
     <style>
-        :root { --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --bg: #f4f7f6; --info: #3498db; --purple: #8e44ad; }
+        :root { 
+            --primary: #2c3e50; 
+            --success: #27ae60; 
+            --danger: #e74c3c; 
+            --warning: #f39c12; 
+            --bg: #f4f7f6; 
+            --info: #3498db; 
+            --purple: #8e44ad; 
+            --text-muted: #7f8c8d;
+            --card-bg: #ffffff;
+        }
         
         html, body { height: 100%; margin: 0; overflow: hidden; }
 
@@ -88,45 +98,59 @@
 
         #uygulamaEkrani { display: none; }
         
-        .tabs { display: flex; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .tab-btn { flex: 1; padding: 15px; border: none; background: white; cursor: pointer; font-size: 16px; font-weight: bold; color: #7f8c8d; transition: 0.3s; border-right: 1px solid #eee; }
+        .tabs { display: flex; margin-bottom: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: white; cursor: pointer; font-size: 15px; font-weight: 600; color: var(--text-muted); transition: 0.3s; border-right: 1px solid #eee; }
         .tab-btn:last-child { border-right: none; }
         .tab-btn.active { background: var(--primary); color: white; }
         
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .form-grid .full { grid-column: span 2; }
-        button.btn-primary { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; border: 1px solid #eef2f5; }
         
-        .rapor-filtre-alani { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; background: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .rapor-filtre-alani { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border: 1px solid #eef2f5; }
         .rapor-filtre-alani .input-grup { margin-top: 0; flex: 1; min-width: 120px; }
-        .rapor-filtre-alani button { padding: 12px 20px; background: var(--info); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; height: 46px; }
+        .rapor-filtre-alani button { padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; height: 46px; transition:0.2s; }
+        .rapor-filtre-alani button:hover { background: #1a252f; }
+        .btn-yazdir { background: var(--info) !important; }
+        .btn-yazdir:hover { background: #2980b9 !important; }
+
+        /* KURUMSAL İSTATİSTİK KARTLARI */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-box { 
+            background: var(--card-bg); padding: 20px; border-radius: 12px; text-align: left; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #eef2f5; border-top: 4px solid var(--primary);
+            position: relative; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-box:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+        .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .stat-box h3 { margin: 0; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;}
+        .stat-icon { font-size: 20px; opacity: 0.6; }
+        .stat-box p { margin: 0; font-size: 24px; font-weight: 700; color: var(--primary); }
         
-        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-box { background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid var(--primary); }
-        .stat-box h3 { margin: 0 0 10px; font-size: 14px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px;}
-        .stat-box p { margin: 0; font-size: 22px; font-weight: bold; color: var(--primary); }
-        
+        .trend { font-size: 12px; font-weight: 600; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+        .trend.up { color: var(--success); }
+        .trend.down { color: var(--danger); }
+        .trend.neutral { color: var(--text-muted); }
+
         .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; align-items: stretch; }
-        .chart-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow: hidden; }
-        .chart-card h3 { margin-top: 0; margin-bottom: 15px; font-size: 16px; color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .chart-card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #eef2f5; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow: hidden; }
+        .chart-card h3 { margin-top: 0; margin-bottom: 15px; font-size: 15px; color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 10px; font-weight: 600; }
         
         .chart-container-wrapper { position: relative; flex-grow: 1; min-height: 250px; width: 100%; }
         
-        .analiz-tablo-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;}
+        .analiz-tablo-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px;}
         .analiz-tablo { width: 100%; min-width: 950px; border-collapse: collapse; background: white; table-layout: auto; }
-        .analiz-tablo th, .analiz-tablo td { padding: 10px 8px; text-align: center; border-bottom: 1px solid #eee; font-size: 13px; white-space: nowrap; }
-        .analiz-tablo th { background: #ecf0f1; font-weight: bold; }
+        .analiz-tablo th, .analiz-tablo td { padding: 12px 10px; text-align: center; border-bottom: 1px solid #eee; font-size: 13px; white-space: nowrap; }
+        .analiz-tablo th { background: #f8f9fa; font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 11px; }
+        .analiz-tablo tbody tr:hover { background-color: #f8f9fa; }
         
         .text-danger { color: var(--danger); }
         .text-success { color: var(--success); }
         .text-info { color: var(--info); }
-        .text-muted { color: #7f8c8d; font-size: 12px; }
+        .text-muted { color: var(--text-muted); font-size: 12px; }
 
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .detay-tablo { width: 100%; min-width: 1600px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
-        .detay-tablo th, .detay-tablo td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
-        .detay-tablo th { background: #ecf0f1; font-weight: bold; }
+        .detay-tablo th, .detay-tablo td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; white-space: nowrap; }
+        .detay-tablo th { background: #f8f9fa; font-weight: 600; color: var(--text-muted); }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -134,89 +158,91 @@
         .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); }
 
         .input-grup { position: relative; margin-top: 10px; }
-        .input-grup input, .input-grup select { width: 100%; padding: 22px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
+        .input-grup input, .input-grup select { width: 100%; padding: 22px 15px 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; background: white; transition: all 0.2s ease; box-sizing: border-box; }
         .input-grup input:focus, .input-grup select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.1); }
         .input-grup input:disabled { background: #ecf0f1; color: #7f8c8d; cursor: not-allowed; }
-        .input-grup label { position: absolute; left: 15px; top: 16px; color: #7f8c8d; font-size: 14px; font-weight: normal; pointer-events: none; transition: all 0.2s ease; margin: 0; }
+        .input-grup label { position: absolute; left: 15px; top: 16px; color: var(--text-muted); font-size: 14px; font-weight: normal; pointer-events: none; transition: all 0.2s ease; margin: 0; }
         .input-grup input:focus + label, .input-grup input:not(:placeholder-shown) + label { top: 5px; font-size: 11px; font-weight: bold; color: var(--primary); }
         
         .input-grup select { appearance: none; background-image: url("data:image/svg+xml;utf8,<svg fill='%237f8c8d' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>"); background-repeat: no-repeat; background-position-x: 95%; background-position-y: center; cursor: pointer;}
         .input-grup .select-label { position: absolute; left: 15px; top: 5px; color: var(--primary); font-size: 11px; font-weight: bold; margin: 0; }
 
-        .hedef-ay-kutu { padding: 22px 15px 10px 15px; border: 1px solid var(--purple); border-radius: 8px; font-size: 16px; background: #f4ecf7; color: var(--purple); font-weight: bold; box-sizing: border-box; height: 100%; display: flex; align-items: center; }
-
-        .toplam-sabit { grid-column: span 2; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid var(--primary); margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .toplam-sabit span { font-weight: bold; font-size: 16px; }
-        .toplam-sabit strong { font-size: 20px; color: var(--primary); }
-
-        .islem-btn { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; color: white; }
+        .islem-btn { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 5px; color: white; font-size: 12px;}
         .btn-duzenle { background: var(--warning); }
         
-        .btn-dagit { background: var(--purple); width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
-        .btn-sil-fis { background: var(--danger); width: 100%; padding: 10px; margin-top: 5px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 14px; grid-column: span 2; display: none;}
-        .btn-ukome { background: var(--success); width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
-
-        .uyari-panosu { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
-        .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 100px; }
-        .uyari-kutu h4 { margin: 0 0 5px 0; font-size: 13px; opacity: 0.9; }
-        .uyari-kutu p { margin: 0; font-size: 18px; font-weight: bold; }
-        .uyari-alt-yazi { margin-top: 8px; font-size: 12px; font-weight: normal; opacity: 0.9; }
-        
-        .durum-yesil { background-color: var(--success); }
-        .durum-sari { background-color: var(--warning); }
-        .durum-kirmizi { background-color: var(--danger); }
-        .durum-gri { background-color: #95a5a6; }
-
-        .chart-full-width { grid-column: span 2; }
-
         .mali-tablo-wrapper { width: 100%; overflow-x: hidden; }
         .mali-tablo { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; table-layout: fixed; }
         .mali-tablo th:nth-child(1) { width: 60%; text-align: left; }
         .mali-tablo th:nth-child(2) { width: 25%; text-align: right; }
         .mali-tablo th:nth-child(3) { width: 15%; text-align: right; }
-        .mali-tablo th { background: var(--primary); color: white; padding: 12px; }
+        .mali-tablo th { background: var(--primary); color: white; padding: 12px; font-weight: 500;}
         .mali-tablo td { padding: 10px 12px; border-bottom: 1px solid #eee; white-space: normal; word-wrap: break-word; }
         .mali-tablo td:nth-child(1) { text-align: left; }
         .mali-tablo td:nth-child(2) { text-align: right; }
         .mali-tablo td:nth-child(3) { text-align: right; font-weight: bold; color: var(--primary); }
-        .mali-tablo .grup-baslik td { font-weight: bold; background: #f8f9fa; color: var(--primary); text-transform: uppercase; font-size: 12px; padding-top: 15px; padding-bottom: 5px; border-bottom: 2px solid var(--primary); }
+        .mali-tablo .grup-baslik td { font-weight: 600; background: #f8f9fa; color: var(--primary); text-transform: uppercase; font-size: 12px; padding-top: 15px; padding-bottom: 5px; border-bottom: 2px solid var(--primary); }
         .mali-tablo .toplam-row td { font-weight: bold; background: #ecf0f1; border-top: 2px solid var(--primary); font-size: 15px; color: var(--primary); }
         .mali-tablo .kar-row td { font-weight: bold; background: #e8f8f5; color: var(--success); font-size: 16px; border-top: 2px solid var(--success); }
-        
         .mali-tablo .grup-toplam td { font-weight: bold; color: var(--primary); font-size: 15px; background-color: #f8f9fa; border-bottom: 2px solid #bdc3c7; }
 
+        /* Diğer eski CSS ayarları (uyarı kutuları, takvim vb.) korundu */
+        .uyari-panosu { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .uyari-kutu { padding: 15px; border-radius: 8px; color: white; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: center; min-height: 100px; }
+        .uyari-kutu h4 { margin: 0 0 5px 0; font-size: 13px; opacity: 0.9; }
+        .uyari-kutu p { margin: 0; font-size: 18px; font-weight: bold; }
+        .uyari-alt-yazi { margin-top: 8px; font-size: 12px; font-weight: normal; opacity: 0.9; }
+        .durum-yesil { background-color: var(--success); }
+        .durum-sari { background-color: var(--warning); }
+        .durum-kirmizi { background-color: var(--danger); }
+        .durum-gri { background-color: #95a5a6; }
+        .chart-full-width { grid-column: span 2; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-grid .full { grid-column: span 2; }
+        button.btn-primary { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; transition:0.2s; }
+        button.btn-primary:hover { background: #219150; }
+        
+        .hedef-ay-kutu { padding: 22px 15px 10px 15px; border: 1px solid var(--purple); border-radius: 8px; font-size: 16px; background: #f4ecf7; color: var(--purple); font-weight: bold; box-sizing: border-box; height: 100%; display: flex; align-items: center; }
+        .toplam-sabit { grid-column: span 2; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 5px solid var(--primary); margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .toplam-sabit span { font-weight: bold; font-size: 16px; }
+        .toplam-sabit strong { font-size: 20px; color: var(--primary); }
+        
+        .btn-dagit { background: var(--purple); width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2; transition:0.2s;}
+        .btn-sil-fis { background: var(--danger); width: 100%; padding: 10px; margin-top: 5px; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; grid-column: span 2; display: none;}
+        .btn-ukome { background: var(--success); width: 100%; padding: 12px; margin-top: 10px; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; grid-column: span 2;}
+        
         .flatpickr-input[readonly] { background: white !important; cursor: pointer; }
-
-        .flatpickr-day.mazotlu-gun {
-            background-color: #ffeaa7 !important; 
-            border-color: #fdcb6e !important;
-            color: #d63031 !important; 
-            font-weight: bold;
-        }
+        .flatpickr-day.mazotlu-gun { background-color: #ffeaa7 !important; border-color: #fdcb6e !important; color: #d63031 !important; font-weight: bold; }
         .flatpickr-day.mazotlu-gun:hover { background-color: #fdcb6e !important; }
         .flatpickr-day.mazotlu-gun.selected { background-color: #e17055 !important; border-color: #e17055 !important; color: white !important; }
-
-        .mazot-dagit-btn {
-            position: absolute;
-            right: 8px;
-            top: 12px;
-            padding: 6px 10px;
-            background: var(--warning);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: bold;
-            display: none; 
-            z-index: 10;
-        }
+        .mazot-dagit-btn { position: absolute; right: 8px; top: 12px; padding: 6px 10px; background: var(--warning); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; display: none; z-index: 10; }
         .mazot-input-grup.has-btn input { padding-right: 75px; }
+
+        /* YAZDIRMA (PRINT) MODU İÇİN ÖZEL CSS */
+        @media print {
+            body { background: white !important; padding: 0 !important; overflow: visible !important; }
+            body.uygulama-acik { padding: 0 !important; }
+            .container { max-width: 100% !important; margin: 0 !important; }
+            .header-alani, .tabs, .rapor-filtre-alani, .islem-btn, button, #loginEkrani, .mazot-dagit-btn, .cikis-btn { display: none !important; }
+            .tab-content { display: block !important; }
+            #giris, #ayarlar { display: none !important; } /* Sadece raporu yazdır */
+            .card, .stat-box, .chart-card { box-shadow: none !important; border: 1px solid #ccc !important; margin-bottom: 10px !important; page-break-inside: avoid; }
+            .chart-grid { display: block !important; }
+            .chart-card { width: 100% !important; margin-bottom: 20px !important; }
+            .stat-box p { font-size: 18px !important; }
+            .stats-row { display: grid !important; grid-template-columns: 1fr 1fr 1fr !important; gap: 10px !important; }
+            .tablo-kapsayici { overflow: visible !important; }
+            .detay-tablo { min-width: 100% !important; font-size: 10px !important; }
+            .detay-tablo th, .detay-tablo td { padding: 5px !important; }
+            .yazdir-baslik { display: block !important; text-align: center; margin-bottom: 20px; font-size: 20px; font-weight: bold; }
+        }
+        .yazdir-baslik { display: none; }
 
         @media (max-width: 1024px) {
             .uyari-panosu { grid-template-columns: repeat(2, 1fr); }
             .chart-grid { grid-template-columns: 1fr; } 
             .chart-full-width { grid-column: span 1; }
+            .stats-row { grid-template-columns: repeat(3, 1fr); }
         }
         @media (max-width: 768px) {
             body { padding: 10px; }
@@ -228,7 +254,6 @@
             .uyari-kutu { min-height: auto; padding: 12px 15px; flex-direction: row; justify-content: space-between; align-items: center; text-align: left; }
             .uyari-kutu h4 { margin: 0; font-size: 14px; }
             .uyari-kutu p { font-size: 18px; margin: 0; }
-            .uyari-alt-yazi { display: block; font-size: 11px; margin-top: 2px; }
             .form-grid { grid-template-columns: 1fr; gap: 10px; }
             .form-grid .full { grid-column: span 1; }
             .input-grup input, .input-grup select { padding: 18px 12px 8px 12px; font-size: 15px; }
@@ -237,17 +262,16 @@
             .input-grup input:focus + label, .input-grup input:not(:placeholder-shown) + label { top: 3px; font-size: 10px; }
             .hedef-ay-kutu { padding: 18px 12px 8px 12px; font-size: 15px; }
             .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .stat-box { padding: 10px; }
-            .stat-box p { font-size: 16px; }
+            .stat-box { padding: 15px; }
+            .stat-box p { font-size: 20px; }
             .stat-box h3 { font-size: 12px; }
             .card { padding: 15px; }
             .toplam-sabit { flex-direction: column; align-items: flex-start; gap: 5px; }
-            .toplam-sabit strong { font-size: 18px; }
-            .rapor-filtre-alani { flex-direction: column; align-items: stretch; }
             .mali-tablo th:nth-child(1) { width: 50%; }
             .mali-tablo th:nth-child(2) { width: 30%; }
             .mali-tablo th:nth-child(3) { width: 20%; }
             .mazot-dagit-btn { top: 10px; padding: 5px 8px; font-size: 10px; }
+            .rapor-filtre-alani { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>
@@ -295,7 +319,7 @@
         </div>
 
         <div class="card">
-            <h2 id="formBaslik" style="margin-top:0; margin-bottom: 20px;">Günlük Sefer ve Gider Ekle</h2>
+            <h2 id="formBaslik" style="margin-top:0; margin-bottom: 20px; font-size: 18px; color:var(--primary);">Günlük Sefer ve Gider Ekle</h2>
             <div class="form-grid">
                 <div class="input-grup">
                     <input type="text" id="tarih" placeholder=" ">
@@ -352,6 +376,7 @@
     </div>
 
     <div id="rapor" class="tab-content">
+        <div class="yazdir-baslik">Dolmuş İşletme Yönetim Raporu</div>
         
         <div class="rapor-filtre-alani">
             <div class="input-grup">
@@ -395,42 +420,68 @@
                     <option value="Dağdibi">Dağdibi</option>
                 </select>
             </div>
-            <button onclick="filtreleRapor()">Filtrele / Raporla</button>
+            <button onclick="filtreleRapor()">Filtrele</button>
+            <button class="btn-yazdir" onclick="raporuYazdir()">🖨️ PDF / Yazdır</button>
         </div>
 
         <div class="stats-row">
-            <div class="stat-box">
-                <h3>Toplam Kazanç</h3>
+            <div class="stat-box" style="border-top-color: var(--success);">
+                <div class="stat-header">
+                    <h3>Toplam Kazanç</h3>
+                    <span class="stat-icon">💰</span>
+                </div>
                 <p id="rKazanc" class="text-success">0 TL</p>
+                <div id="trendKazanc" class="trend neutral"></div>
             </div>
-            <div class="stat-box">
-                <h3>Toplam Gider</h3>
+            
+            <div class="stat-box" style="border-top-color: var(--danger);">
+                <div class="stat-header">
+                    <h3>Toplam Gider</h3>
+                    <span class="stat-icon">📉</span>
+                </div>
                 <p id="rGider" class="text-danger">0 TL</p>
+                <div id="trendGider" class="trend neutral"></div>
             </div>
-            <div class="stat-box">
-                <h3>Net Kâr</h3>
+            
+            <div class="stat-box" style="border-top-color: var(--primary);">
+                <div class="stat-header">
+                    <h3>Net Kâr</h3>
+                    <span class="stat-icon">📊</span>
+                </div>
                 <p id="rKar">0 TL</p>
+                <div id="trendKar" class="trend neutral"></div>
             </div>
+            
             <div class="stat-box" style="border-top-color: var(--info);">
-                <h3>Günlük Ort. Kâr</h3>
-                <p id="rOrtKar">0 TL</p>
+                <div class="stat-header">
+                    <h3>Kâr Marjı</h3>
+                    <span class="stat-icon">🎯</span>
+                </div>
+                <p id="rKarMarji">%0</p>
+                <div class="trend neutral">Gelire oranı</div>
             </div>
+            
             <div class="stat-box" style="border-top-color: var(--purple);">
-                <h3>Ort. KM Maliyeti</h3>
-                <p id="rOrtKmMaliyet">0 TL/KM</p>
+                <div class="stat-header">
+                    <h3>Ort. KM Maliyeti</h3>
+                    <span class="stat-icon">🛣️</span>
+                </div>
+                <p id="rOrtKmMaliyet">0 TL</p>
+                <div class="trend neutral">Yakıt / KM</div>
             </div>
-            <div class="stat-box" style="border-top-color: var(--info);">
-                <h3>Toplam KM</h3>
-                <p id="rToplamKM">0 KM</p>
-            </div>
+
             <div class="stat-box" style="border-top-color: var(--warning);">
-                <h3>Toplam Sefer</h3>
-                <p id="rSeferSayisi">0 Gün</p>
+                <div class="stat-header">
+                    <h3>Toplam KM / Sefer</h3>
+                    <span class="stat-icon">📍</span>
+                </div>
+                <p id="rToplamKM" style="font-size: 20px;">0 KM</p>
+                <div id="rSeferSayisi" class="trend neutral">0 Gün</div>
             </div>
         </div>
 
         <div class="card">
-            <h2>📊 Maliyet Kalemleri ve Kar/Zarar Tablosu</h2>
+            <h2 style="font-size: 16px; margin-top:0; margin-bottom:15px; color:var(--primary);">📊 Maliyet Kalemleri ve Kar/Zarar Tablosu</h2>
             <div class="mali-tablo-wrapper">
                 <table class="mali-tablo" id="maliTablo">
                     <thead>
@@ -513,7 +564,10 @@
         </div>
 
         <div class="card">
-            <h2>Filtrelenen Kayıtlar (Detaylı)</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                <h2 style="font-size: 16px; margin:0; color:var(--primary);">Filtrelenen Kayıtlar (Detaylı)</h2>
+                <button onclick="tabloyuExcelIndir()" style="background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:13px;">📥 Excel'e Aktar</button>
+            </div>
             <div class="tablo-kapsayici">
                 <table class="detay-tablo">
                     <thead>
@@ -536,7 +590,7 @@
                             <th>Destek</th>
                             <th>Toplam Gider</th>
                             <th>Net</th>
-                            <th>İşlem</th>
+                            <th class="islem-btn-kolonu">İşlem</th>
                         </tr>
                     </thead>
                     <tbody id="tabloListesi">
@@ -548,6 +602,7 @@
     </div>
 
     <div id="ayarlar" class="tab-content">
+        <!-- Ayarlar sekmesi içeriği değişmedi, orijinal kod korundu -->
         <div class="card">
             <h2>⚙️ Sistem Ayarları (Araç Bakım & Takip)</h2>
             <div class="form-grid">
@@ -836,7 +891,7 @@
         bugun.setHours(23, 59, 59, 999);
 
         const enEski = new Date(bugun);
-        enEski.setDate(enEski.getDate() - 1); // Bugün ve Dün
+        enEski.setDate(enEski.getDate() - 1);
 
         const inputEl = document.getElementById('tarih');
         
@@ -2314,7 +2369,7 @@
         let tMuhasebeKalemleri = { pesinVergi: 0, stopaj: 0, kdv: 0, gelirVergisi: 0, bagKur: 0, sigorta: 0, matbaaNoter: 0, muhasebe: 0, sabitDigerGider: 0, geciciVergi: 0 };
         let tSabit = 0;
         let toplamGunlukKM = 0;
-        let mazotluGunlerKM = 0; // YENİ: Sadece mazot alınan günlerin KM'sini tutar
+        let mazotluGunlerKM = 0; 
         
         filtrelenmisKayitlar.forEach(k => {
             tKazanc += k.hasilat || 0;
@@ -2331,7 +2386,6 @@
             let gunlukKM = (gunlukKmMap[k.id] || 0);
             toplamGunlukKM += gunlukKM;
 
-            // YENİ: Eğer bu güne ait mazot gideri girilmişse, bu günün KM'sini ayrı bir havuza ekle
             if ((k.mazotTL || 0) > 0) {
                 mazotluGunlerKM += gunlukKM;
             }
@@ -2349,15 +2403,50 @@
         const netKar = toplamGelir - tGider;
         const gunSayisi = filtrelenmisKayitlar.length;
         const ortKar = gunSayisi > 0 ? netKar / gunSayisi : 0;
-        
-        // YENİ: Ortalama maliyet, toplam mazotun sadece mazot alınan günlerin KM'sine bölünmesiyle bulunur
         const ortKmMaliyet = mazotluGunlerKM > 0 ? (tMazot / mazotluGunlerKM) : 0;
+        
+        const karMarji = toplamGelir > 0 ? ((netKar / toplamGelir) * 100) : 0;
+
+        // YENİ: Trend Hesaplamaları (Seçili dönemin süresi kadar önceki dönemle kıyaslama)
+        const gunFarki = Math.ceil((bitis - baslangic) / (1000 * 60 * 60 * 24));
+        const oncekiBitir = new Date(baslangic);
+        oncekiBitir.setDate(oncekiBitir.getDate() - 1);
+        const oncekiBasla = new Date(oncekiBitir);
+        oncekiBasla.setDate(oncekiBasla.getDate() - gunFarki);
+        oncekiBasla.setHours(0,0,0,0);
+        oncekiBitir.setHours(23,59,59,999);
+
+        let oKazanc = 0, oGider = 0, oKar = 0;
+        kayitlar.forEach(k => {
+            const kTarih = new Date(k.tarih);
+            if(kTarih >= oncekiBasla && kTarih <= oncekiBitir) {
+                oKazanc += (k.hasilat || 0) + (k.ukomeGeliri || 0);
+                oGider += (k.toplamGider || 0);
+            }
+        });
+        oKar = oKazanc - oGider;
+
+        const trendHesapla = (mevcut, onceki) => {
+            if(onceki === 0) return `<span class="trend neutral">Önceki veri yok</span>`;
+            const fark = ((mevcut - onceki) / Math.abs(onceki)) * 100;
+            if(fark > 0) return `<span class="trend up">▲ %${fark.toFixed(1)} artış (Önceki Dönem)</span>`;
+            if(fark < 0) return `<span class="trend down">▼ %${Math.abs(fark).toFixed(1)} düşüş (Önceki Dönem)</span>`;
+            return `<span class="trend neutral">Değişim yok</span>`;
+        };
 
         document.getElementById('rKazanc').innerText = Math.round(toplamGelir).toLocaleString('tr-TR') + " TL";
+        document.getElementById('trendKazanc').innerHTML = trendHesapla(toplamGelir, oKazanc);
+
         document.getElementById('rGider').innerText = Math.round(tGider).toLocaleString('tr-TR') + " TL";
+        document.getElementById('trendGider').innerHTML = trendHesapla(tGider, oGider);
+
         document.getElementById('rKar').innerText = Math.round(netKar).toLocaleString('tr-TR') + " TL";
         document.getElementById('rKar').className = netKar >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById('rOrtKar').innerText = Math.round(ortKar).toLocaleString('tr-TR') + " TL";
+        document.getElementById('trendKar').innerHTML = trendHesapla(netKar, oKar);
+
+        document.getElementById('rKarMarji').innerText = "%" + karMarji.toFixed(1);
+        document.getElementById('rKarMarji').style.color = karMarji >= 0 ? 'var(--success)' : 'var(--danger)';
+
         document.getElementById('rOrtKmMaliyet').innerText = ortKmMaliyet.toFixed(2) + " TL/KM";
         document.getElementById('rToplamKM').innerText = Math.round(toplamGunlukKM).toLocaleString('tr-TR') + " KM";
         document.getElementById('rSeferSayisi').innerText = gunSayisi + " Gün";
@@ -2464,7 +2553,7 @@
                 <td class="${net >= 0 ? 'text-success' : 'text-danger'}" style="font-weight:bold;">
                     ${Math.round(net).toLocaleString('tr-TR')} TL
                 </td>
-                <td>
+                <td class="islem-btn-kolonu">
                     <button onclick="duzenle('${k.id}')" class="islem-btn btn-duzenle">Düzenle</button>
                     <button onclick="sil('${k.id}')" class="islem-btn" style="background:var(--danger);">Sil</button>
                 </td>
@@ -2487,8 +2576,8 @@
             data: {
                 labels: etiketler,
                 datasets: [
-                    { label: 'Toplam Gelir (TL)', data: kazancData, borderColor: '#27ae60', backgroundColor: 'rgba(39, 174, 96, 0.1)', tension: 0.3, fill: true },
-                    { label: 'Gider (TL)', data: giderData, borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.1)', tension: 0.3, fill: true }
+                    { label: 'Toplam Gelir (TL)', data: kazancData, borderColor: '#27ae60', backgroundColor: 'rgba(39, 174, 96, 0.1)', tension: 0.3, fill: true, pointRadius: 2 },
+                    { label: 'Gider (TL)', data: giderData, borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.1)', tension: 0.3, fill: true, pointRadius: 2 }
                 ]
             },
             options: { responsive: true, maintainAspectRatio: false }
@@ -2501,10 +2590,11 @@
 
         const labels = ['Mazot', 'Sıvı Bakım', 'Tamir', 'Parça', 'Diğer', 'Şoför'];
         const data = [mazot, sivi, tamir, parca, diger, sofor];
-        const colors = ['#e74c3c', '#3498db', '#f1c40f', '#9b59b6', '#95a5a6', '#2ecc71'];
+        // Kurumsal Pastel Renkler
+        const colors = ['#2c3e50', '#34495e', '#7f8c8d', '#95a5a6', '#bdc3c7', '#16a085'];
 
-        if(muhasebe.stopaj > 0) { labels.push('Stopaj'); data.push(muhasebe.stopaj); colors.push('#34495e'); }
-        if(muhasebe.kdv > 0) { labels.push('KDV'); data.push(muhasebe.kdv); colors.push('#1abc9c'); }
+        if(muhasebe.stopaj > 0) { labels.push('Stopaj'); data.push(muhasebe.stopaj); colors.push('#2980b9'); }
+        if(muhasebe.kdv > 0) { labels.push('KDV'); data.push(muhasebe.kdv); colors.push('#8e44ad'); }
         if(muhasebe.sigorta > 0) { labels.push('Sigorta'); data.push(muhasebe.sigorta); colors.push('#d35400'); }
         if(muhasebe.bagKur > 0) { labels.push('Bağ-Kur'); data.push(muhasebe.bagKur); colors.push('#c0392b'); }
         if(muhasebe.geciciVergi > 0) { labels.push('Geçici Vergi'); data.push(muhasebe.geciciVergi); colors.push('#f39c12'); }
@@ -2520,7 +2610,7 @@
                     backgroundColor: colors
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, cutout: '65%' }
         });
     }
 
@@ -2544,7 +2634,7 @@
         });
 
         const ortalamaKar = gunlukToplamKar.map((kar, i) => gunlukSayi[i] > 0 ? kar / gunlukSayi[i] : 0);
-        const arkaPlanRenkleri = ortalamaKar.map(deger => deger < 0 ? '#e74c3c' : '#3498db');
+        const arkaPlanRenkleri = ortalamaKar.map(deger => deger < 0 ? '#e74c3c' : '#2c3e50');
 
         chartHaftalik = new Chart(ctx, {
             type: 'bar',
@@ -2642,8 +2732,8 @@
                     backgroundColor: dolguRenkleri,
                     borderWidth: 3,
                     pointBackgroundColor: cizgiRenkleri,
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
                     tension: 0.3,
                     fill: true
                 }]
@@ -2719,7 +2809,7 @@
             const bugun = new Date();
             bugun.setHours(23, 59, 59, 999);
             const enEski = new Date(bugun);
-            enEski.setDate(enEski.getDate() - 1); // Dün ve bugüne izin ver
+            enEski.setDate(enEski.getDate() - 1);
 
             const eskiTarihObj = new Date(eskiTarih);
             if (eskiTarihObj < enEski || eskiTarihObj > bugun) {
@@ -2762,6 +2852,47 @@
             try { await window.deleteDoc(window.doc(window.db, "kayitlar", id)); } 
             catch (e) { alert("Hata!"); }
         }
+    }
+
+    // YENİ FONKSİYONLAR: Excel ve Yazdırma
+    function tabloyuExcelIndir() {
+        if (!filtrelenmisKayitlar || filtrelenmisKayitlar.length === 0) {
+            alert("İndirilecek veri bulunamadı!"); return;
+        }
+
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // Türkçe karakterler için BOM
+        csvContent += "Tarih,Güzergah,Hasılat,Mazot,Sıvı Bakım,Tamir,Parça,Diğer,Şoför,Sabit Gider,Toplam Gider,Net Kâr\n";
+
+        filtrelenmisKayitlar.forEach(k => {
+            const net = ((k.hasilat || 0) + (k.ukomeGeliri || 0)) - (k.toplamGider || 0);
+            const row = [
+                k.tarih.split('-').reverse().join('.'),
+                k.guzergah || '-',
+                k.hasilat || 0,
+                k.mazotTL || 0,
+                k.siviBakim || 0,
+                k.tamir || 0,
+                k.parca || 0,
+                k.diger || 0,
+                k.gunlukSoforUcret || 0,
+                k.sabitGiderPayi || 0,
+                k.toplamGider || 0,
+                net
+            ];
+            csvContent += row.join(",") + "\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Dolmus_Raporu_${formatTarih(new Date())}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function raporuYazdir() {
+        window.print();
     }
 
     window.onload = function() {
