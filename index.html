@@ -228,40 +228,16 @@
             .header-alani, .tabs, .rapor-filtre-alani, .islem-btn, button, #loginEkrani, .mazot-dagit-btn, .cikis-btn { display: none !important; }
             .tab-content { display: block !important; }
             #giris, #ayarlar { display: none !important; } /* Sadece raporu yazdır */
-            
-            /* İlk sayfalar için genel ayarlar (Dikey A4) */
-            @page { size: A4 portrait; margin: 10mm; }
-            
-            .card, .stat-box, .chart-card { box-shadow: none !important; border: 1px solid #ddd !important; margin-bottom: 10px !important; page-break-inside: avoid; }
+            .card, .stat-box, .chart-card { box-shadow: none !important; border: 1px solid #ccc !important; margin-bottom: 10px !important; page-break-inside: avoid; }
             .chart-grid { display: block !important; }
             .chart-card { width: 100% !important; margin-bottom: 20px !important; }
             .stat-box p { font-size: 18px !important; }
             .stats-row { display: grid !important; grid-template-columns: 1fr 1fr 1fr !important; gap: 10px !important; }
-            
-            .yazdir-baslik { display: block !important; text-align: center; margin-bottom: 20px; font-size: 22px; font-weight: bold; color: #000; }
+            .tablo-kapsayici { overflow: visible !important; }
+            .detay-tablo { min-width: 100% !important; font-size: 10px !important; }
+            .detay-tablo th, .detay-tablo td { padding: 5px !important; }
+            .yazdir-baslik { display: block !important; text-align: center; margin-bottom: 20px; font-size: 20px; font-weight: bold; }
             .islem-btn-kolonu { display: none !important; }
-
-            /* SON SAYFA: DETAYLI TABLO (YATAY VE GENİŞ) */
-            #detayRaporKart {
-                page-break-before: always !important; /* Yeni sayfada başlat */
-                
-                /* Tabloyu yatay hale getirmek için döndürme ve ölçeklendirme */
-                transform: rotate(90deg) translateY(-100%) scale(0.75); 
-                transform-origin: top left;
-                width: 130vh; /* Döndürüldüğü için genişlik ve yükseklik yer değiştirir */
-                height: 100vw;
-                overflow: visible;
-                position: relative;
-                margin: 0;
-                padding: 0;
-                border: none !important;
-                box-shadow: none !important;
-            }
-
-            /* Tablo içindeki yazıları küçültüp sığdırma */
-            .detay-tablo { min-width: 100% !important; font-size: 9px !important; table-layout: auto; }
-            .detay-tablo th, .detay-tablo td { padding: 4px 6px !important; white-space: normal !important; word-wrap: break-word; }
-            #detayRaporKart h2 { font-size: 16px !important; margin-bottom: 10px !important; }
         }
         .yazdir-baslik { display: none; }
 
@@ -590,8 +566,7 @@
             </div>
         </div>
 
-        <!-- DETAYLI TABLO İÇİN ÖZEL KART (YAZDIRMADA SON SAYFA OLACAK) -->
-        <div class="card" id="detayRaporKart">
+        <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                 <h2 style="font-size: 16px; margin:0; color:var(--primary);">Filtrelenen Kayıtlar (Detaylı)</h2>
                 <button onclick="tabloyuExcelIndir()" style="background:#27ae60; color:white; border:none; padding:8px 15px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:5px;">📥 Excel'e Aktar (.xlsx)</button>
