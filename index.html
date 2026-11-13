@@ -114,7 +114,7 @@
         .chart-container-wrapper { position: relative; flex-grow: 1; min-height: 250px; width: 100%; }
         
         .analiz-tablo-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;}
-        .analiz-tablo { width: 100%; min-width: 750px; border-collapse: collapse; background: white; table-layout: auto; }
+        .analiz-tablo { width: 100%; min-width: 950px; border-collapse: collapse; background: white; table-layout: auto; }
         .analiz-tablo th, .analiz-tablo td { padding: 10px 8px; text-align: center; border-bottom: 1px solid #eee; font-size: 13px; white-space: nowrap; }
         .analiz-tablo th { background: #ecf0f1; font-weight: bold; }
         
@@ -476,6 +476,8 @@
                             <tr>
                                 <th>Güzergah</th>
                                 <th>Sefer</th>
+                                <th>Toplam Kazanç</th>
+                                <th>Toplam Gider</th>
                                 <th>Toplam Kâr</th>
                                 <th>Ort. Kâr/Sefer</th>
                                 <th>Toplam KM</th>
@@ -2657,11 +2659,16 @@
         const analiz = {};
         liste.forEach(k => {
             const g = k.guzergah || 'Belirtilmedi';
-            if(!analiz[g]) analiz[g] = { sefer: 0, toplamKar: 0, toplamKM: 0, toplamYakit: 0 };
+            if(!analiz[g]) analiz[g] = { sefer: 0, toplamKazanc: 0, toplamGider: 0, toplamKar: 0, toplamKM: 0, toplamYakit: 0 };
             
             analiz[g].sefer += 1;
             
-            const net = ((k.hasilat || 0) + (k.ukomeGeliri || 0)) - (k.toplamGider || 0);
+            const kazanc = (k.hasilat || 0) + (k.ukomeGeliri || 0);
+            const gider = (k.toplamGider || 0);
+            const net = kazanc - gider;
+
+            analiz[g].toplamKazanc += kazanc;
+            analiz[g].toplamGider += gider;
             analiz[g].toplamKar += net;
             
             const gunlukKM = gunlukKmMap[k.id] || 0;
@@ -2682,6 +2689,8 @@
             tr.innerHTML = `
                 <td style="font-weight:bold;">${g}</td>
                 <td>${veri.sefer}</td>
+                <td class="text-success" style="font-weight:bold;">${Math.round(veri.toplamKazanc).toLocaleString('tr-TR')} TL</td>
+                <td class="text-danger" style="font-weight:bold;">${Math.round(veri.toplamGider).toLocaleString('tr-TR')} TL</td>
                 <td class="${veri.toplamKar >= 0 ? 'text-success' : 'text-danger'}" style="font-weight:bold;">${Math.round(veri.toplamKar).toLocaleString('tr-TR')} TL</td>
                 <td>${Math.round(ortKar).toLocaleString('tr-TR')} TL</td>
                 <td class="text-info" style="font-weight:bold;">${Math.round(veri.toplamKM).toLocaleString('tr-TR')} KM</td>
