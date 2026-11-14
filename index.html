@@ -2386,17 +2386,32 @@
 
         // --- TREND HESAPLAMALARI BAŞLANGIÇ ---
         
-        // Seçilen tarih aralığını tam 1 ay geriye kaydırarak "Geçen Dönem" aralığını bul
         const oncekiBasla = new Date(baslangic);
-        const gunBas = oncekiBasla.getDate();
-        oncekiBasla.setMonth(oncekiBasla.getMonth() - 1);
-        if (oncekiBasla.getDate() !== gunBas) oncekiBasla.setDate(0); 
-        oncekiBasla.setHours(0,0,0,0);
-
         const oncekiBitir = new Date(bitis);
-        const gunBit = oncekiBitir.getDate();
-        oncekiBitir.setMonth(oncekiBitir.getMonth() - 1);
-        if (oncekiBitir.getDate() !== gunBit) oncekiBitir.setDate(0); 
+
+        // Seçilen tarih tam bir ay mı? (Ayın 1. günü başlayıp, ayın son günü bitiyor mu?)
+        const ayinSonGunu = new Date(bitis.getFullYear(), bitis.getMonth() + 1, 0).getDate();
+        const tamAyMi = (baslangic.getDate() === 1 && bitis.getDate() === ayinSonGunu);
+
+        if (tamAyMi) {
+            // Eğer tam ay seçildiyse, geçen ayın da tamamını (31 çekiyorsa 31'ini) al
+            oncekiBasla.setMonth(oncekiBasla.getMonth() - 1);
+            oncekiBasla.setDate(1); 
+            
+            oncekiBitir.setMonth(oncekiBitir.getMonth() - 1);
+            oncekiBitir.setDate(new Date(oncekiBitir.getFullYear(), oncekiBitir.getMonth() + 1, 0).getDate());
+        } else {
+            // Eğer tam ay değil de belirli bir aralık seçildiyse, gün bazlı geriye kaydır
+            const gunBas = oncekiBasla.getDate();
+            oncekiBasla.setMonth(oncekiBasla.getMonth() - 1);
+            if (oncekiBasla.getDate() !== gunBas) oncekiBasla.setDate(0); 
+
+            const gunBit = oncekiBitir.getDate();
+            oncekiBitir.setMonth(oncekiBitir.getMonth() - 1);
+            if (oncekiBitir.getDate() !== gunBit) oncekiBitir.setDate(0); 
+        }
+
+        oncekiBasla.setHours(0,0,0,0);
         oncekiBitir.setHours(23,59,59,999);
 
         // Önceki dönem verilerini hesapla
