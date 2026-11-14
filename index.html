@@ -2380,18 +2380,23 @@
         const toplamGelir = tKazanc + tUkome;
         const netKar = toplamGelir - tGider;
         const gunSayisi = filtrelenmisKayitlar.length;
-        const ortKar = gunSayisi > 0 ? netKar / gunSayisi : 0;
         const ortKmMaliyet = mazotluGunlerKM > 0 ? (tMazot / mazotluGunlerKM) : 0;
         
         const karMarji = toplamGelir > 0 ? ((netKar / toplamGelir) * 100) : 0;
 
         // --- TREND HESAPLAMALARI BAŞLANGIÇ ---
-        const gunFarki = Math.ceil((bitis - baslangic) / (1000 * 60 * 60 * 24));
-        const oncekiBitir = new Date(baslangic);
-        oncekiBitir.setDate(oncekiBitir.getDate() - 1);
-        const oncekiBasla = new Date(oncekiBitir);
-        oncekiBasla.setDate(oncekiBasla.getDate() - gunFarki);
+        
+        // Seçilen tarih aralığını tam 1 ay geriye kaydırarak "Geçen Dönem" aralığını bul
+        const oncekiBasla = new Date(baslangic);
+        const gunBas = oncekiBasla.getDate();
+        oncekiBasla.setMonth(oncekiBasla.getMonth() - 1);
+        if (oncekiBasla.getDate() !== gunBas) oncekiBasla.setDate(0); 
         oncekiBasla.setHours(0,0,0,0);
+
+        const oncekiBitir = new Date(bitis);
+        const gunBit = oncekiBitir.getDate();
+        oncekiBitir.setMonth(oncekiBitir.getMonth() - 1);
+        if (oncekiBitir.getDate() !== gunBit) oncekiBitir.setDate(0); 
         oncekiBitir.setHours(23,59,59,999);
 
         // Önceki dönem verilerini hesapla
@@ -2412,29 +2417,59 @@
             }
         });
 
-        const oKar = oKazanc - oGider;
-        const oKarMarji = oKazanc > 0 ? ((oKar / oKazanc) * 100) : 0;
+        // Geçen dönemin günlük ortalamalarını bul
+        const oOrtGunlukKazanc = oGunSayisi > 0 ? oKazanc / oGunSayisi : 0;
+        const oOrtGunlukGider = oGunSayisi > 0 ? oGider / oGunSayisi : 0;
+        const oOrtGunlukKar = oGunSayisi > 0 ? (oKazanc - oGider) / oGunSayisi : 0;
+        const oOrtGunlukKM = oGunSayisi > 0 ? oToplamGunlukKM / oGunSayisi : 0;
         const oOrtKmMaliyet = oMazotluGunlerKM > 0 ? (oMazot / oMazotluGunlerKM) : 0;
+        const oKarMarji = oKazanc > 0 ? (((oKazanc - oGider) / oKazanc) * 100) : 0;
+
+        // BEKLENEN DEĞERLER (Geçen dönemin günlük ortalaması x Bu dönemin gün sayısı)
+        const beklenenKazanc = oOrtGunlukKazanc * gunSayisi;
+        const beklenenGider = oOrtGunlukGider * gunSayisi;
+        const beklenenKar = oOrtGunlukKar * gunSayisi;
+        const beklenenKM = oOrtGunlukKM * gunSayisi;
 
         // Jenerik Trend Hesaplama Fonksiyonu
-        const trendHesapla = (mevcut, onceki, tip) => {
-            let oncekiStr = "";
-            if (tip === 'para') oncekiStr = Math.round(onceki).toLocaleString('tr-TR') + " TL";
-            else if (tip === 'yuzde') oncekiStr = "%" + onceki.toFixed(1);
-            else if (tip === 'km') oncekiStr = Math.round(onceki).toLocaleString('tr-TR') + " KM";
-            else if (tip === 'tl_km') oncekiStr = onceki.toFixed(2) + " TL/KM";
-            else if (tip === 'gun') oncekiStr = Math.round(onceki) + " Gün";
+        const trendHesapla = (mevcutToplam, beklenenToplam, tip, oncekiGercekToplam) => {
+            let altYazi = "";
+            let yuzdeHesaplanacakMevcut = 0;
+            let yuzdeHesaplanacakBeklenen = 0;
+
+            // Tipine göre yüzdelik hesabı ve alt metni hazırla
+            if (tip === 'para') {
+                yuzdeHesaplanacakMevcut = mevcutToplam;
+                yuzdeHesaplanacakBeklenen = beklenenToplam;
+                altYazi = `Beklenen: ${Math.round(beklenenToplam).toLocaleString('tr-TR')} TL <span style="font-size:10px;color:#95a5a6;">(Geçen Dönem: ${Math.round(oncekiGercekToplam).toLocaleString('tr-TR')} TL / ${oGunSayisi} Gün)</span>`;
+            } else if (tip === 'km') {
+                yuzdeHesaplanacakMevcut = mevcutToplam;
+                yuzdeHesaplanacakBeklenen = beklenenToplam;
+                altYazi = `Beklenen: ${Math.round(beklenenToplam).toLocaleString('tr-TR')} KM <span style="font-size:10px;color:#95a5a6;">(Geçen Dönem: ${Math.round(oncekiGercekToplam).toLocaleString('tr-TR')} KM / ${oGunSayisi} Gün)</span>`;
+            } else if (tip === 'gun') {
+                yuzdeHesaplanacakMevcut = mevcutToplam;
+                yuzdeHesaplanacakBeklenen = oncekiGercekToplam; // Gün sayısında beklenen = geçen dönem gün sayısı
+                altYazi = `Geçen Dönem: ${Math.round(oncekiGercekToplam)} Gün`;
+            } else if (tip === 'yuzde') {
+                yuzdeHesaplanacakMevcut = mevcutToplam;
+                yuzdeHesaplanacakBeklenen = oncekiGercekToplam; // Marjlar zaten oransal
+                altYazi = `Geçen Dönem: %${oncekiGercekToplam.toFixed(1)}`;
+            } else if (tip === 'tl_km') {
+                yuzdeHesaplanacakMevcut = mevcutToplam;
+                yuzdeHesaplanacakBeklenen = oncekiGercekToplam; // Birim maliyetler zaten oransal
+                altYazi = `Geçen Dönem: ${oncekiGercekToplam.toFixed(2)} TL/KM`;
+            }
 
             let trendClass = 'neutral';
             let trendText = 'Değişim yok';
 
-            if (onceki === 0 && mevcut === 0) {
+            if (yuzdeHesaplanacakBeklenen === 0 && yuzdeHesaplanacakMevcut === 0) {
                 trendText = 'Veri yok';
-            } else if (onceki === 0) {
+            } else if (yuzdeHesaplanacakBeklenen === 0) {
                 trendClass = 'up';
                 trendText = '▲ Yeni Veri';
             } else {
-                const fark = ((mevcut - onceki) / Math.abs(onceki)) * 100;
+                const fark = ((yuzdeHesaplanacakMevcut - yuzdeHesaplanacakBeklenen) / Math.abs(yuzdeHesaplanacakBeklenen)) * 100;
                 if (fark > 0) { trendClass = 'up'; trendText = `▲ %${fark.toFixed(1)} artış`; }
                 else if (fark < 0) { trendClass = 'down'; trendText = `▼ %${Math.abs(fark).toFixed(1)} düşüş`; }
             }
@@ -2442,33 +2477,33 @@
             return `
                 <div style="display: flex; flex-direction: column; gap: 2px; margin-top: 8px;">
                     <span class="trend ${trendClass}" style="margin-top: 0; font-size: 12px;">${trendText}</span>
-                    <span style="font-size: 11px; color: #7f8c8d; font-weight: normal;">Geçen Dönem: ${oncekiStr}</span>
+                    <span style="font-size: 11px; color: #7f8c8d; font-weight: normal;">${altYazi}</span>
                 </div>
             `;
         };
 
         // Değerleri HTML'e Yaz
         document.getElementById('rKazanc').innerText = Math.round(toplamGelir).toLocaleString('tr-TR') + " TL";
-        document.getElementById('trendKazanc').innerHTML = trendHesapla(toplamGelir, oKazanc, 'para');
+        document.getElementById('trendKazanc').innerHTML = trendHesapla(toplamGelir, beklenenKazanc, 'para', oKazanc);
 
         document.getElementById('rGider').innerText = Math.round(tGider).toLocaleString('tr-TR') + " TL";
-        document.getElementById('trendGider').innerHTML = trendHesapla(tGider, oGider, 'para');
+        document.getElementById('trendGider').innerHTML = trendHesapla(tGider, beklenenGider, 'para', oGider);
 
         document.getElementById('rKar').innerText = Math.round(netKar).toLocaleString('tr-TR') + " TL";
         document.getElementById('rKar').className = netKar >= 0 ? 'text-success' : 'text-danger';
-        document.getElementById('trendKar').innerHTML = trendHesapla(netKar, oKar, 'para');
+        document.getElementById('trendKar').innerHTML = trendHesapla(netKar, beklenenKar, 'para', (oKazanc - oGider));
 
         document.getElementById('rKarMarji').innerText = "%" + karMarji.toFixed(1);
         document.getElementById('rKarMarji').style.color = karMarji >= 0 ? 'var(--success)' : 'var(--danger)';
-        document.getElementById('trendKarMarji').innerHTML = trendHesapla(karMarji, oKarMarji, 'yuzde');
+        document.getElementById('trendKarMarji').innerHTML = trendHesapla(karMarji, oKarMarji, 'yuzde', oKarMarji);
 
         document.getElementById('rOrtKmMaliyet').innerText = ortKmMaliyet.toFixed(2) + " TL/KM";
-        document.getElementById('trendOrtKmMaliyet').innerHTML = trendHesapla(ortKmMaliyet, oOrtKmMaliyet, 'tl_km');
+        document.getElementById('trendOrtKmMaliyet').innerHTML = trendHesapla(ortKmMaliyet, oOrtKmMaliyet, 'tl_km', oOrtKmMaliyet);
 
         document.getElementById('rToplamKM').innerText = Math.round(toplamGunlukKM).toLocaleString('tr-TR') + " KM";
         
-        let kmTrendHTML = trendHesapla(toplamGunlukKM, oToplamGunlukKM, 'km');
-        let gunTrendHTML = trendHesapla(gunSayisi, oGunSayisi, 'gun');
+        let kmTrendHTML = trendHesapla(toplamGunlukKM, beklenenKM, 'km', oToplamGunlukKM);
+        let gunTrendHTML = trendHesapla(gunSayisi, oGunSayisi, 'gun', oGunSayisi);
         
         document.getElementById('rSeferSayisi').innerHTML = `
             <div style="display:flex; flex-direction:column; gap:4px;">
