@@ -2464,7 +2464,7 @@
             } else if (tip === 'gun') {
                 yuzdeHesaplanacakMevcut = mevcutToplam;
                 yuzdeHesaplanacakBeklenen = oncekiGercekToplam; // Gün sayısında beklenen = geçen dönem gün sayısı
-                altYazi = `Geçen Dönem: ${Math.round(oncekiGercekToplam)} Gün`;
+                altYazi = `Bu Dönem: ${Math.round(mevcutToplam)} Gün <span style="font-size:10px;color:#95a5a6;">(Geçen Dönem: ${Math.round(oncekiGercekToplam)} Gün)</span>`;
             } else if (tip === 'yuzde') {
                 yuzdeHesaplanacakMevcut = mevcutToplam;
                 yuzdeHesaplanacakBeklenen = oncekiGercekToplam; // Marjlar zaten oransal
