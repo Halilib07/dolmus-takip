@@ -1217,40 +1217,71 @@
             dagitilacakGunler.push(mevcutKayit);
         }
 
-        const gunSayisi = dagitilacakGunler.length;
-        
-        const tamPay = Math.floor(toplamMazot / gunSayisi);
-        const kalan = toplamMazot - (tamPay * gunSayisi);
-        const asilGunPay = tamPay + kalan;
+        // YENİ MANTIK: Toplam KM hesapla
+        let toplamDagitilacakKM = 0;
+        dagitilacakGunler.forEach(k => {
+            toplamDagitilacakKM += (gunlukKmMap[k.id] || 0);
+        });
 
-        const onay = confirm(`Toplam ${toplamMazot.toLocaleString('tr-TR')} TL mazot gideri,\n\nEn son mazot alım tarihi olan ${baslangicTarih.split('-').reverse().join('.')} ile bugün (${secilenTarih.split('-').reverse().join('.')}) arasındaki ${gunSayisi} çalışılmış güne dağıtılacak.\n\nHer güne ${tamPay.toLocaleString('tr-TR')} TL, mazot alım gününe ise kalan ${kalan} TL farkla birlikte ${asilGunPay.toLocaleString('tr-TR')} TL yazılacaktır.\n\nToplu alım günü takvimde renkli kalmaya devam edecek. Onaylıyor musunuz?`);
+        if (toplamDagitilacakKM === 0) {
+            alert("Seçilen günlerde gidilen toplam KM 0. Mazot dağıtımı yapılamaz. Lütfen günlük KM girişlerini kontrol edin."); 
+            return;
+        }
+
+        const kmBasiMaliyet = toplamMazot / toplamDagitilacakKM;
+
+        const onay = confirm(`Toplam ${toplamMazot.toLocaleString('tr-TR')} TL mazot gideri,\n\n${baslangicTarih.split('-').reverse().join('.')} ile ${secilenTarih.split('-').reverse().join('.')} arasındaki ${dagitilacakGunler.length} çalışılmış güne, o günlerde yapılan KM'lere oranlanarak dağıtılacak.\n\nToplam Yapılan KM: ${toplamDagitilacakKM.toLocaleString('tr-TR')} KM\nOrtalama KM Başı Maliyet: ${kmBasiMaliyet.toFixed(2)} TL\n\nOnaylıyor musunuz?`);
         if (!onay) return;
 
         try {
             const batch = window.writeBatch(window.db);
+            let dagitilanToplam = 0;
 
+            // Mazot alım günü için işaretleme
             batch.update(window.doc(window.db, "kayitlar", mevcutKayit.id), {
-                mazotTL: asilGunPay,
                 mazotAlimGunu: true,
-                orijinalMazotTutari: toplamMazot,
-                toplamGider: (Number(mevcutKayit.toplamGider) || 0) - toplamMazot + asilGunPay
+                orijinalMazotTutari: toplamMazot
             });
 
-            dagitilacakGunler.forEach(kayit => {
-                if (kayit.id === mevcutKayit.id) return; 
+            dagitilacakGunler.forEach((kayit, index) => {
+                const gunlukKM = (gunlukKmMap[kayit.id] || 0);
+                let hesaplananMazot = gunlukKM * kmBasiMaliyet;
+
+                // Yuvarlama hatası olmaması için son gün kalanı ekle
+                if (index === dagitilacakGunler.length - 1) {
+                    hesaplananMazot = toplamMazot - dagitilanToplam;
+                }
                 
-                const mevcutGunlukMazot = Number(kayit.mazotTL) || 0;
-                const mevcutToplamGider = Number(kayit.toplamGider) || 0;
+                hesaplananMazot = Math.round(hesaplananMazot * 100) / 100; // 2 ondalık basamak
+                dagitilanToplam += hesaplananMazot;
+
+                // Eğer bu gün daha önce mazot almışsa üzerine ekle, almamışsa direkt ata
+                const eskiMazot = Number(kayit.mazotTL) || 0; // Eski mazot tutarı
+                const eskiToplamGider = Number(kayit.toplamGider) || 0;
                 
+                // Eğer seçili olan asıl mazot kaydıysa, onun eski mazot değerini düşüp yenisini yazıyoruz.
+                // Diğer günler için üzerine ekliyoruz.
+                let yeniMazotDegeri = hesaplananMazot;
+                let yeniToplamGider = eskiToplamGider;
+
+                if (kayit.id === mevcutKayit.id) {
+                    // Mazot alım günü: Eski tutarı çıkar yeni hesaplananı ekle
+                    yeniToplamGider = (eskiToplamGider - eskiMazot) + hesaplananMazot;
+                } else {
+                    // Diğer günler: Üzerine ekle (Eğer o gün başka bir mazot kaydı yoksa)
+                    yeniMazotDegeri = eskiMazot + hesaplananMazot;
+                    yeniToplamGider = eskiToplamGider + hesaplananMazot;
+                }
+
                 batch.update(window.doc(window.db, "kayitlar", kayit.id), {
-                    mazotTL: mevcutGunlukMazot + tamPay,
-                    toplamGider: mevcutToplamGider + tamPay,
+                    mazotTL: yeniMazotDegeri,
+                    toplamGider: yeniToplamGider,
                     dagitimMazot: true 
                 });
             });
 
             await batch.commit();
-            alert(`✅ Başarılı! Toplam ${toplamMazot.toLocaleString('tr-TR')} TL mazot gideri ${gunSayisi} güne bölündü. Mazot alım gününe ${asilGunPay} TL, diğer günlere ${tamPay} TL eklendi.`);
+            alert(`✅ Başarılı! Toplam ${toplamMazot.toLocaleString('tr-TR')} TL mazot gideri, KM oranına göre ${dagitilacakGunler.length} güne dağıtıldı.`);
             
             setTimeout(() => {
                 formuTariheGoreDoldur(secilenTarih);
