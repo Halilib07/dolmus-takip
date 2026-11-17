@@ -1460,7 +1460,7 @@
             muhasebeKalemleri: ayniTarihliKayit ? (ayniTarihliKayit.muhasebeKalemleri || {}) : {},
             sabitGiderPayi: ayniTarihliKayit ? (ayniTarihliKayit.sabitGiderPayi || 0) : 0,
             ukomeGeliri: ayniTarihliKayit ? (ayniTarihliKayit.ukomeGeliri || 0) : 0,
-            kdvGideri: ayniTarihliKayit ? (ayniTarihliKayit.kdvGideri || 0) : 0
+            kdvGideri: (mazotDeger > 0 && ayniTarihliKayit) ? (ayniTarihliKayit.kdvGideri || 0) : 0
         };
 
         const [yilStr, ayStr] = secilenTarih.split('-');
