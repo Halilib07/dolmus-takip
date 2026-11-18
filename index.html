@@ -317,7 +317,7 @@
                 </div>
                 <div class="input-grup">
                     <input type="text" inputmode="decimal" id="hasilat" class="para" placeholder="">
-                    <label for="hasilat">Günlük Kazanç (TL)</label>
+                    <label for="hasilat" id="hasilatLabel">Günlük Kazanç (TL)</label>
                 </div>
                 <div class="input-grup">
                     <input type="text" inputmode="numeric" id="km" class="para" placeholder="">
@@ -612,6 +612,15 @@
             <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Girdiğiniz tarihlerin üzerine sistem otomatik olarak <b>+1 Yıl</b> ekler. Yağ ve Triger ömrü için belirlediğiniz KM, şoförün girdiği <b>en güncel tarihli</b> KM'den düşülerek hesaplanır.</p>
         </div>
 
+        <div class="card" style="border-left: 5px solid var(--info);">
+            <h2>📊 Bilgi Amaçlı Hesaplama Oranı</h2>
+            <div class="input-grup">
+                <input type="text" inputmode="decimal" id="ayarHasilaOrani" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
+                <label for="ayarHasilaOrani">Oran (%) — Önceki Hasılat Payı</label>
+            </div>
+            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Bu oran, günlük giriş ekranında "Günlük Kazanç" alanının yanında örnek hesaplama olarak gösterilir. Raporlara, gelirlere, giderlere ve net kâra <b>etki etmez</b> ve <b>kaydedilmez</b>.</p>
+        </div>
+
         <div class="card" style="border-left: 5px solid var(--success);">
             <h2>🏛️ Devlet Destekleri / UKOME Engelli Desteği</h2>
             <p style="font-size: 13px; color: #555; margin-bottom: 15px;">UKOME tarafından engelli taşımacılığı için verilen aylık desteği buradan ilgili aya dağıtabilirsiniz. Daha önce girilmiş bir destek varsa <b>güncelleyebilir</b> veya <b>silebilirsiniz</b>. Silme işleminde o aya ait tüm günlük dağıtımlar da temizlenir.</p>
@@ -805,6 +814,31 @@
         return Number(temizDeger) || 0;
     }
 
+    function oncekiHasilatPayiHesapla() {
+        const secilenTarih = document.getElementById('tarih') ? document.getElementById('tarih').value : null;
+        const labelEl = document.getElementById('hasilatLabel');
+        if (!secilenTarih || !labelEl) return;
+
+        const oran = Number(window._hasilaOrani) || 0;
+        if (oran <= 0) {
+            labelEl.innerText = "Günlük Kazanç (TL)";
+            return;
+        }
+
+        const oncekiKayit = kayitlar
+            .filter(k => k.tarih && new Date(k.tarih) < new Date(secilenTarih))
+            .sort((a,b) => new Date(b.tarih) - new Date(a.tarih))[0];
+
+        if (!oncekiKayit || !oncekiKayit.hasilat) {
+            labelEl.innerText = "Günlük Kazanç (TL)";
+            return;
+        }
+
+        const oncekiHasilat = Number(oncekiKayit.hasilat) || 0;
+        const pay = Math.round(oncekiHasilat * (oran / 100) * 100) / 100;
+        labelEl.innerText = `Günlük Kazanç (Örnek ${pay.toLocaleString('tr-TR')} TL)`;
+    }
+
     function formuTariheGoreDoldur(secilenTarih) {
         if (!secilenTarih) return;
 
@@ -824,6 +858,7 @@
                 document.getElementById('parca').value = "";
                 document.getElementById('diger').value = "";
                 document.getElementById('gunlukSoforUcret').value = "";
+                oncekiHasilatPayiHesapla();
                 return;
             }
         }
@@ -868,6 +903,7 @@
             document.getElementById('tamir').value = "";
             document.getElementById('parca').value = "";
             document.getElementById('diger').value = "";
+            document.getElementById('gunlukSofurUcret') && (document.getElementById('gunlukSoforUcret').value = "");
             document.getElementById('gunlukSoforUcret').value = "";
 
             mazotDagitBtn.style.display = 'none';
@@ -880,6 +916,7 @@
                 setTimeout(() => { mesajEl.innerText = ""; }, 8000);
             }
         }
+        oncekiHasilatPayiHesapla();
     }
 
     function tarihSeciciyiBaslat() {
@@ -1026,7 +1063,7 @@
         if(btnElement) btnElement.classList.add('active');
         
         if(tabId === 'rapor') { filtreleRapor(); }
-        if(tabId === 'giris') { aracUyarilariniGuncelle(); }
+        if(tabId === 'giris') { aracUyarilariniGuncelle(); oncekiHasilatPayiHesapla(); }
         if(tabId === 'ayarlar') { aracAyarlariniBuluttanYukle(); }
     }
 
@@ -1100,9 +1137,12 @@
         const yagOmru = formatiCoz(document.getElementById('ayarYagOmru').value); 
         const trigerKm = formatiCoz(document.getElementById('ayarTrigerKm').value);
         const trigerOmru = formatiCoz(document.getElementById('ayarTrigerOmru').value);
-        const ayarlar = { muayene, egzoz, yagKm, yagOmru, trigerKm, trigerOmru };
+        const hasilaOrani = formatiCoz(document.getElementById('ayarHasilaOrani').value);
+        const ayarlar = { muayene, egzoz, yagKm, yagOmru, trigerKm, trigerOmru, hasilaOrani };
         try {
             await window.setDoc(window.doc(window.db, "sistem", "aracAyarlari"), ayarlar);
+            window._hasilaOrani = hasilaOrani;
+            oncekiHasilatPayiHesapla();
             aracUyarilariniGuncelle(); 
         } catch (e) { console.error(e); }
     }
@@ -1122,6 +1162,11 @@
                     document.getElementById('ayarTrigerKm').value = sayiyiFormatla(ayarlar.trigerKm, false) || ""; 
                     document.getElementById('ayarTrigerOmru').value = sayiyiFormatla(ayarlar.trigerOmru, false) || ""; 
                 }
+                window._hasilaOrani = Number(ayarlar.hasilaOrani) || 0;
+                if (document.getElementById('ayarHasilaOrani')) {
+                    document.getElementById('ayarHasilaOrani').value = ayarlar.hasilaOrani ? sayiyiFormatla(ayarlar.hasilaOrani, true) : "";
+                }
+                oncekiHasilatPayiHesapla();
                 aracUyarilariniGuncelle(ayarlar);
             }
         } catch(e) { console.error(e); }
@@ -1297,7 +1342,6 @@
                     yeniToplamGider = eskiToplamGider + hesaplananMazot;
                 }
 
-                // KDV HESAPLAMASI - Sadece bilgi amaçlı saklanır, toplam gidere EKLENMEZ
                 const gunlukHasilat = Number(kayit.hasilat) || 0;
                 const kdv1 = gunlukHasilat - (gunlukHasilat / 1.2);
                 const kdv2 = yeniMazotDegeri - (yeniMazotDegeri / 1.2);
@@ -1537,7 +1581,6 @@
 
         } catch(e) { console.log("Kontrol hatası:", e); }
 
-        // KDV GİDERİ TOPLAM GİDER FORMÜLÜNE EKLENMİYOR (mükerrer olmaması için)
         kayit.toplamGider = kayit.mazotTL + kayit.siviBakim + kayit.tamir + kayit.parca + kayit.diger + kayit.gunlukSoforUcret + kayit.sabitGiderPayi;
 
         try {
@@ -1590,6 +1633,7 @@
                 aracUyarilariniGuncelle(); 
                 const aktifTarih = document.getElementById('tarih').value;
                 if (aktifTarih) formuTariheGoreDoldur(aktifTarih);
+                oncekiHasilatPayiHesapla();
                 
                 if (isYonetici && typeof fpInstance !== 'undefined' && fpInstance) {
                     fpInstance.redraw();
@@ -2448,8 +2492,6 @@
         
         const karMarji = toplamGelir > 0 ? ((netKar / toplamGelir) * 100) : 0;
 
-        // --- TREND HESAPLAMALARI BAŞLANGIÇ ---
-        
         const oncekiBasla = new Date(baslangic);
         const oncekiBitir = new Date(bitis);
 
