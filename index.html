@@ -613,18 +613,12 @@
         </div>
 
         <div class="card" style="border-left: 5px solid var(--info);">
-            <h2>📊 Bilgi Amaçlı Hesaplama Oranları</h2>
-            <div class="form-grid">
-                <div class="input-grup">
-                    <input type="text" inputmode="decimal" id="ayarHasilaOrani" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
-                    <label for="ayarHasilaOrani">1. Oran (%) — Günlük Kazanç Örneği</label>
-                </div>
-                <div class="input-grup">
-                    <input type="text" inputmode="decimal" id="ayarHasilaOrani2" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
-                    <label for="ayarHasilaOrani2">2. Oran (%) — Mazot Örneği</label>
-                </div>
+            <h2>📊 Bilgi Amaçlı Hesaplama Oranı</h2>
+            <div class="input-grup">
+                <input type="text" inputmode="decimal" id="ayarHasilaOrani" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
+                <label for="ayarHasilaOrani">Oran (%) — Günlük Kazanç &amp; Mazot Örneği</label>
             </div>
-            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Bu oranlar, günlük giriş ekranında "Günlük Kazanç" ve "Mazot" alanlarının yanında örnek hesaplama olarak gösterilir. Sonuçlar <b>10 TL'ye yukarı yuvarlanır</b>. Raporlara, gelirlere, giderlere ve net kâra <b>etki etmez</b> ve <b>kaydedilmez</b>.</p>
+            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Bu oran, günlük giriş ekranında <b>Günlük Kazanç</b> (bir önceki hasılata göre) ve <b>Mazot</b> (iki önceki hasılata göre) alanlarının yanında örnek hesaplama olarak gösterilir. Sonuçlar <b>5 TL'ye yukarı yuvarlanır</b>. Raporlara, gelirlere, giderlere ve net kâra <b>etki etmez</b> ve <b>kaydedilmez</b>.</p>
         </div>
 
         <div class="card" style="border-left: 5px solid var(--success);">
@@ -770,8 +764,8 @@
 
     let fpInstance = null;
 
-    // Yukarı yuvarlama: 10 TL adımlarla (506 → 510)
-    function yukariYuvarla10TL(deger) {
+    // Yukarı yuvarlama: 5 TL adımlarla (506 → 510, 531 → 535)
+    function yukariYuvarla5TL(deger) {
         if (!deger || deger <= 0) return 0;
         return Math.ceil(deger / 5) * 5;
     }
@@ -832,34 +826,38 @@
         const mazotLabelEl = document.getElementById('mazotLabel');
         if (!secilenTarih) return;
 
-        const oran1 = Number(window._hasilaOrani) || 0;
-        const oran2 = Number(window._hasilaOrani2) || 0;
+        const oran = Number(window._hasilaOrani) || 0;
 
-        const oncekiKayit = kayitlar
+        // Seçilen tarihten önceki tüm kayıtlar (yeniden eskiye sıralı, kronolojik kayıt sırası)
+        const oncekiKayitlar = kayitlar
             .filter(k => k.tarih && new Date(k.tarih) < new Date(secilenTarih))
-            .sort((a,b) => new Date(b.tarih) - new Date(a.tarih))[0];
+            .sort((a,b) => new Date(b.tarih) - new Date(a.tarih));
 
-        const oncekiHasilat = (oncekiKayit && oncekiKayit.hasilat) ? (Number(oncekiKayit.hasilat) || 0) : 0;
+        // Günlük Kazanç → bir önceki kaydın hasılatı
+        const birOncekiKayit = oncekiKayitlar[0] || null;
+        const birOncekiHasilat = (birOncekiKayit && birOncekiKayit.hasilat) ? (Number(birOncekiKayit.hasilat) || 0) : 0;
 
-        // 1. Oran → Günlük Kazanç label'ı
         if (hasilatLabelEl) {
-            if (oran1 <= 0 || oncekiHasilat <= 0) {
+            if (oran <= 0 || birOncekiHasilat <= 0) {
                 hasilatLabelEl.innerText = "Günlük Kazanç (TL)";
             } else {
-                const hamPay1 = oncekiHasilat * (oran1 / 100);
-                const pay1 = yukariYuvarla10TL(hamPay1);
-                hasilatLabelEl.innerText = `Günlük Kazanç (Örnek ${pay1.toLocaleString('tr-TR')} TL)`;
+                const hamPay = birOncekiHasilat * (oran / 100);
+                const pay = yukariYuvarla5TL(hamPay);
+                hasilatLabelEl.innerText = `Günlük Kazanç (Örnek ${pay.toLocaleString('tr-TR')} TL)`;
             }
         }
 
-        // 2. Oran → Mazot label'ı
+        // Mazot → iki önceki kaydın hasılatı (kronolojik olarak 2 kayıt geriye, aradaki boş günler atlanır)
+        const ikiOncekiKayit = oncekiKayitlar[1] || null;
+        const ikiOncekiHasilat = (ikiOncekiKayit && ikiOncekiKayit.hasilat) ? (Number(ikiOncekiKayit.hasilat) || 0) : 0;
+
         if (mazotLabelEl) {
-            if (oran2 <= 0 || oncekiHasilat <= 0) {
+            if (oran <= 0 || ikiOncekiHasilat <= 0) {
                 mazotLabelEl.innerText = "Mazot (TL)";
             } else {
-                const hamPay2 = oncekiHasilat * (oran2 / 100);
-                const pay2 = yukariYuvarla10TL(hamPay2);
-                mazotLabelEl.innerText = `Mazot (Örnek ${pay2.toLocaleString('tr-TR')} TL)`;
+                const hamPay = ikiOncekiHasilat * (oran / 100);
+                const pay = yukariYuvarla5TL(hamPay);
+                mazotLabelEl.innerText = `Mazot (Örnek ${pay.toLocaleString('tr-TR')} TL)`;
             }
         }
     }
@@ -1162,12 +1160,10 @@
         const trigerKm = formatiCoz(document.getElementById('ayarTrigerKm').value);
         const trigerOmru = formatiCoz(document.getElementById('ayarTrigerOmru').value);
         const hasilaOrani = formatiCoz(document.getElementById('ayarHasilaOrani').value);
-        const hasilaOrani2 = formatiCoz(document.getElementById('ayarHasilaOrani2').value);
-        const ayarlar = { muayene, egzoz, yagKm, yagOmru, trigerKm, trigerOmru, hasilaOrani, hasilaOrani2 };
+        const ayarlar = { muayene, egzoz, yagKm, yagOmru, trigerKm, trigerOmru, hasilaOrani };
         try {
             await window.setDoc(window.doc(window.db, "sistem", "aracAyarlari"), ayarlar);
             window._hasilaOrani = hasilaOrani;
-            window._hasilaOrani2 = hasilaOrani2;
             oncekiHasilatPayiHesapla();
             aracUyarilariniGuncelle(); 
         } catch (e) { console.error(e); }
@@ -1189,12 +1185,8 @@
                     document.getElementById('ayarTrigerOmru').value = sayiyiFormatla(ayarlar.trigerOmru, false) || ""; 
                 }
                 window._hasilaOrani = Number(ayarlar.hasilaOrani) || 0;
-                window._hasilaOrani2 = Number(ayarlar.hasilaOrani2) || 0;
                 if (document.getElementById('ayarHasilaOrani')) {
                     document.getElementById('ayarHasilaOrani').value = ayarlar.hasilaOrani ? sayiyiFormatla(ayarlar.hasilaOrani, true) : "";
-                }
-                if (document.getElementById('ayarHasilaOrani2')) {
-                    document.getElementById('ayarHasilaOrani2').value = ayarlar.hasilaOrani2 ? sayiyiFormatla(ayarlar.hasilaOrani2, true) : "";
                 }
                 oncekiHasilatPayiHesapla();
                 aracUyarilariniGuncelle(ayarlar);
