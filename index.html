@@ -464,32 +464,37 @@
             </div>
         </div>
 
-            <!-- YENİ: BİLGİ AMAÇLI TOPLAMLAR KARTI -->
+
+        <!-- YENİ: BİLGİ AMAÇLI TOPLAMLAR KARTI -->
         <div class="stat-box" style="border-top-color: var(--warning);">
-            <div class="stat-header">
-                <h3>Bilgi Amaçlı Toplamlar</h3>
-                <span class="stat-icon">ℹ️</span>
-            </div>
+                <div class="stat-header">
+                    <h3>Bilgi Amaçlı Toplamlar</h3>
+                    <span class="stat-icon">ℹ️</span>
+                </div>
                 
-            <div style="display: flex; gap: 15px; margin-top: 5px;">
-                <div>
-                    <div style="font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Hasıla2</div>
-                    <div id="bilgiHasila2" style="font-size: 16px; font-weight: 700; color: var(--success);">0 TL</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 5px;">
+                    <div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Hasıla2</div>
+                        <div id="bilgiHasila2" style="font-size: 15px; font-weight: 700; color: var(--success);">0 TL</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Toplam Mazot</div>
+                        <div id="bilgiToplamMazot" style="font-size: 15px; font-weight: 700; color: var(--primary);">0 TL</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Kdv2</div>
+                        <div id="bilgiKdv2" style="font-size: 15px; font-weight: 700; color: var(--danger);">0 TL</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">KDV (Mazot)</div>
+                        <div id="bilgiKdv" style="font-size: 15px; font-weight: 700; color: var(--warning);">0 TL</div>
+                    </div>
                 </div>
-                <div>
-                    <div style="font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Kdv2</div>
-                    <div id="bilgiKdv2" style="font-size: 16px; font-weight: 700; color: var(--danger);">0 TL</div>
-                </div>
-                <div>
-                    <div style="font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">KDV (Mazot)</div>
-                    <div id="bilgiKdv" style="font-size: 16px; font-weight: 700; color: var(--warning);">0 TL</div>
-                </div>
-            </div>
                 
-            <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
-                * Gelir/Gider'e dahil değildir.
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+                    * Gelir/Gider'e dahil değildir.
+                </div>
             </div>
-        </div>
 
 
         
@@ -2717,7 +2722,7 @@
 
         maliTabloDoldur(toplamGelir, tKazanc, tUkome, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
 
-        // YENİ: Bilgi Amaçlı Toplamları Hesapla
+                // YENİ: Bilgi Amaçlı Toplamları Hesapla
         let tHasila2 = 0;
         let tKdv2 = 0;
         let tKdv = 0;
@@ -2731,6 +2736,9 @@
         document.getElementById('bilgiHasila2').innerText = Math.round(tHasila2).toLocaleString('tr-TR') + " TL";
         document.getElementById('bilgiKdv2').innerText = Math.round(tKdv2).toLocaleString('tr-TR') + " TL";
         document.getElementById('bilgiKdv').innerText = Math.round(tKdv).toLocaleString('tr-TR') + " TL";
+        
+        // Toplam Mazot'u da yazdır (tMazot zaten yukarıdaki döngüde hesaplanmıştı)
+        document.getElementById('bilgiToplamMazot').innerText = Math.round(tMazot).toLocaleString('tr-TR') + " TL";
 
         cizTrendGrafigi(filtrelenmisKayitlar);
         cizGiderGrafigi(tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
