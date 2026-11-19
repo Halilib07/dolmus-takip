@@ -547,21 +547,26 @@
             </div>
         </div>
 
-        <!-- YENİ EKLENEN BİLGİ KUTUSU -->
-        <div class="card" style="background: #fff8e1; border-left: 5px solid var(--warning); padding: 15px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
-            <h3 style="margin: 0; font-size: 14px; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">ℹ️ Bilgi Amaçlı Toplamlar (Gelir/Gider'e Dahil Değildir)</h3>
-            <div class="bilgi-kutu-container" style="margin-top: 0; gap: 10px;">
-                <div class="bilgi-kutu-item" style="padding: 10px; background: #fff;">
-                    <div class="bilgi-kutu-title" style="font-size: 11px;">Hasıla2</div>
-                    <div id="bilgiHasila2" class="bilgi-kutu-value" style="color: var(--success); font-size: 16px;">0 TL</div>
+                <!-- YENİ: BİLGİ AMAÇLI TOPLAMLAR KUTUSU (Kartların Altında) -->
+        <div class="card" style="background: #fff8e1; border: 1px solid #ffe082; border-left: 5px solid var(--warning); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+            <div style="font-size: 14px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; flex: 1; min-width: 250px;">
+                <span style="font-size: 18px;">ℹ️</span> BİLGİ AMAÇLI TOPLAMLAR <span style="font-size: 11px; font-weight: normal; color: var(--text-muted);">(Gelir/Gider'e Dahil Değildir)</span>
+            </div>
+            
+            <div style="display: flex; gap: 25px; flex-wrap: wrap; justify-content: flex-end; flex: 1;">
+                <div style="text-align: right;">
+                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Hasıla2</div>
+                    <div id="bilgiHasila2" style="font-size: 18px; font-weight: bold; color: var(--success);">0 TL</div>
                 </div>
-                <div class="bilgi-kutu-item" style="padding: 10px; background: #fff;">
-                    <div class="bilgi-kutu-title" style="font-size: 11px;">Kdv2</div>
-                    <div id="bilgiKdv2" class="bilgi-kutu-value" style="color: var(--danger); font-size: 16px;">0 TL</div>
+                <div style="width: 1px; background: #ffe082; margin: 0 5px;"></div>
+                <div style="text-align: right;">
+                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Kdv2</div>
+                    <div id="bilgiKdv2" style="font-size: 18px; font-weight: bold; color: var(--danger);">0 TL</div>
                 </div>
-                <div class="bilgi-kutu-item" style="padding: 10px; background: #fff;">
-                    <div class="bilgi-kutu-title" style="font-size: 11px;">KDV (Mazot)</div>
-                    <div id="bilgiKdv" class="bilgi-kutu-value" style="color: var(--warning); font-size: 16px;">0 TL</div>
+                <div style="width: 1px; background: #ffe082; margin: 0 5px;"></div>
+                <div style="text-align: right;">
+                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">KDV (Mazot)</div>
+                    <div id="bilgiKdv" style="font-size: 18px; font-weight: bold; color: var(--warning);">0 TL</div>
                 </div>
             </div>
         </div>
