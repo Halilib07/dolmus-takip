@@ -464,37 +464,32 @@
             </div>
         </div>
 
-        <!-- YENİ: BİLGİ AMAÇLI KUTU (Eski yerine, kart tasarımıyla) -->
-        <div class="stat-box" style="border-top-color: var(--warning); margin-bottom: 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 20px;">
-            <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;">
-                <div class="stat-header" style="margin-bottom: 0;">
-                    <h3 style="margin: 0; font-size: 14px; font-weight: 700; color: var(--primary); letter-spacing: 0.5px;">ℹ️ BİLGİ AMAÇLI TOPLAMLAR</h3>
-                    <span class="stat-icon">📋</span>
-                </div>
-                <div style="font-size: 12px; color: var(--text-muted);">(Gelir/Gider'e Dahil Değildir)</div>
-            </div>
-
-            <div style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: flex-end; flex: 1;">
-                <div style="text-align: right;">
-                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Hasıla2</div>
-                    <div id="bilgiHasila2" style="font-size: 20px; font-weight: 700; color: var(--success);">0 TL</div>
+            <!-- YENİ: BİLGİ AMAÇLI TOPLAMLAR KARTI -->
+            <div class="stat-box" style="border-top-color: var(--warning);">
+                <div class="stat-header">
+                    <h3>Bilgi Amaçlı Toplamlar</h3>
+                    <span class="stat-icon">ℹ️</span>
                 </div>
                 
-                <div style="width: 1px; background: #eee; margin: 0 5px;"></div>
-                
-                <div style="text-align: right;">
-                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Kdv2</div>
-                    <div id="bilgiKdv2" style="font-size: 20px; font-weight: 700; color: var(--danger);">0 TL</div>
+                <div style="display: flex; gap: 15px; margin-top: 5px;">
+                    <div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Hasıla2</div>
+                        <div id="bilgiHasila2" style="font-size: 16px; font-weight: 700; color: var(--success);">0 TL</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Kdv2</div>
+                        <div id="bilgiKdv2" style="font-size: 16px; font-weight: 700; color: var(--danger);">0 TL</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">KDV (Mazot)</div>
+                        <div id="bilgiKdv" style="font-size: 16px; font-weight: 700; color: var(--warning);">0 TL</div>
+                    </div>
                 </div>
                 
-                <div style="width: 1px; background: #eee; margin: 0 5px;"></div>
-                
-                <div style="text-align: right;">
-                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">KDV (Mazot)</div>
-                    <div id="bilgiKdv" style="font-size: 20px; font-weight: 700; color: var(--warning);">0 TL</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+                    * Gelir/Gider'e dahil değildir.
                 </div>
             </div>
-        </div>
 
 
         
