@@ -825,18 +825,19 @@
         const hasilatLabelEl = document.getElementById('hasilatLabel');
         const mazotLabelEl = document.getElementById('mazotLabel');
         if (!secilenTarih) return;
-
+    
         const oran = Number(window._hasilaOrani) || 0;
-
-        // Seçilen tarihten önceki tüm kayıtlar (yeniden eskiye sıralı, kronolojik kayıt sırası)
+    
+        // Seçilen tarihten önceki tüm kayıtlar (yeniden eskiye sıralı)
         const oncekiKayitlar = kayitlar
             .filter(k => k.tarih && new Date(k.tarih) < new Date(secilenTarih))
             .sort((a,b) => new Date(b.tarih) - new Date(a.tarih));
-
-        // Günlük Kazanç → bir önceki kaydın hasılatı
+    
+        // 1. GÜNLÜK KAZANÇ HESABI (Aynı kalıyor)
+        // Bir önceki kaydın hasılatı
         const birOncekiKayit = oncekiKayitlar[0] || null;
         const birOncekiHasilat = (birOncekiKayit && birOncekiKayit.hasilat) ? (Number(birOncekiKayit.hasilat) || 0) : 0;
-
+    
         if (hasilatLabelEl) {
             if (oran <= 0 || birOncekiHasilat <= 0) {
                 hasilatLabelEl.innerText = "Günlük Kazanç (TL)";
@@ -846,16 +847,27 @@
                 hasilatLabelEl.innerText = `Günlük Kazanç (Örnek ${pay.toLocaleString('tr-TR')} TL)`;
             }
         }
-
-        // Mazot → iki önceki kaydın hasılatı (kronolojik olarak 2 kayıt geriye, aradaki boş günler atlanır)
-        const ikiOncekiKayit = oncekiKayitlar[1] || null;
-        const ikiOncekiHasilat = (ikiOncekiKayit && ikiOncekiKayit.hasilat) ? (Number(ikiOncekiKayit.hasilat) || 0) : 0;
-
+    
+        // 2. MAZOT HESABI (Revize edildi: Son iki kaydın ortalaması)
+        // En son iki kaydı alıyoruz (yoksa tek kayıt veya 0 kullanılacak)
+        const kayit1 = oncekiKayitlar[0] || null;
+        const kayit2 = oncekiKayitlar[1] || null;
+    
+        let mazotOrtalamaHasilat = 0;
+    
+        if (kayit1 && kayit2) {
+            // İki kayıt da varsa ortalamasını al
+            mazotOrtalamaHasilat = ((Number(kayit1.hasilat) || 0) + (Number(kayit2.hasilat) || 0)) / 2;
+        } else if (kayit1 && kayit1.hasilat) {
+            // Sadece 1 önceki kayıt varsa (ayın ilk günleri vb.) onu kullan
+            mazotOrtalamaHasilat = Number(kayit1.hasilat) || 0;
+        }
+    
         if (mazotLabelEl) {
-            if (oran <= 0 || ikiOncekiHasilat <= 0) {
+            if (oran <= 0 || mazotOrtalamaHasilat <= 0) {
                 mazotLabelEl.innerText = "Mazot (TL)";
             } else {
-                const hamPay = ikiOncekiHasilat * (oran / 100);
+                const hamPay = mazotOrtalamaHasilat * (oran / 100);
                 const pay = yukariYuvarla5TL(hamPay);
                 mazotLabelEl.innerText = `Mazot (Örnek ${pay.toLocaleString('tr-TR')} TL)`;
             }
