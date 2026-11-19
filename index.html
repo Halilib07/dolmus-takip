@@ -150,7 +150,7 @@
         .text-muted { color: var(--text-muted); font-size: 12px; }
 
         .tablo-kapsayici { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .detay-tablo { width: 100%; min-width: 1600px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
+        .detay-tablo { width: 100%; min-width: 1800px; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
         .detay-tablo th, .detay-tablo td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; white-space: nowrap; }
         .detay-tablo th { background: #f8f9fa; font-weight: 600; color: var(--text-muted); }
         
@@ -254,6 +254,12 @@
             .mazot-dagit-btn { top: 10px; padding: 5px 8px; font-size: 10px; }
             .rapor-filtre-alani { flex-direction: column; align-items: stretch; }
         }
+        
+        /* BİLGİ AMAÇLI KUTU */
+        .bilgi-kutu-container { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px; }
+        .bilgi-kutu-item { flex: 1; min-width: 150px; background: white; padding: 15px; border-radius: 8px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .bilgi-kutu-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 5px; }
+        .bilgi-kutu-value { font-size: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -541,6 +547,25 @@
             </div>
         </div>
 
+        <!-- BİLGİ AMAÇLI TOPLAMLAR KUTUSU -->
+        <div class="card" style="background: #fff8e1; border-left: 5px solid var(--warning);">
+            <h3 style="margin-top:0; font-size: 15px; color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 10px;">ℹ️ Bilgi Amaçlı Toplamlar (Gelir/Gider'e Dahil Değildir)</h3>
+            <div class="bilgi-kutu-container">
+                <div class="bilgi-kutu-item">
+                    <div class="bilgi-kutu-title">Hasıla2 Toplamı</div>
+                    <div id="bilgiHasila2" class="bilgi-kutu-value" style="color: var(--success);">0 TL</div>
+                </div>
+                <div class="bilgi-kutu-item">
+                    <div class="bilgi-kutu-title">Kdv2 Toplamı</div>
+                    <div id="bilgiKdv2" class="bilgi-kutu-value" style="color: var(--danger);">0 TL</div>
+                </div>
+                <div class="bilgi-kutu-item">
+                    <div class="bilgi-kutu-title">KDV Toplamı (Mazot)</div>
+                    <div id="bilgiKdv" class="bilgi-kutu-value" style="color: var(--warning);">0 TL</div>
+                </div>
+            </div>
+        </div>
+
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                 <h2 style="font-size: 16px; margin:0; color:var(--primary);">Filtrelenen Kayıtlar (Detaylı)</h2>
@@ -555,11 +580,13 @@
                             <th>Son Giriş</th>
                             <th>Güzergah</th>
                             <th>Hasılat</th>
+                            <th>Mazot</th>
                             <th>KM</th>
                             <th>Günlük KM</th>
-                            <th>Mazot</th>
-                            <th>KDV</th>
                             <th>KM Başı Mazot</th>
+                            <th>KDV</th>
+                            <th>Hasıla2</th>
+                            <th>Kdv2</th>
                             <th>Sıvı Bakım</th>
                             <th>Tamir</th>
                             <th>Parça</th>
@@ -573,7 +600,7 @@
                         </tr>
                     </thead>
                     <tbody id="tabloListesi">
-                        <tr><td colspan="20" class="loading">Veriler buluttan yükleniyor...</td></tr>
+                        <tr><td colspan="22" class="loading">Veriler buluttan yükleniyor...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -618,7 +645,7 @@
                 <input type="text" inputmode="decimal" id="ayarHasilaOrani" class="para" placeholder="" onchange="aracAyarlariniKaydet()">
                 <label for="ayarHasilaOrani">Oran (%) — Günlük Kazanç &amp; Mazot Örneği</label>
             </div>
-            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Bu oran, günlük giriş ekranında <b>Günlük Kazanç</b> (bir önceki hasılata göre) ve <b>Mazot</b> (iki önceki hasılata göre) alanlarının yanında örnek hesaplama olarak gösterilir. Sonuçlar <b>5 TL'ye yukarı yuvarlanır</b>. Raporlara, gelirlere, giderlere ve net kâra <b>etki etmez</b> ve <b>kaydedilmez</b>.</p>
+            <p style="font-size: 12px; color: var(--info); margin-top: 10px;">* Bu oran, günlük giriş ekranında <b>Günlük Kazanç</b> (bir önceki hasılata göre) ve <b>Mazot</b> (son iki hasılatın ortalamasına göre) alanlarının yanında örnek hesaplama olarak gösterilir. Sonuçlar <b>5 TL'ye yukarı yuvarlanır</b>. Raporlara, gelirlere, giderlere ve net kâra <b>etki etmez</b> ve <b>kaydedilmez</b> (Sadece Hasıla2/Kdv2 olarak bilgi amaçlı kaydedilir).</p>
         </div>
 
         <div class="card" style="border-left: 5px solid var(--success);">
@@ -825,19 +852,18 @@
         const hasilatLabelEl = document.getElementById('hasilatLabel');
         const mazotLabelEl = document.getElementById('mazotLabel');
         if (!secilenTarih) return;
-    
+
         const oran = Number(window._hasilaOrani) || 0;
-    
+
         // Seçilen tarihten önceki tüm kayıtlar (yeniden eskiye sıralı)
         const oncekiKayitlar = kayitlar
             .filter(k => k.tarih && new Date(k.tarih) < new Date(secilenTarih))
             .sort((a,b) => new Date(b.tarih) - new Date(a.tarih));
-    
+
         // 1. GÜNLÜK KAZANÇ HESABI (Aynı kalıyor)
-        // Bir önceki kaydın hasılatı
         const birOncekiKayit = oncekiKayitlar[0] || null;
         const birOncekiHasilat = (birOncekiKayit && birOncekiKayit.hasilat) ? (Number(birOncekiKayit.hasilat) || 0) : 0;
-    
+
         if (hasilatLabelEl) {
             if (oran <= 0 || birOncekiHasilat <= 0) {
                 hasilatLabelEl.innerText = "Günlük Kazanç (TL)";
@@ -847,22 +873,19 @@
                 hasilatLabelEl.innerText = `Günlük Kazanç (Örnek ${pay.toLocaleString('tr-TR')} TL)`;
             }
         }
-    
+
         // 2. MAZOT HESABI (Revize edildi: Son iki kaydın ortalaması)
-        // En son iki kaydı alıyoruz (yoksa tek kayıt veya 0 kullanılacak)
         const kayit1 = oncekiKayitlar[0] || null;
         const kayit2 = oncekiKayitlar[1] || null;
-    
+
         let mazotOrtalamaHasilat = 0;
-    
+
         if (kayit1 && kayit2) {
-            // İki kayıt da varsa ortalamasını al
             mazotOrtalamaHasilat = ((Number(kayit1.hasilat) || 0) + (Number(kayit2.hasilat) || 0)) / 2;
         } else if (kayit1 && kayit1.hasilat) {
-            // Sadece 1 önceki kayıt varsa (ayın ilk günleri vb.) onu kullan
             mazotOrtalamaHasilat = Number(kayit1.hasilat) || 0;
         }
-    
+
         if (mazotLabelEl) {
             if (oran <= 0 || mazotOrtalamaHasilat <= 0) {
                 mazotLabelEl.innerText = "Mazot (TL)";
@@ -1519,6 +1542,22 @@
         btn.innerText = "Buluta Kaydediliyor...";
         btn.disabled = true;
 
+        // YENİ: Hasıla2 ve Kdv2 Hesaplaması
+        const hasilatLabelText = document.getElementById('hasilatLabel').innerText;
+        const mazotLabelText = document.getElementById('mazotLabel').innerText;
+        
+        let ornekKazanc = 0;
+        let ornekMazot = 0;
+        
+        const kazancMatch = hasilatLabelText.match(/Örnek ([\d.,]+) TL/);
+        if (kazancMatch) ornekKazanc = formatiCoz(kazancMatch[1]);
+        
+        const mazotMatch = mazotLabelText.match(/Örnek ([\d.,]+) TL/);
+        if (mazotMatch) ornekMazot = formatiCoz(mazotMatch[1]);
+
+        const hasila2 = ornekKazanc + ornekMazot;
+        const kdv2 = hasila2 - (hasila2 / 1.2);
+
         let kayit = {
             tarih: secilenTarih,
             zaman: ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now(),
@@ -1527,6 +1566,8 @@
             hasilat: hasilatDeger,
             km: kmDeger,
             mazotTL: mazotDeger,
+            hasila2: hasila2, // YENİ KAYIT
+            kdv2: kdv2,       // YENİ KAYIT
             mazotAlimGunu: (mazotDeger > 0 && ayniTarihliKayit) ? (ayniTarihliKayit.mazotAlimGunu || false) : false,
             orijinalMazotTutari: (mazotDeger > 0 && ayniTarihliKayit) ? (ayniTarihliKayit.orijinalMazotTutari || 0) : 0,
             dagitimMazot: ayniTarihliKayit ? (ayniTarihliKayit.dagitimMazot || false) : false, 
@@ -2660,6 +2701,21 @@
 
         maliTabloDoldur(toplamGelir, tKazanc, tUkome, tGider, netKar, tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
 
+        // YENİ: Bilgi Amaçlı Toplamları Hesapla
+        let tHasila2 = 0;
+        let tKdv2 = 0;
+        let tKdv = 0;
+        
+        filtrelenmisKayitlar.forEach(k => {
+            tHasila2 += k.hasila2 || 0;
+            tKdv2 += k.kdv2 || 0;
+            tKdv += k.kdvGideri || 0;
+        });
+
+        document.getElementById('bilgiHasila2').innerText = Math.round(tHasila2).toLocaleString('tr-TR') + " TL";
+        document.getElementById('bilgiKdv2').innerText = Math.round(tKdv2).toLocaleString('tr-TR') + " TL";
+        document.getElementById('bilgiKdv').innerText = Math.round(tKdv).toLocaleString('tr-TR') + " TL";
+
         cizTrendGrafigi(filtrelenmisKayitlar);
         cizGiderGrafigi(tMazot, tSivi, tTamir, tParca, tDiger, tSofor, tMuhasebeKalemleri, tSabit);
         cizHaftalikGrafigi(filtrelenmisKayitlar);
@@ -2713,7 +2769,7 @@
         if (muhasebe.gelirVergisi > 0) trEkle("Gelir Vergisi", muhasebe.gelirVergisi);
         if (muhasebe.bagKur > 0) trEkle("Bağ-Kur", muhasebe.bagKur);
         if (muhasebe.sigorta > 0) trEkle("Sigorta", muhasebe.sigorta);
-        if (muhasebe.matbaaNoter > 0) trEkle("Matbaa / Noter", muhasebe.matbaaNoter);
+        if (muhasebe.matbaaNoter > 0) trRkle("Matbaa / Noter", muhasebe.matbaaNoter);
         if (muhasebe.muhasebe > 0) trEkle("Muhasebe Ücreti", muhasebe.muhasebe);
         if (muhasebe.sabitDigerGider > 0) trEkle("Diğer Sabit Giderler", muhasebe.sabitDigerGider);
         if (muhasebe.geciciVergi > 0) trEkle("Geçici Vergi", muhasebe.geciciVergi);
@@ -2745,11 +2801,13 @@
                 <td>${tarihSaatFormatla(k.kayitSaati)}</td>
                 <td><span style="background:#ecf0f1; padding:3px 8px; border-radius:4px; font-weight:bold;">${k.guzergah || '-'}</span></td>
                 <td>${Math.round(k.hasilat||0).toLocaleString('tr-TR')} TL</td>
+                <td>${mazotGosterim}</td>
                 <td>${Math.round(k.km||0).toLocaleString('tr-TR')}</td>
                 <td style="font-weight:bold; color:var(--info);">${gunlukKM.toLocaleString('tr-TR')}</td>
-                <td>${mazotGosterim}</td>
-                <td style="font-weight:bold; color:var(--warning);" title="Bilgi amaçlıdır, giderlere dahil değildir">${Math.round(k.kdvGideri||0).toLocaleString('tr-TR')}</td>
                 <td style="font-weight:bold; color:var(--purple);">${kmBasiMazot.toFixed(2)} TL</td>
+                <td style="font-weight:bold; color:var(--warning);" title="Bilgi amaçlıdır, giderlere dahil değildir">${Math.round(k.kdvGideri||0).toLocaleString('tr-TR')}</td>
+                <td style="font-weight:bold; color:var(--success);" title="Günlük Kazanç ve Mazot Örnekleri Toplamı">${Math.round(k.hasila2||0).toLocaleString('tr-TR')} TL</td>
+                <td style="font-weight:bold; color:var(--danger);" title="Hasıla2 üzerinden hesaplanan bilgi amaçlı KDV">${Math.round(k.kdv2||0).toLocaleString('tr-TR')} TL</td>
                 <td>${Math.round(k.siviBakim||0).toLocaleString('tr-TR')}</td>
                 <td>${Math.round(k.tamir||0).toLocaleString('tr-TR')}</td>
                 <td>${Math.round(k.parca||0).toLocaleString('tr-TR')}</td>
@@ -3079,6 +3137,8 @@
                 "Günlük KM": gunlukKM,
                 "Mazot (TL)": k.mazotTL || 0,
                 "KDV (TL)": Math.round(k.kdvGideri || 0),
+                "Hasıla2 (TL)": Math.round(k.hasila2 || 0),
+                "Kdv2 (TL)": Math.round(k.kdv2 || 0),
                 "KM Başı Mazot (TL)": Number(kmBasiMazot.toFixed(2)),
                 "Sıvı Bakım (TL)": k.siviBakim || 0,
                 "Tamir (TL)": k.tamir || 0,
@@ -3100,7 +3160,7 @@
             {wch: 12}, {wch: 15}, {wch: 12}, {wch: 10}, {wch: 10},
             {wch: 12}, {wch: 12}, {wch: 15}, {wch: 12}, {wch: 12},
             {wch: 12}, {wch: 12}, {wch: 12}, {wch: 18}, {wch: 15},
-            {wch: 15}, {wch: 12}
+            {wch: 15}, {wch: 12}, {wch: 15}, {wch: 12}
         ];
         worksheet['!cols'] = wscols;
 
