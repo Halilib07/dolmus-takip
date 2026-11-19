@@ -1556,7 +1556,10 @@
         if (mazotMatch) ornekMazot = formatiCoz(mazotMatch[1]);
 
         const hasila2 = ornekKazanc + ornekMazot;
-        const kdv2 = hasila2 - (hasila2 / 1.2);
+        // KDV hesabıyla birebir aynı yöntem: (Hasıla2 - Hasıla2/1.2) - (Mazot - Mazot/1.2)
+        const kdv2Hasila = hasila2 - (hasila2 / 1.2);
+        const kdv2Mazot = ornekMazot - (ornekMazot / 1.2);
+        const kdv2 = Math.round((kdv2Hasila - kdv2Mazot) * 100) / 100;
 
         let kayit = {
             tarih: secilenTarih,
