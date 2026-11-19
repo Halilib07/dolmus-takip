@@ -1421,11 +1421,19 @@
                 const kdv2 = yeniMazotDegeri - (yeniMazotDegeri / 1.2);
                 const kdvGideri = Math.round((kdv1 - kdv2) * 100) / 100;
 
+                // --- YENİ EKLENEN KISIM: KDV2 (Hasıla2) GÜNCELLEMESİ ---
+                const hasila2 = kayit.hasila2 || 0;
+                const kdv2Hasila = hasila2 - (hasila2 / 1.2);
+                const kdv2Mazot = yeniMazotDegeri - (yeniMazotDegeri / 1.2);
+                const yeniKdv2 = Math.round((kdv2Hasila - kdv2Mazot) * 100) / 100;
+                // --------------------------------------------------------
+
                 batch.update(window.doc(window.db, "kayitlar", kayit.id), {
                     mazotTL: yeniMazotDegeri,
                     toplamGider: yeniToplamGider,
                     dagitimMazot: true,
-                    kdvGideri: kdvGideri
+                    kdvGideri: kdvGideri,
+                    kdv2: yeniKdv2  // <-- Burası eklendi
                 });
             });
 
