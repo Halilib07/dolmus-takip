@@ -1555,12 +1555,13 @@
         const mazotMatch = mazotLabelText.match(/Örnek ([\d.,]+) TL/);
         if (mazotMatch) ornekMazot = formatiCoz(mazotMatch[1]);
 
+        // Kdv2: Hasıla2 (bilgi amaçlı) ve Gerçek/Dağıtılmış Mazot üzerinden
         const hasila2 = ornekKazanc + ornekMazot;
-        // KDV hesabıyla birebir aynı yöntem: (Hasıla2 - Hasıla2/1.2) - (Mazot - Mazot/1.2)
-        const kdv2Hasila = hasila2 - (hasila2 / 1.2);
-        const kdv2Mazot = ornekMazot - (ornekMazot / 1.2);
-        const kdv2 = Math.round((kdv2Hasila - kdv2Mazot) * 100) / 100;
+        const kdv2Hasila = hasila2 - (hasila2 / 1.2);              // Hasıla2'nin KDV payı
+        const kdv2Mazot = mazotDeger - (mazotDeger / 1.2);         // Gerçek mazotun KDV payı
+        const kdv2 = Math.round((kdv2Hasila - kdv2Mazot) * 100) / 100;  // Fark
 
+        
         let kayit = {
             tarih: secilenTarih,
             zaman: ayniTarihliKayit ? ayniTarihliKayit.zaman : Date.now(),
