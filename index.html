@@ -2913,11 +2913,9 @@
         });
     }
 
-    function cizGiderGrafigi(mazot, sivi, tamir, parca, diger, sofor, muhasebe, tSabit) {
-        // Mevcut Chart.js grafiği varsa temizle (hata vermemesi için)
+        function cizGiderGrafigi(mazot, sivi, tamir, parca, diger, sofor, muhasebe, tSabit) {
         if(chartGider) { chartGider.destroy(); chartGider = null; }
 
-        // Verileri diziye dönüştür
         let data = [
             { name: 'Mazot', y: mazot, color: '#2c3e50' },
             { name: 'Sıvı Bakım', y: sivi, color: '#34495e' },
@@ -2936,23 +2934,21 @@
         const digerMuhasebe = (muhasebe.pesinVergi||0) + (muhasebe.gelirVergisi||0) + (muhasebe.matbaaNoter||0) + (muhasebe.muhasebe||0) + (muhasebe.sabitDigerGider||0);
         if(digerMuhasebe > 0) data.push({ name: 'Diğer Sabit', y: digerMuhasebe, color: '#7f8c8d' });
 
-        // 0 olan değerleri grafikten çıkar (kalabalık yapmasın)
         data = data.filter(item => item.y > 0);
 
-        // Highcharts 3D Pasta Grafiği Çizimi
         Highcharts.chart('giderGrafik', {
             chart: {
                 type: 'pie',
                 options3d: {
                     enabled: true,
-                    alpha: 55, // Derinlik açısı (Görseldeki gibi yatık durması için)
+                    alpha: 55,
                     beta: 0
                 },
-                backgroundColor: 'transparent' // Arka planı şeffaf yapar, kartın beyazı görünür
+                backgroundColor: 'transparent'
             },
-            title: {
-                text: null // Başlık zaten üstteki kartta var
-            },
+            title: { text: null },
+            // Highcharts reklamını kaldırır
+            credits: { enabled: false },
             tooltip: {
                 pointFormat: '<b>{point.percentage:.1f}%</b> - {point.y:,.0f} TL<br/><i>{series.name}</i>'
             },
@@ -2963,10 +2959,11 @@
                     depth: 45, 
                     innerSize: '0%', 
                     center: ['50%', '50%'], 
-                    size: '90%', // Mobilde daha büyük görünsün diye %90 yaptık
+                    size: '85%', 
                     dataLabels: {
                         enabled: true,
-                        format: '<b>{point.name}</b><br/>{point.y:,.0f} TL',
+                        // Hem tutar hem yüzde aynı etikette
+                        format: '<b>{point.name}</b><br/>{point.y:,.0f} TL (%{point.percentage:.1f})',
                         distance: 15, 
                         connectorWidth: 1,
                         style: {
@@ -2979,28 +2976,20 @@
                     showInLegend: false 
                 }
             },
-            legend: {
-                enabled: false 
-            },
-            // EKRAN BOYUTUNA GÖRE OTOMATİK AYAR (RESPONSIVE)
+            legend: { enabled: false },
             responsive: {
                 rules: [{
-                    condition: {
-                        maxWidth: 500 // Ekran genişliği 500px'den küçükse (Telefonlar)
-                    },
+                    condition: { maxWidth: 500 },
                     chartOptions: {
-                        chart: {
-                            height: 300 // Yüksekliği biraz kısaltalım ki yazılar sığsın
-                        },
+                        chart: { height: 320 },
                         plotOptions: {
                             pie: {
-                                size: '70%', // Mobilde pastayı küçültüp kenarlara yer aç
+                                size: '65%', // Mobilde biraz daha küçültüp yazılara yer açtık
                                 dataLabels: {
-                                    distance: 10, // Çizgileri kısalt
-                                    format: '<b>{point.name}</b><br/>{point.percentage:.1f}%', // Mobilde sadece isim ve yüzde yeterli
-                                    style: {
-                                        fontSize: '10px' // Mobilde yazı boyutunu küçült
-                                    }
+                                    distance: 8,
+                                    // Mobilde de aynı formatı kullanıyoruz, sadece fontu küçültüyoruz
+                                    format: '<b>{point.name}</b><br/>{point.y:,.0f} TL (%{point.percentage:.1f})',
+                                    style: { fontSize: '10px' }
                                 }
                             }
                         }
