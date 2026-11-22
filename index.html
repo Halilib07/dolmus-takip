@@ -2981,33 +2981,93 @@
         const siraliListe = [...liste].sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
 
         const etiketler = [];
+        const hasilatData = [];
+        const giderData = [];
         const netKarData = [];
 
-        siraliListe.forEach((k, index) => {
+        siraliListe.forEach((k) => {
             const d = new Date(k.tarih);
             etiketler.push(d.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' }));
-            const net = ((k.hasilat || 0) + (k.ukomeGeliri || 0)) - (k.toplamGider || 0);
+            
+            const hasilat = (k.hasilat || 0) + (k.ukomeGeliri || 0); // Toplam Hasılat
+            const gider = (k.toplamGider || 0); // Toplam Gider
+            const net = hasilat - gider; // Net Kâr
+
+            hasilatData.push(hasilat);
+            giderData.push(gider);
             netKarData.push(net);
         });
 
-        const arkaPlanRenkleri = netKarData.map(deger => deger < 0 ? '#e74c3c' : '#3498db');
-
         chartGunlukSutun = new Chart(ctx, {
-            type: 'bar',
+            type: 'bar', // Ana tip Sütun
             data: {
                 labels: etiketler,
-                datasets: [{
-                    label: 'Günlük Net Kâr (TL)',
-                    data: netKarData,
-                    backgroundColor: arkaPlanRenkleri,
-                    borderRadius: 5
-                }]
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Toplam Hasılat (TL)',
+                        data: hasilatData,
+                        backgroundColor: '#3498db', // Mavi
+                        borderRadius: 4,
+                        order: 2 // Sütunlar arkada kalsın
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Toplam Gider (TL)',
+                        data: giderData,
+                        backgroundColor: '#e74c3c', // Kırmızı
+                        borderRadius: 4,
+                        order: 2 // Sütunlar arkada kalsın
+                    },
+                    {
+                        type: 'line', // Çizgi veri seti
+                        label: 'Net Kâr (TL)',
+                        data: netKarData,
+                        borderColor: '#27ae60', // Yeşil Çizgi
+                        backgroundColor: '#27ae60',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#27ae60',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        tension: 0.3, // Çizgiye hafif kıvrım
+                        fill: false, // Çizgi altını doldurma
+                        order: 1 // Çizgi önde olsun
+                    }
+                ]
             },
             options: { 
                 responsive: true, 
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
                 plugins: {
-                    legend: { display: false }
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toLocaleString('tr-TR', { maximumFractionDigits: 0 }) + ' TL';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString('tr-TR') + ' TL';
+                            }
+                        }
+                    }
                 }
             }
         });
