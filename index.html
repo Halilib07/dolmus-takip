@@ -2963,15 +2963,15 @@
                     depth: 45, 
                     innerSize: '0%', 
                     center: ['50%', '50%'], 
-                    size: '75%', // Boyutu hafifçe %85'ten %75'e çektik ki yazılara yer açılsın
+                    size: '90%', // Mobilde daha büyük görünsün diye %90 yaptık
                     dataLabels: {
                         enabled: true,
-                        format: '<b>{point.name}</b><br/>{point.y:,.0f} TL (%{point.percentage:.1f})',
-                        distance: 20, // Etiketleri biraz daha dışarı ittik
-                        connectorWidth: 2, // İnce çizgileri biraz kalınlaştırdık
+                        format: '<b>{point.name}</b><br/>{point.y:,.0f} TL',
+                        distance: 15, 
+                        connectorWidth: 1,
                         style: {
                             color: '#2c3e50',
-                            textOutline: '2px contrast', // Yazıların arka planla karışmasını önler (beyaz gölge ekler)
+                            textOutline: '2px contrast',
                             fontSize: '12px',
                             fontWeight: 'bold'
                         }
@@ -2982,6 +2982,31 @@
             legend: {
                 enabled: false 
             },
+            // EKRAN BOYUTUNA GÖRE OTOMATİK AYAR (RESPONSIVE)
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 500 // Ekran genişliği 500px'den küçükse (Telefonlar)
+                    },
+                    chartOptions: {
+                        chart: {
+                            height: 300 // Yüksekliği biraz kısaltalım ki yazılar sığsın
+                        },
+                        plotOptions: {
+                            pie: {
+                                size: '70%', // Mobilde pastayı küçültüp kenarlara yer aç
+                                dataLabels: {
+                                    distance: 10, // Çizgileri kısalt
+                                    format: '<b>{point.name}</b><br/>{point.percentage:.1f}%', // Mobilde sadece isim ve yüzde yeterli
+                                    style: {
+                                        fontSize: '10px' // Mobilde yazı boyutunu küçült
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }]
+            }
             series: [{
                 name: 'Gider',
                 data: data
