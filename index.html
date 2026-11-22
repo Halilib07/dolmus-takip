@@ -2960,26 +2960,27 @@
                 pie: {
                     allowPointSelect: true,
                     cursor: 'pointer',
-                    depth: 45, // Derinliği biraz daha artırdık
-                    innerSize: '0%', // İçi boş olmasın, tam pasta olsun (daha heybetli durur)
-                    center: ['50%', '50%'], // Pastayı tam ortaya hizala
-                    size: '85%', // Pastayı kapsayıcının %85'i kadar büyüt
+                    depth: 45, 
+                    innerSize: '0%', 
+                    center: ['50%', '50%'], 
+                    size: '75%', // Boyutu hafifçe %85'ten %75'e çektik ki yazılara yer açılsın
                     dataLabels: {
                         enabled: true,
-                        format: '<b>{point.name}</b><br/>{point.percentage:.1f}%',
-                        distance: 15, // Etiketleri pastadan biraz uzaklaştır
+                        format: '<b>{point.name}</b><br/>{point.y:,.0f} TL (%{point.percentage:.1f})',
+                        distance: 20, // Etiketleri biraz daha dışarı ittik
+                        connectorWidth: 2, // İnce çizgileri biraz kalınlaştırdık
                         style: {
-                            color: '#333',
-                            textOutline: 'none',
+                            color: '#2c3e50',
+                            textOutline: '2px contrast', // Yazıların arka planla karışmasını önler (beyaz gölge ekler)
                             fontSize: '12px',
                             fontWeight: 'bold'
                         }
                     },
-                    showInLegend: false // Legend'ı kapatıyoruz çünkü isimler direkt pasta üzerinde yazacak
+                    showInLegend: false 
                 }
             },
             legend: {
-                enabled: false // Alt taraftaki renk kutularını gizle, çünkü isimler pasta üzerinde
+                enabled: false 
             },
             series: [{
                 name: 'Gider',
