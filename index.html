@@ -878,7 +878,17 @@
         const mazotLabelEl = document.getElementById('mazotLabel');
         if (!secilenTarih) return;
 
-        const oran = Number(window._hasilaOrani) || 0;
+                // Oranı al (eğer ayarlardan gelmediyse veya 0 ise veritabanından çek)
+        let oran = Number(window._hasilaOrani) || 0;
+        if (oran === 0) {
+            try {
+                const ayarDoc = await window.getDoc(window.doc(window.db, "sistem", "aracAyarlari"));
+                if (ayarDoc.exists()) {
+                    oran = Number(ayarDoc.data().hasilaOrani) || 0;
+                    window._hasilaOrani = oran; // Bir sonraki sefer için hafızaya al
+                }
+            } catch (e) { console.log("Oran çekilemedi:", e); }
+        }
 
         // Seçilen tarihten önceki tüm kayıtlar (yeniden eskiye sıralı)
         const oncekiKayitlar = kayitlar
@@ -1579,8 +1589,18 @@
         let ornekKazanc = 0;
         let ornekMazot = 0;
         
-        // Oranı al (eğer ayarlardan gelmediyse varsayılan 0'dır)
-        const oran = Number(window._hasilaOrani) || 0;
+
+        // Oranı al (eğer ayarlardan gelmediyse veya 0 ise veritabanından çek)
+        let oran = Number(window._hasilaOrani) || 0;
+        if (oran === 0) {
+            try {
+                const ayarDoc = await window.getDoc(window.doc(window.db, "sistem", "aracAyarlari"));
+                if (ayarDoc.exists()) {
+                    oran = Number(ayarDoc.data().hasilaOrani) || 0;
+                    window._hasilaOrani = oran; // Bir sonraki sefer için hafızaya al
+                }
+            } catch (e) { console.log("Oran çekilemedi:", e); }
+        }
 
         if (oran > 0) {
             // Seçilen tarihten önceki kayıtları bul
@@ -2835,7 +2855,7 @@
         if (muhasebe.gelirVergisi > 0) trEkle("Gelir Vergisi", muhasebe.gelirVergisi);
         if (muhasebe.bagKur > 0) trEkle("Bağ-Kur", muhasebe.bagKur);
         if (muhasebe.sigorta > 0) trEkle("Sigorta", muhasebe.sigorta);
-        if (muhasebe.matbaaNoter > 0) trRkle("Matbaa / Noter", muhasebe.matbaaNoter);
+        if (muhasebe.matbaaNoter > 0) trEkle("Matbaa / Noter", muhasebe.matbaaNoter);
         if (muhasebe.muhasebe > 0) trEkle("Muhasebe Ücreti", muhasebe.muhasebe);
         if (muhasebe.sabitDigerGider > 0) trEkle("Diğer Sabit Giderler", muhasebe.sabitDigerGider);
         if (muhasebe.geciciVergi > 0) trEkle("Geçici Vergi", muhasebe.geciciVergi);
