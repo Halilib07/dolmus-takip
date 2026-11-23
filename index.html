@@ -1591,16 +1591,7 @@
         
 
         // Oranı al (eğer ayarlardan gelmediyse veya 0 ise veritabanından çek)
-        let oran = Number(window._hasilaOrani) || 0;
-        if (oran === 0) {
-            try {
-                const ayarDoc = await window.getDoc(window.doc(window.db, "sistem", "aracAyarlari"));
-                if (ayarDoc.exists()) {
-                    oran = Number(ayarDoc.data().hasilaOrani) || 0;
-                    window._hasilaOrani = oran; // Bir sonraki sefer için hafızaya al
-                }
-            } catch (e) { console.log("Oran çekilemedi:", e); }
-        }
+        const oran = Number(window._hasilaOrani) || 0;
 
         if (oran > 0) {
             // Seçilen tarihten önceki kayıtları bul
