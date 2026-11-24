@@ -879,16 +879,7 @@
         if (!secilenTarih) return;
 
         // Oranı al (eğer ayarlardan gelmediyse veya 0 ise veritabanından çek)
-        let oran = Number(window._hasilaOrani) || 0;
-        if (oran === 0) {
-            try {
-                const ayarDoc = await window.getDoc(window.doc(window.db, "sistem", "aracAyarlari"));
-                if (ayarDoc.exists()) {
-                    oran = Number(ayarDoc.data().hasilaOrani) || 0;
-                    window._hasilaOrani = oran;
-                }
-            } catch (e) { console.log("Oran çekilemedi:", e); }
-        }
+        const oran = Number(window._hasilaOrani) || 0;
 
         // Seçilen tarihten önceki tüm kayıtlar (yeniden eskiye sıralı)
         const oncekiKayitlar = kayitlar
@@ -1590,8 +1581,17 @@
         let ornekMazot = 0;
         
 
-        // Oranı al (eğer ayarlardan gelmediyse veya 0 ise veritabanından çek)
-        const oran = Number(window._hasilaOrani) || 0;
+                // Oranı al (eğer ayarlardan gelmediyse veya 0 ise veritabanından çek)
+        let oran = Number(window._hasilaOrani) || 0;
+        if (oran === 0) {
+            try {
+                const ayarDoc = await window.getDoc(window.doc(window.db, "sistem", "aracAyarlari"));
+                if (ayarDoc.exists()) {
+                    oran = Number(ayarDoc.data().hasilaOrani) || 0;
+                    window._hasilaOrani = oran;
+                }
+            } catch (e) { console.log("Oran çekilemedi:", e); }
+        }
 
         if (oran > 0) {
             // Seçilen tarihten önceki kayıtları bul
